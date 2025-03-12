@@ -14,7 +14,7 @@ declare global {
     SpeechRecognition: any
     webkitSpeechRecognition: any
   }
-  
+
   // 音声認識のメインインターフェース
   interface SpeechRecognition extends EventTarget {
     continuous: boolean
