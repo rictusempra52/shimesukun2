@@ -8,12 +8,14 @@ interface SearchBarProps {
   onSearch: (query: string) => void
 }
 
-// Declare SpeechRecognition interface
+// WebSpeech APIのインターフェース定義
 declare global {
   interface Window {
     SpeechRecognition: any
     webkitSpeechRecognition: any
   }
+  
+  // 音声認識のメインインターフェース
   interface SpeechRecognition extends EventTarget {
     continuous: boolean
     interimResults: boolean
@@ -26,42 +28,48 @@ declare global {
     abort: () => void
   }
 
+  // 音声認識イベントのインターフェース
   interface SpeechRecognitionEvent extends Event {
-    results: SpeechRecognitionResultList
-    resultIndex: number
+    readonly results: SpeechRecognitionResultList
+    readonly resultIndex: number
   }
 
+  // 音声認識結果のリスト（Array-likeオブジェクト）
   interface SpeechRecognitionResultList {
-    [index: number]: SpeechRecognitionResult
-    length: number
-    item(index: number): SpeechRecognitionResult
+    readonly [index: number]: SpeechRecognitionResult  // インデックスアクセス（読み取り専用）
+    readonly length: number                            // 結果の数（読み取り専用）
+    item(index: number): SpeechRecognitionResult      // インデックスで結果を取得
   }
 
+  // 個々の音声認識結果
   interface SpeechRecognitionResult {
-    [index: number]: SpeechRecognitionAlternative
-    length: number
-    isFinal: boolean
-    item(index: number): SpeechRecognitionAlternative
+    readonly [index: number]: SpeechRecognitionAlternative  // 候補のインデックスアクセス
+    readonly length: number                                 // 候補の数
+    readonly isFinal: boolean                              // 最終結果かどうか
+    item(index: number): SpeechRecognitionAlternative      // 候補を取得
   }
 
+  // 音声認識の候補
   interface SpeechRecognitionAlternative {
-    transcript: string
-    confidence: number
+    readonly transcript: string  // 認識されたテキスト
+    readonly confidence: number  // 信頼度
   }
 
+  // エラーイベント
   interface SpeechRecognitionErrorEvent extends Event {
-    error: SpeechRecognitionErrorCode
+    readonly error: SpeechRecognitionErrorCode  // エラーコード
   }
 
+  // エラーの種類
   type SpeechRecognitionErrorCode =
-    | "no-speech"
-    | "aborted"
-    | "audio-capture"
-    | "network"
-    | "not-allowed"
-    | "service-not-allowed"
-    | "bad-grammar"
-    | "language-not-supported"
+    | "no-speech"               // 音声が検出されない
+    | "aborted"                // 中断された
+    | "audio-capture"          // マイクの問題
+    | "network"               // ネットワークエラー
+    | "not-allowed"           // 権限なし
+    | "service-not-allowed"   // サービス利用不可
+    | "bad-grammar"           // 文法エラー
+    | "language-not-supported" // 言語未対応
 }
 
 export function SearchBar({ onSearch }: SearchBarProps) {
@@ -156,4 +164,3 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     </div>
   )
 }
-

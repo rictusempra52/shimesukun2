@@ -157,14 +157,14 @@ export function DocumentList({ searchQuery = "" }: DocumentListProps) {
   return (
     <div className="space-y-4">
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+        <div className="flex-1 relative">
           <Input
             placeholder="キーワードで検索..."
             value={localSearchQuery || searchQuery}
             onChange={(e) => setLocalSearchQuery(e.target.value)}
-            className="w-full"
-            icon={Search}
+            className="w-full pl-10"
           />
+          <Search className="h-4 w-4 absolute left-3 top-3 text-muted-foreground" />
         </div>
         <Select value={buildingFilter} onValueChange={setBuildingFilter}>
           <SelectTrigger className="w-full sm:w-[200px]">
@@ -297,4 +297,3 @@ export function DocumentList({ searchQuery = "" }: DocumentListProps) {
     </div>
   )
 }
-
