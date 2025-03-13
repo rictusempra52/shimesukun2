@@ -11,7 +11,8 @@ import { FileText, Download, Eye, Search, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
 
 // サンプルデータ - 実際の実装ではAPIから取得するか、サーバーコンポーネントでデータを渡す
-export const documents = [
+// default export から named export に変更
+export const documentsData = [
   {
     id: 1,
     title: "管理組合総会議事録",
@@ -118,6 +119,9 @@ export function DocumentList({ searchQuery = "" }: DocumentListProps) {
   const [typeFilter, setTypeFilter] = useState<string>("")
   const [localSearchQuery, setLocalSearchQuery] = useState<string>(searchQuery)
   const [viewMode, setViewMode] = useState<"table" | "card">("table")
+
+  // documentsData を使用するように変更
+  const documents = documentsData;
 
   // 検索とフィルタリングの適用
   const filteredDocuments = documents.filter((doc) => {

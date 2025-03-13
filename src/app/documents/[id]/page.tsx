@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { DocumentViewer } from './document-viewer'
-import { documents } from "@/components/document-list"
+import { documentsData } from "@/components/document-list"
 
 type Props = {
   params: Promise<{ id: string }>
@@ -9,7 +9,7 @@ type Props = {
 
 async function getDocument(id: string) {
   const docId = Number.parseInt(id)
-  const doc = documents.find((doc) => doc.id === docId)
+  const doc = documentsData.find((doc) => doc.id === docId)
   return doc || null // undefinedの代わりにnullを返す
 }
 
@@ -25,9 +25,9 @@ export async function generateMetadata(
   }
 }
 
-export default async function DocumentPage({ 
+export default async function DocumentPage({
   params,
-  searchParams 
+  searchParams
 }: Props) {
   const { id } = await params
   const document = await getDocument(id)
