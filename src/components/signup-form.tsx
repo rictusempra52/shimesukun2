@@ -15,18 +15,19 @@ import { useAuth } from '@/contexts/AuthContext';
  * メールアドレス/パスワードによる登録とGoogleアカウントによる登録の2種類に対応しています。
  */
 export function SignupForm() {
-    // フォーム入力値の状態管理
+    // フォーム入力の状態管理
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-
-    // エラー、成功メッセージ、ローディング状態の管理
+    const [passwordConfirm, setPasswordConfirm] = useState('');
+    // エラーメッセージと処理中の状態管理
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
+    const [success, setSuccess] = useState(false);
 
     // 認証コンテキストとルーターの取得
-    const { signup, loginWithGoogle } = useAuth();
+    const auth = useAuth();
+    const signup = auth?.signup;
+    const loginWithGoogle = auth?.loginWithGoogle;
     const router = useRouter();
 
     /**
@@ -36,39 +37,39 @@ export function SignupForm() {
      * @param {React.FormEvent} e - フォーム送信イベント
      */
     async function handleSubmit(e: React.FormEvent) {
-        e.preventDefault(); // フォームのデフォルト送信を防止
+        e.preventDefault();
 
-        // パスワードの一致確認
-        if (password !== confirmPassword) {
-            return setError('パスワードが一致しません。');
-        }
-
-        // パスワードの長さチェック（セキュリティ対策）
-        if (password.length < 6) {
-            return setError('パスワードは6文字以上で入力してください。');
+        // パスワードの一致チェック
+        if (password !== passwordConfirm) {
+            return setError('パスワードが一致しません');
         }
 
         try {
-            setError(''); // エラーメッセージをリセット
-            setLoading(true); // ローディング状態を開始
-            await signup(email, password); // Firebase認証でアカウント作成
-            setSuccessMessage('アカウントが作成されました！'); // 成功メッセージを表示
+            setError('');
+            setLoading(true);
 
-            // 2秒後にトップページへリダイレクト
-            setTimeout(() => {
-                router.push('/');
-            }, 2000);
+            // signup関数が存在する場合のみ実行
+            if (signup) {
+                await signup(email, password);
+                setSuccess(true);
+
+                // 2秒後にトップページへリダイレクト
+                setTimeout(() => {
+                    router.push('/');
+                }, 2000);
+            } else {
+                throw new Error('認証機能が初期化されていません');
+            }
         } catch (err: any) {
             // メールアドレス重複エラーの場合
             if (err.code === 'auth/email-already-in-use') {
                 setError('このメールアドレスは既に使用されています。');
             } else {
-                // その他のエラー - デバッグ用に詳細情報を表示
-                setError(`アカウントの作成に失敗しました。エラー: ${err.code} - ${err.message}`);
+                setError('アカウント作成に失敗しました。再度お試しください。');
             }
             console.error(err);
         } finally {
-            setLoading(false); // ローディング状態を終了
+            setLoading(false);
         }
     }
 
@@ -78,16 +79,21 @@ export function SignupForm() {
      */
     async function handleGoogleLogin() {
         try {
-            setError(''); // エラーメッセージをリセット
-            setLoading(true); // ローディング状態を開始
-            await loginWithGoogle(); // Google認証を実行
-            router.push('/'); // 成功時はトップページへリダイレクト
+            setError('');
+            setLoading(true);
+
+            // loginWithGoogle関数が存在する場合のみ実行
+            if (loginWithGoogle) {
+                await loginWithGoogle();
+                router.push('/');
+            } else {
+                throw new Error('Google認証機能が初期化されていません');
+            }
         } catch (err: any) {
-            // エラーが発生した場合はユーザーに通知 - デバッグ用に詳細情報を表示
-            setError(`Googleログインに失敗しました。エラー: ${err.code || 'unknown'} - ${err.message || '詳細不明'}`);
+            setError('Googleログインに失敗しました。再度お試しください。');
             console.error(err);
         } finally {
-            setLoading(false); // ローディング状態を終了
+            setLoading(false);
         }
     }
 
@@ -104,7 +110,7 @@ export function SignupForm() {
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {/* エラーメッセージと成功メッセージの表示エリア */}
                     {error && <p className="text-red-500 text-sm">{error}</p>}
-                    {successMessage && <p className="text-green-500 text-sm">{successMessage}</p>}
+                    {success && <p className="text-green-500 text-sm">アカウントが作成されました！</p>}
 
                     {/* メールアドレス入力欄 */}
                     <div className="space-y-2">
@@ -137,8 +143,8 @@ export function SignupForm() {
                         <Input
                             id="confirm-password"
                             type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            value={passwordConfirm}
+                            onChange={(e) => setPasswordConfirm(e.target.value)}
                             required
                         />
                     </div>

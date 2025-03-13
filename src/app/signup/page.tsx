@@ -1,13 +1,26 @@
-import { SignupForm } from "@/components/signup-form";
+"use client"
+
+import { SignupForm } from '@/components/signup-form'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Metadata } from 'next'
+
+// exportしないことで静的生成時にメタデータが評価されなくなります
+const metadata: Metadata = {
+    title: '新規登録 - シメスくん',
+    description: 'マンション書類管理システムへの新規登録',
+}
 
 export default function SignupPage() {
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-muted/40">
-            <div className="mb-8 text-center">
-                <h1 className="text-3xl font-bold">しめすくん</h1>
-                <p className="text-muted-foreground">マンション書類管理システム</p>
-            </div>
-            <SignupForm />
+        <div className="flex items-center justify-center min-h-screen bg-muted/50 p-4">
+            <Card className="w-full max-w-md mx-auto">
+                <CardHeader>
+                    <CardTitle className="text-center">シメスくんに新規登録</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <SignupForm />
+                </CardContent>
+            </Card>
         </div>
-    );
+    )
 }
