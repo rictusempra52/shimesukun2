@@ -1,3 +1,5 @@
+import { Document } from "@/types/document";
+
 /**
  * ドキュメントデータを管理するモジュール
  *
@@ -34,45 +36,46 @@
 export const documentsData = [
   {
     id: 1,
-    title: "管理組合総会議事録", // 管理組合の総会で作成された議事録
-    building: "グランドパレス東京", // 対象マンション名
-    type: "PDF", // ファイル形式
-    uploadedAt: "2023-12-15", // アップロード日
-    tags: ["議事録", "総会"], // 検索やフィルタリング用のタグ
+    title: "第1回理事会議事録",
+    building: "グリーンハイツ",
+    type: "議事録",
+    uploadedAt: "2023-04-15T10:30:00",
+    tags: ["理事会", "重要", "2023年度"],
     description:
-      "2023年度第2回管理組合総会の議事録です。主な議題は大規模修繕計画と予算承認について。", // 内容の要約
+      "2023年度第1回理事会の議事録です。主な議題は予算案と修繕計画について。",
     uploadedBy: {
-      name: "田中太郎", // アップロードしたユーザー
-      avatar: "/placeholder.svg?height=32&width=32", // アバター画像のURL
-      initials: "TT", // イニシャル（アバター画像がない場合に表示）
+      name: "山田太郎",
+      avatar: "/avatars/user-01.png",
+      initials: "YT",
     },
-    fileSize: "1.2 MB", // ファイルサイズ
-    pages: 5, // ドキュメントのページ数
-    previewUrl: "/placeholder.svg?height=500&width=400", // プレビュー画像のURL
+    fileSize: "1.2MB",
+    pages: 5,
+    previewUrl: "/previews/document-01.pdf",
     relatedDocuments: [
-      // このドキュメントに関連する他の書類（ID参照）
-      { id: 2, title: "修繕工事見積書" },
-      { id: 5, title: "エレベーター保守点検報告書" },
+      { id: 2, title: "修繕計画書" },
+      { id: 3, title: "2023年度予算案" },
     ],
   },
   {
     id: 2,
-    title: "修繕工事見積書", // 修繕工事の業者からの見積書
-    building: "サンシャインマンション",
-    type: "PDF",
-    uploadedAt: "2023-12-10",
-    tags: ["見積書", "修繕"], // 書類の種類を表すタグ
-    description:
-      "外壁塗装および防水工事の見積書です。3社の相見積もりの中から最も安価な業者を選定しました。", // 書類の概要
+    title: "修繕計画書",
+    building: "グリーンハイツ",
+    type: "計画書",
+    uploadedAt: "2023-03-10T14:20:00",
+    tags: ["修繕", "長期計画"],
+    description: "今後10年間の修繕計画と概算費用をまとめた資料です。",
     uploadedBy: {
       name: "佐藤花子",
-      avatar: "/placeholder.svg?height=32&width=32",
+      avatar: "/avatars/user-02.png",
       initials: "SH",
     },
-    fileSize: "3.5 MB",
-    pages: 12, // 複数ページの書類
-    previewUrl: "/placeholder.svg?height=500&width=400",
-    relatedDocuments: [{ id: 1, title: "管理組合総会議事録" }], // 関連する議事録へのリンク
+    fileSize: "3.5MB",
+    pages: 12,
+    previewUrl: "/previews/document-02.pdf",
+    relatedDocuments: [
+      { id: 1, title: "第1回理事会議事録" },
+      { id: 4, title: "修繕積立金検討資料" },
+    ],
   },
   // 消防設備点検報告書 - 法令で定められた定期点検の結果報告書
   {
@@ -117,22 +120,22 @@ export const documentsData = [
   // エレベーター保守点検報告書 - 設備の定期点検結果報告書
   {
     id: 5,
-    title: "エレベーター保守点検報告書",
-    building: "グリーンヒルズ札幌",
-    type: "PDF",
-    uploadedAt: "2023-11-20",
-    tags: ["点検", "エレベーター"],
-    description:
-      "定期エレベーター保守点検の報告書です。特に問題は見つかりませんでしたが、次回の定期交換部品についての案内が含まれています。", // 点検結果と今後の予定
+    title: "防災マニュアル",
+    building: "サンシャインマンション",
+    type: "マニュアル",
+    uploadedAt: "2023-02-01T09:15:00",
+    tags: ["防災", "マニュアル", "重要"],
+    description: "災害時の避難経路や対応方法についてのマニュアルです。",
     uploadedBy: {
-      name: "高橋恵子",
-      avatar: "/placeholder.svg?height=32&width=32",
-      initials: "TK",
+      name: "鈴木一郎",
+      avatar: "/avatars/user-05.png",
+      initials: "SI",
     },
-    fileSize: "1.7 MB",
-    pages: 6,
-    previewUrl: "/placeholder.svg?height=500&width=400",
-    relatedDocuments: [{ id: 1, title: "管理組合総会議事録" }], // 総会で議題になった関連議事録
+    fileSize: "2.1MB",
+    pages: 8,
+    previewUrl: "/previews/document-05.pdf",
+    // 関連ドキュメントがない場合でも空配列で初期化
+    relatedDocuments: [],
   },
 ];
 
