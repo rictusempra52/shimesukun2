@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileText, Download, Eye, ChevronLeft, Building2, Calendar, User, FileType, Tag, Clock } from "lucide-react"
-import { documentsData } from "@/components/document-list"
+import { documentsData } from "@/lib/document-data" // 新しい共通ライブラリからインポート
 
 interface DocumentViewerProps {
     documentId: string

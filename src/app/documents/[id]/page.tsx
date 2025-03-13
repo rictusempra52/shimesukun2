@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { DocumentViewer } from './document-viewer'
-import { documentsData } from "@/components/document-list"
+import { documentsData } from "@/lib/document-data" // 新しい共通ライブラリからインポート
 
 type Props = {
   params: Promise<{ id: string }>
@@ -10,7 +10,7 @@ type Props = {
 async function getDocument(id: string) {
   const docId = Number.parseInt(id)
   const doc = documentsData.find((doc) => doc.id === docId)
-  return doc || null // undefinedの代わりにnullを返す
+  return doc || null
 }
 
 export async function generateMetadata(
