@@ -2,22 +2,23 @@
  * 書類情報を表す型定義
  */
 export interface Document {
-  id: string;
-  title: string;
-  building: string;
-  type: string;
-  uploadedAt: string;
-  tags: string[];
-  description: string;
+  id: string; // 文字列型のID
+  title: string; // タイトル
+  building: string; // 建物名
+  type: string; // 書類のタイプ
+  uploadedAt: string; // アップロード日時
+  tags: string[]; // タグの配列
+  description: string; // 説明文
   uploadedBy: {
-    name: string;
-    avatar: string;
-    initials: string;
+    // アップロードしたユーザー情報
+    name: string; // 名前
+    avatar: string; // アバター画像URL
+    initials: string; // イニシャル
   };
-  fileSize: string;
-  pages: number;
-  previewUrl?: string;
-  relatedDocuments: RelatedDocument[];
+  fileSize: string; // ファイルサイズ
+  pages: number; // ページ数
+  previewUrl?: string; // プレビューURL（オプショナル）
+  relatedDocuments: RelatedDocument[]; // 関連書類の配列
 }
 
 /**

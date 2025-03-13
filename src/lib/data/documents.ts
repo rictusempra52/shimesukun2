@@ -18,24 +18,20 @@ export async function getAllDocuments(
     return firebaseDocuments.map((doc) => ({
       ...doc,
       id: doc.id.toString(),
-      relatedDocuments: doc.relatedDocuments
-        ? doc.relatedDocuments.map((relatedDoc) => ({
-            ...relatedDoc,
-            id: relatedDoc.id.toString(),
-          }))
-        : [],
+      relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
+        id: relatedDoc.id.toString(),
+        title: relatedDoc.title,
+      })),
     })) as Document[];
   } else {
     // モックデータから取得し、id及びrelatedDocumentsのidも文字列に変換
     return documentsData.map((doc) => ({
       ...doc,
       id: doc.id.toString(),
-      relatedDocuments: doc.relatedDocuments
-        ? doc.relatedDocuments.map((relatedDoc) => ({
-            ...relatedDoc,
-            id: relatedDoc.id.toString(),
-          }))
-        : [],
+      relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
+        id: relatedDoc.id.toString(),
+        title: relatedDoc.title,
+      })),
     })) as Document[];
   }
 }
@@ -56,12 +52,12 @@ export async function getDocumentById(
       ? ({
           ...firebaseDocument,
           id: firebaseDocument.id.toString(),
-          relatedDocuments: firebaseDocument.relatedDocuments
-            ? firebaseDocument.relatedDocuments.map((relatedDoc) => ({
-                ...relatedDoc,
-                id: relatedDoc.id.toString(),
-              }))
-            : [],
+          relatedDocuments: firebaseDocument.relatedDocuments.map(
+            (relatedDoc) => ({
+              id: relatedDoc.id.toString(),
+              title: relatedDoc.title,
+            })
+          ),
         } as Document)
       : null;
   } else {
@@ -72,12 +68,10 @@ export async function getDocumentById(
       ? ({
           ...doc,
           id: doc.id.toString(),
-          relatedDocuments: doc.relatedDocuments
-            ? doc.relatedDocuments.map((relatedDoc) => ({
-                ...relatedDoc,
-                id: relatedDoc.id.toString(),
-              }))
-            : [],
+          relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
+            id: relatedDoc.id.toString(),
+            title: relatedDoc.title,
+          })),
         } as Document)
       : null;
   }
