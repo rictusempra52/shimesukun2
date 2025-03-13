@@ -4,8 +4,9 @@ import { getDocumentById } from '@/lib/data/documents'
 import { cookies } from "next/headers";
 import { Document } from '@/types/document'
 
+// Next.js 15の型定義に合わせて更新
 type Props = {
-  params: { id: string }
+  params: Promise<{ id: string }> // paramsをPromiseに変更
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
@@ -21,7 +22,7 @@ async function getDocument(id: string): Promise<Document | null> {
 export async function generateMetadata(
   { params }: Props
 ): Promise<Metadata> {
-  const { id } = params
+  const { id } = await params // awaitを追加
   const document = await getDocument(id)
 
   return {
@@ -34,7 +35,7 @@ export default async function DocumentPage({
   params,
   searchParams
 }: Props) {
-  const { id } = params
+  const { id } = await params // awaitを追加
   const document = await getDocument(id)
 
   return <DocumentViewer initialDocument={document} documentId={id} />
