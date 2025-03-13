@@ -2,16 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
-// 正しい型定義
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
-export async function GET(request: NextRequest, context: RouteContext) {
+// カスタムインターフェースを削除し、Next.jsが期待するインライン型を使用
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const { id } = context.params;
+    const { id } = params;
 
     // データソース設定をクッキーから取得
     const cookieStore = await cookies();
