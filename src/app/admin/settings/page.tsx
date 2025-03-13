@@ -6,21 +6,19 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "sonner" // shadcn/uiのuseToastからsonnerのtoastに変更
 import { useDataSource } from "@/contexts/data-source-context"
 import { ArrowLeft, Database, FileJson } from "lucide-react"
 
 export default function AdminSettingsPage() {
     const { dataSource, setDataSource } = useDataSource();
     const [selectedSource, setSelectedSource] = useState<'firebase' | 'mock'>(dataSource);
-    const { toast } = useToast();
     const router = useRouter();
 
     // 変更を保存する
     const saveChanges = () => {
         setDataSource(selectedSource);
-        toast({
-            title: "設定を保存しました",
+        toast("設定を保存しました", {
             description: `データソースを ${selectedSource === 'firebase' ? 'Firebase' : 'モックデータ'} に変更しました`,
         });
     };

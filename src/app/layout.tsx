@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { DataSourceProvider } from "@/contexts/data-source-context";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner"; // sonnerのToasterをインポート
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <DataSourceProvider>
           {children}
-          <Toaster />
+          <Toaster /> {/* Toasterコンポーネントを追加 */}
         </DataSourceProvider>
       </body>
     </html>
