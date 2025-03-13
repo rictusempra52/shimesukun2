@@ -3,13 +3,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
-/**
- * Firebaseの設定
- *
- * 環境変数から取得したFirebaseのプロジェクト情報を設定します。
- * これらの情報はアプリケーションとFirebaseサービスを接続するために使用されます。
- * 重要: 環境変数はクライアントサイドでも安全に使用できる公開情報のみを含めてください。
- */
+// Firebaseの設定情報
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -20,43 +14,36 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-/**
- * Firebase初期化
- *
- * アプリケーション内でFirebaseを一度だけ初期化します。
- * すでに初期化されている場合は既存のインスタンスを再利用します。
- * これにより、複数回の初期化によるエラーやリソース無駄遣いを防ぎます。
- */
-const app =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// デバッグ用：環境変数が正しく読み込まれているか確認
+if (typeof window !== "undefined") {
+  console.log(
+    "Firebase設定情報が設定されているか:",
+    process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? "✅" : "❌",
+    process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ? "✅" : "❌",
+    process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ? "✅" : "❌"
+  );
+}
 
-/**
- * Firebase認証サービスのインスタンス
- *
- * ユーザーのログイン、登録、認証状態の管理に使用します。
- */
-const auth = getAuth(app);
+// Firebase初期化
+let app;
+let auth;
+let googleProvider;
+let db;
+let storage;
 
-/**
- * Google認証プロバイダー
- *
- * Googleアカウントでのログイン機能を提供するためのプロバイダー設定です。
- */
-const googleProvider = new GoogleAuthProvider();
+try {
+  if (typeof window !== "undefined") {
+    console.log("Firebaseの初期化を試みています...");
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+    db = getFirestore(app);
+    storage = getStorage(app);
+    console.log("Firebaseの初期化が完了しました");
+  }
+} catch (error) {
+  console.error("Firebaseの初期化に失敗しました:", error);
+  // エラーをキャッチしても、クライアントでは処理を続行可能にする
+}
 
-/**
- * Firestoreデータベースのインスタンス
- *
- * マンション情報や書類のメタデータなどのデータを保存・取得するために使用します。
- */
-const db = getFirestore(app);
-
-/**
- * Firebaseストレージのインスタンス
- *
- * PDFや画像などの実際のファイルデータを保存するために使用します。
- */
-const storage = getStorage(app);
-
-// 他のコンポーネントで使用できるようにエクスポート
 export { auth, googleProvider, db, storage };
