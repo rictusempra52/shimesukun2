@@ -10,7 +10,7 @@ export async function GET(
     const { id } = params;
 
     // データソース設定をクッキーから取得
-    const cookieStore = cookies();
+    const cookieStore = await cookies(); // awaitを追加
     const dataSource =
       (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
       "firebase";

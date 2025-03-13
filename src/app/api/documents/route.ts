@@ -5,9 +5,9 @@ import { cookies } from "next/headers";
 export async function GET(request: NextRequest) {
   try {
     // データソース設定をクッキーから取得（クライアントのローカルストレージは参照できないため）
-    const cookieStore = cookies();
+    const cookieStore = await cookies(); // 修正: awaitを追加し、ネストされたawaitを削除
     const dataSource =
-      ((await cookieStore).get("dataSource")?.value as "firebase" | "mock") ||
+      (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
       "firebase";
 
     // 統一インターフェースでデータを取得

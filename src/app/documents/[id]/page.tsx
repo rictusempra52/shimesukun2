@@ -12,7 +12,7 @@ type Props = {
 // サーバーサイドでドキュメントを取得する関数
 async function getDocument(id: string): Promise<Document | null> {
   // クッキーからデータソース設定を取得
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const dataSource = cookieStore.get('dataSource')?.value as 'firebase' | 'mock' || 'firebase';
 
   return await getDocumentById(id, dataSource);

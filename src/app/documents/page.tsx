@@ -5,7 +5,7 @@ import { cookies } from "next/headers";
 // サーバーコンポーネントでデータを取得
 export default async function DocumentsPage() {
     // クッキーからデータソース設定を取得（デフォルトはfirebase）
-    const cookieStore = await cookies();
+    const cookieStore = await cookies();  // awaitを追加
     const dataSource = cookieStore.get('dataSource')?.value as 'firebase' | 'mock' || 'firebase';
 
     // 統一インターフェースでデータを取得
