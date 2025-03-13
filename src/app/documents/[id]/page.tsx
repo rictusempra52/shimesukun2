@@ -1,22 +1,37 @@
 import { Metadata } from 'next'
 import { DocumentViewer } from './document-viewer'
-import { documentsData } from "@/lib/document-data" // 新しい共通ライブラリからインポート
+import { db } from '@/lib/firebase/admin-config'
+import { Document } from '@/types/document'
 
 type Props = {
-  params: Promise<{ id: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  params: { id: string }
+  searchParams: { [key: string]: string | string[] | undefined }
 }
 
-async function getDocument(id: string) {
-  const docId = Number.parseInt(id)
-  const doc = documentsData.find((doc) => doc.id === docId)
-  return doc || null
+// サーバーサイドでドキュメントを取得する関数
+async function getDocument(id: string): Promise<Document | null> {
+  try {
+    const docRef = db.collection('documents').doc(id);
+    const docSnap = await docRef.get();
+
+    if (!docSnap.exists) {
+      return null;
+    }
+
+    return {
+      id: docSnap.id,
+      ...docSnap.data() as Omit<Document, 'id'>
+    };
+  } catch (error) {
+    console.error("ドキュメント取得エラー:", error);
+    return null;
+  }
 }
 
 export async function generateMetadata(
-  { params }: { params: Promise<{ id: string }> }
+  { params }: Props
 ): Promise<Metadata> {
-  const { id } = await params
+  const { id } = params
   const document = await getDocument(id)
 
   return {
@@ -29,7 +44,7 @@ export default async function DocumentPage({
   params,
   searchParams
 }: Props) {
-  const { id } = await params
+  const { id } = params
   const document = await getDocument(id)
 
   return <DocumentViewer initialDocument={document} documentId={id} />

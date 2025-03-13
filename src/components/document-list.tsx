@@ -9,20 +9,49 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { FileText, Download, Eye, Search, ChevronRight } from "lucide-react"
 import { useRouter } from "next/navigation"
-import { documentsData } from "@/lib/document-data" // 新しい共通ライブラリからインポート
+// モックデータのインポートを削除し、型定義をインポート
+import { Document } from "@/types/document"
+// SWRを使用してデータの状態管理を行う
+import useSWR from 'swr'
 
+// インターフェースを更新してinitialDocumentsプロパティを追加
 interface DocumentListProps {
   searchQuery?: string
+  initialDocuments?: Document[]  // サーバーコンポーネントから渡される初期データ
 }
 
-export function DocumentList({ searchQuery = "" }: DocumentListProps) {
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
+
+export function DocumentList({ searchQuery = "", initialDocuments = [] }: DocumentListProps) {
   const router = useRouter()
   const [buildingFilter, setBuildingFilter] = useState<string>("")
   const [typeFilter, setTypeFilter] = useState<string>("")
   const [localSearchQuery, setLocalSearchQuery] = useState<string>(searchQuery)
   const [viewMode, setViewMode] = useState<"table" | "card">("table")
 
-  const documents = documentsData;
+  // SWRを使ってデータ取得（initialDocumentsがある場合は使用）
+  const { data, error, isLoading } = useSWR<{ documents: Document[] }>(
+    '/api/documents',
+    fetcher,
+    {
+      fallbackData: initialDocuments.length ? { documents: initialDocuments } : undefined,
+      // データを更新するタイミング設定
+      revalidateOnFocus: true,  // ページにフォーカスが戻ったとき
+      revalidateOnReconnect: true,  // ネットワーク再接続時
+    }
+  );
+
+  // データ取得中や取得エラー時の表示
+  if (isLoading && !initialDocuments.length) {
+    return <div className="py-8 text-center">書類データを読み込み中...</div>;
+  }
+
+  if (error) {
+    return <div className="py-8 text-center text-red-500">データの読み込みに失敗しました。ページを再読み込みしてください。</div>;
+  }
+
+  // 書類データ
+  const documents = data?.documents || [];
 
   // 検索とフィルタリングの適用
   const filteredDocuments = documents.filter((doc) => {
