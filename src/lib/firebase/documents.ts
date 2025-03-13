@@ -8,7 +8,7 @@ import {
   addDoc,
   updateDoc,
 } from "firebase/firestore";
-import { db } from "./config";
+import { db } from "@/lib/firebase/firebase-config";
 import { Document } from "@/types/document";
 
 /**
