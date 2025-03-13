@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
-// Next.js公式ドキュメントに準拠した型定義
+// Next.js 15.0.0-RCからparamsはPromiseになりました
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    // Promiseを解決するためにawaitが必要
+    const { id } = await params;
 
     // データソース設定をクッキーから取得
     const cookieStore = await cookies();
