@@ -18,6 +18,7 @@ import { FileText, Download, Eye, ChevronLeft, Building2, Calendar, User, FileTy
 import { Document } from "@/types/document"
 // SWRをインポート
 import useSWR from 'swr'
+import { useApiFetcher } from "@/lib/api-fetcher"
 
 /**
  * DocumentViewerコンポーネントのプロパティ
@@ -27,10 +28,11 @@ interface DocumentViewerProps {
     initialDocument?: Document | null  // 型をDocumentに変更
 }
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json());
-
 export function DocumentViewer({ documentId, initialDocument }: DocumentViewerProps) {
-    const router = useRouter()
+    const router = useRouter();
+
+    // カスタムフェッチャーを使用
+    const fetcher = useApiFetcher();
 
     // APIからデータ取得（initialDocumentがある場合は使用）
     const { data, error, isLoading } = useSWR<{ document: Document }>(

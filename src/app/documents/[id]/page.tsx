@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { DocumentViewer } from './document-viewer'
-import { db } from '@/lib/firebase/admin-config'
+import { getDocumentById } from '@/lib/data/documents'
+import { cookies } from "next/headers";
 import { Document } from '@/types/document'
 
 type Props = {
@@ -10,22 +11,11 @@ type Props = {
 
 // サーバーサイドでドキュメントを取得する関数
 async function getDocument(id: string): Promise<Document | null> {
-  try {
-    const docRef = db.collection('documents').doc(id);
-    const docSnap = await docRef.get();
+  // クッキーからデータソース設定を取得
+  const cookieStore = cookies();
+  const dataSource = cookieStore.get('dataSource')?.value as 'firebase' | 'mock' || 'firebase';
 
-    if (!docSnap.exists) {
-      return null;
-    }
-
-    return {
-      id: docSnap.id,
-      ...docSnap.data() as Omit<Document, 'id'>
-    };
-  } catch (error) {
-    console.error("ドキュメント取得エラー:", error);
-    return null;
-  }
+  return await getDocumentById(id, dataSource);
 }
 
 export async function generateMetadata(

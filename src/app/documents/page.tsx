@@ -1,14 +1,15 @@
-import { db } from '@/lib/firebase/admin-config';
-import DocumentList from '@/components/document-list';
+import { getAllDocuments } from '@/lib/data/documents';
+import { DocumentList } from '@/components/document-list';
+import { cookies } from "next/headers";
 
 // サーバーコンポーネントでデータを取得
 export default async function DocumentsPage() {
-    // サーバーサイドでFirebaseからデータ取得
-    const snapshot = await db.collection('documents').get();
-    const documents = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-    }));
+    // クッキーからデータソース設定を取得（デフォルトはfirebase）
+    const cookieStore = cookies();
+    const dataSource = cookieStore.get('dataSource')?.value as 'firebase' | 'mock' || 'firebase';
+
+    // 統一インターフェースでデータを取得
+    const documents = await getAllDocuments(dataSource);
 
     // クライアントコンポーネントにデータを渡す
     return <DocumentList initialDocuments={documents} />;

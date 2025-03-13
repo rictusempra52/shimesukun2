@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { db } from "@/lib/firebase/admin-config";
+import { getDocumentById } from "@/lib/data/documents";
+import { cookies } from "next/headers";
 
 export async function GET(
   request: NextRequest,
@@ -8,23 +9,22 @@ export async function GET(
   try {
     const { id } = params;
 
-    // Firestoreからドキュメントを取得
-    const docRef = db.collection("documents").doc(id);
-    const docSnap = await docRef.get();
+    // データソース設定をクッキーから取得
+    const cookieStore = cookies();
+    const dataSource =
+      (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
+      "firebase";
+
+    // 統一インターフェースでデータを取得
+    const document = await getDocumentById(id, dataSource);
 
     // ドキュメントが存在しない場合
-    if (!docSnap.exists) {
+    if (!document) {
       return NextResponse.json(
         { error: "ドキュメントが見つかりません" },
         { status: 404 }
       );
     }
-
-    // ドキュメントデータを取得
-    const document = {
-      id: docSnap.id,
-      ...docSnap.data(),
-    };
 
     return NextResponse.json({ document });
   } catch (error) {

@@ -1,16 +1,21 @@
-import { NextResponse } from "next/server";
-import { db } from "@/lib/firebase/admin-config";
+import { NextRequest, NextResponse } from "next/server";
+import { getAllDocuments } from "@/lib/data/documents";
+import { cookies } from "next/headers";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const snapshot = await db.collection("documents").get();
-    const documents = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    // データソース設定をクッキーから取得（クライアントのローカルストレージは参照できないため）
+    const cookieStore = cookies();
+    const dataSource =
+      (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
+      "firebase";
+
+    // 統一インターフェースでデータを取得
+    const documents = await getAllDocuments(dataSource);
 
     return NextResponse.json({ documents });
   } catch (error) {
+    console.error("ドキュメント取得エラー:", error);
     return NextResponse.json(
       { error: "ドキュメント取得に失敗しました" },
       { status: 500 }
