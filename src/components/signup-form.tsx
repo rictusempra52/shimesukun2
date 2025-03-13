@@ -63,8 +63,8 @@ export function SignupForm() {
             if (err.code === 'auth/email-already-in-use') {
                 setError('このメールアドレスは既に使用されています。');
             } else {
-                // その他のエラー
-                setError('アカウントの作成に失敗しました。');
+                // その他のエラー - デバッグ用に詳細情報を表示
+                setError(`アカウントの作成に失敗しました。エラー: ${err.code} - ${err.message}`);
             }
             console.error(err);
         } finally {
