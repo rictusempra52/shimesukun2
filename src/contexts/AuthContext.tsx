@@ -20,6 +20,7 @@ import { auth, googleProvider } from '@/lib/firebase';
 type AuthContextType = {
     currentUser: User | null;      // 現在ログインしているユーザー情報
     loading: boolean;              // 認証状態の読み込み中フラグ
+    initError: string | null;      // 初期化エラーの状態
     login: (email: string, password: string) => Promise<any>; // メール/パスワードでのログイン
     signup: (email: string, password: string) => Promise<any>; // 新規ユーザー登録
     loginWithGoogle: () => Promise<any>; // Googleアカウントでのログイン
@@ -47,17 +48,18 @@ export const useAuth = () => {
 /**
  * 認証プロバイダーコンポーネント
  * 
- * このコンポーネントでアプリをラップすることで、すべての子コンポーネントに
- * 認証関連の機能（ログイン、ログアウトなど）を提供します。
+ * アプリケーション全体に認証機能を提供するラッパーコンポーネントです。
  * 
  * @param {object} props - コンポーネントのプロパティ
- * @param {React.ReactNode} props.children - 子コンポーネント
+ * @param {ReactNode} props.children - 子コンポーネント
  */
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export function AuthProvider({ children }: { children: React.ReactNode }) {
     // 現在のユーザー状態を管理
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     // 認証状態の読み込み中かどうかのフラグ
     const [loading, setLoading] = useState(true);
+    // 初期化エラーの状態
+    const [initError, setInitError] = useState<string | null>(null);
 
     /**
      * メール/パスワードでのユーザー登録
@@ -116,20 +118,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
      * アンマウント時に監視を解除します。
      */
     useEffect(() => {
-        // Firebase認証の状態変化を監視する関数をセット
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setCurrentUser(user); // ユーザー情報を更新
-            setLoading(false);    // 読み込み完了フラグをセット
-        });
+        console.log('AuthProvider: 認証状態の監視を開始します');
 
-        // コンポーネントのクリーンアップ時に監視を解除
-        return unsubscribe;
+        try {
+            // Firebase認証の状態変化を監視する関数をセット
+            const unsubscribe = onAuthStateChanged(auth, (user) => {
+                console.log('AuthProvider: 認証状態が変更されました', user ? `ユーザーID: ${user.uid}` : 'ユーザーなし');
+                setCurrentUser(user); // ユーザー情報を更新
+                setLoading(false);    // 読み込み完了フラグをセット
+            }, (error) => {
+                console.error('AuthProvider: 認証状態の監視中にエラーが発生しました', error);
+                setInitError(error.message);
+                setLoading(false);
+            });
+
+            // コンポーネントのクリーンアップ時に監視を解除
+            return () => {
+                console.log('AuthProvider: 認証状態の監視を解除します');
+                unsubscribe();
+            };
+        } catch (error) {
+            console.error('AuthProvider: 認証初期化エラー', error);
+            setInitError(error instanceof Error ? error.message : '認証の初期化に失敗しました');
+            setLoading(false);
+        }
     }, []);
 
     // コンテキストで提供する値をまとめる
     const value = {
         currentUser,
         loading,
+        initError,
         login,
         signup,
         loginWithGoogle,
@@ -138,9 +157,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         // 認証情報をアプリ全体に提供
-        // ローディング中は子コンポーネントをレンダリングしない
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
-};
+}
