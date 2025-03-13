@@ -24,7 +24,7 @@ export function LoginForm() {
     const [loading, setLoading] = useState(false);
 
     // 認証関連の関数とルーターの取得
-    const { login, loginWithGoogle } = useAuth();
+    const { login, loginWithGoogle } = useAuth() || { login: null, loginWithGoogle: null };
     const router = useRouter();
 
     /**
@@ -38,8 +38,14 @@ export function LoginForm() {
         try {
             setError(''); // エラーメッセージをリセット
             setLoading(true); // ローディング状態を開始
-            await login(email, password); // 認証処理を実行
-            router.push('/'); // 成功時はトップページへリダイレクト
+
+            // login関数が存在する場合のみ実行
+            if (login) {
+                await login(email, password); // 認証処理を実行
+                router.push('/'); // 成功時はトップページへリダイレクト
+            } else {
+                throw new Error('認証機能が初期化されていません');
+            }
         } catch (err) {
             // エラーが発生した場合はユーザーに通知
             setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
@@ -57,8 +63,14 @@ export function LoginForm() {
         try {
             setError(''); // エラーメッセージをリセット
             setLoading(true); // ローディング状態を開始
-            await loginWithGoogle(); // Google認証を実行
-            router.push('/'); // 成功時はトップページへリダイレクト
+
+            // loginWithGoogle関数が存在する場合のみ実行
+            if (loginWithGoogle) {
+                await loginWithGoogle(); // Google認証を実行
+                router.push('/'); // 成功時はトップページへリダイレクト
+            } else {
+                throw new Error('Google認証機能が初期化されていません');
+            }
         } catch (err) {
             // エラーが発生した場合はユーザーに通知
             setError('Googleログインに失敗しました。再度お試しください。');
