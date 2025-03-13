@@ -14,6 +14,11 @@ const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// コンソールからの警告確認用のコメント
+// 注意: Next.js の NEXT_PUBLIC_ 環境変数はクライアント側に公開されますが、
+// Firebaseのクライアントキーは公開されることを前提に設計されています。
+// セキュリティはFirebaseのセキュリティルールで担保します。
+
 // Firebase初期化（既に初期化されている場合は既存のインスタンスを使用）
 const app =
   getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
