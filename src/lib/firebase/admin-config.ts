@@ -1,31 +1,34 @@
 import * as admin from "firebase-admin";
 
-// 環境変数からサービスアカウント情報を取得する方法
-// または、JSON設定ファイルをインポート
-let serviceAccount;
-
-try {
-  // 本番環境では環境変数から取得
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY);
-  } else {
-    // 開発環境ではJSONファイルから取得（注：このファイルはGitにコミットしないこと）
-    serviceAccount = require("../../../firebase-service-account.json");
-  }
-} catch (error) {
-  console.error("Firebase Admin初期化エラー:", error);
-}
-
-// Firebaseアプリの初期化（一度だけ）
+// 初期化がまだ行われていない場合のみ初期化を実行
 if (!admin.apps.length) {
-  try {
+  // サービスアカウントキーがある場合（ローカル開発環境など）
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_KEY) {
+    try {
+      const serviceAccount = JSON.parse(
+        process.env.FIREBASE_SERVICE_ACCOUNT_KEY
+      );
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
+      });
+    } catch (error) {
+      console.error("Firebase admin initialization error:", error);
+    }
+  }
+  // Vercel などの環境変数を使用する場合
+  else {
     admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
-      // 他の必要な設定（データベースURLなど）
-      databaseURL: process.env.FIREBASE_DATABASE_URL,
+      credential: admin.credential.cert({
+        projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY
+          ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+          : undefined,
+      }),
+      databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
     });
-  } catch (error) {
-    console.error("Firebase admin初期化エラー:", error);
   }
 }
 
