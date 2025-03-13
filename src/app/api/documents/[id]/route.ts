@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
-// Next.js 15.2.2のApp Routerの正しい型定義
+// Next.js公式ドキュメントに準拠した型定義
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = context.params;
+    const { id } = params;
 
     // データソース設定をクッキーから取得
     const cookieStore = await cookies();
