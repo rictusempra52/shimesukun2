@@ -6,7 +6,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardPage from '@/components/dashboard-page';
 
 export default function Home() {
-  const { currentUser, loading } = useAuth();
+  const auth = useAuth();
+  const currentUser = auth?.currentUser;
+  const loading = auth?.loading ?? true;
   const router = useRouter();
 
   useEffect(() => {

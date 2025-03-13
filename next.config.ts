@@ -4,17 +4,16 @@ const nextConfig: NextConfig = {
   // 静的ページ生成からログイン関連ページを除外
   output: "standalone",
 
-  // Next.js 15.2.2でサポートされている実験的オプション
+  // Next.js 15.2.2でサポートされているオプション
   experimental: {
-    // missingSuspenseWithCSRBailoutは認識されないのでコメントアウト
-    // missingSuspenseWithCSRBailout: false,
-
-    // 代わりに以下のオプションでサーバーコンポーネントの挙動を調整
+    // サーバーアクションの設定
     serverActions: {
       bodySizeLimit: "2mb",
     },
-    serverComponentsExternalPackages: ["firebase", "firebase-admin"],
   },
+
+  // 外部パッケージ設定（experimental配下から移動）
+  serverExternalPackages: ["firebase", "firebase-admin"],
 };
 
 export default nextConfig;
