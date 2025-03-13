@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
-// カスタムインターフェースを削除し、Next.jsが期待するインライン型を使用
+// Next.js 15.2.2のApp Routerの正しい型定義
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     // データソース設定をクッキーから取得
     const cookieStore = await cookies();
