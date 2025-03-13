@@ -72,7 +72,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
     return () => window.removeEventListener("resize", handleResize)
   }, [])
 
-  const navigateToDocumentDetails = (docId: number) => {
+  const navigateToDocumentDetails = (docId: string) => {
     router.push(`/documents/${docId}`)
   }
 
