@@ -14,9 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileText, Download, Eye, ChevronLeft, Building2, Calendar, User, FileType, Tag, Clock } from "lucide-react"
-// モックデータのインポートを削除
 import { Document } from "@/types/document"
-// SWRをインポート
 import useSWR from 'swr'
 import { useApiFetcher } from "@/lib/api-fetcher"
 
@@ -30,8 +28,6 @@ interface DocumentViewerProps {
 
 export function DocumentViewer({ documentId, initialDocument }: DocumentViewerProps) {
     const router = useRouter();
-
-    // カスタムフェッチャーを使用
     const fetcher = useApiFetcher();
 
     // APIからデータ取得（initialDocumentがある場合は使用）
@@ -43,18 +39,25 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
         }
     );
 
-    // 関連書類を取得する関数
-    const getRelatedDocument = async (id: string) => {
-        try {
-            const response = await fetch(`/api/documents/${id}`);
-            if (!response.ok) return null;
-            const data = await response.json();
-            return data.document;
-        } catch (error) {
-            console.error("関連書類取得エラー:", error);
-            return null;
+    // 関連書類の完全情報の状態を管理
+    const [relatedDocsData, setRelatedDocsData] = useState<Record<string, Document | null>>({});
+
+    // 関連書類のデータを取得するuseEffect
+    useEffect(() => {
+        if (data?.document?.relatedDocuments?.length > 0) {
+            data.document.relatedDocuments.forEach(async (relDoc) => {
+                try {
+                    const docData = await fetcher(`/api/documents/${relDoc.id}`);
+                    setRelatedDocsData(prev => ({
+                        ...prev,
+                        [relDoc.id]: docData.document
+                    }));
+                } catch (error) {
+                    console.error("関連書類取得エラー:", error);
+                }
+            });
         }
-    }
+    }, [data?.document?.relatedDocuments]);
 
     // 前のページに戻る
     const goBack = () => {
@@ -120,7 +123,6 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
         )
     }
 
-    // 以下のUIレンダリング部分は基本的に同じ
     return (
         <div className="container mx-auto py-8 px-4">
             {/* 戻るボタン */}
@@ -215,123 +217,119 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                                         <div>
                                             <h3 className="text-sm font-medium">アップロードユーザー</h3>
                                             <div className="flex items-center gap-2 mt-1">
-                                                <Avatar className="h-6 w-6"></Avatar>
-                                                <AvatarImage src={document.uploadedBy.avatar} alt={document.uploadedBy.name} />
-                                                <AvatarFallback>{document.uploadedBy.initials}</AvatarFallback>
-                                            </Avatar>
-                                            <span className="text-sm">{document.uploadedBy.name}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* 右カラム: ファイル情報、タグ */}
-                            <div className="space-y-4">
-                                {/* ファイル情報 */}
-                                <div className="flex items-start gap-3">
-                                    <FileType className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <h3 className="text-sm font-medium">ファイル情報</h3>
-                                        <p className="text-sm">形式: {document.type}</p>
-                                        <p className="text-sm">サイズ: {document.fileSize}</p>
-                                        <p className="text-sm">ページ数: {document.pages}ページ</p>
-                                    </div>
-                                </div>
-
-                                {/* タグ情報 */}
-                                <div className="flex items-start gap-3">
-                                    <Tag className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <h3 className="text-sm font-medium">タグ</h3>
-                                        <div className="flex flex-wrap gap-1 mt-1">
-                                            {document.tags.map((tag, i) => (
-                                                <Badge key={i} variant="outline">
-                                                    {tag}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 説明文セクション */}
-                        <div className="mt-6 pt-6 border-t">
-                            <h3 className="text-sm font-medium mb-2">説明</h3>
-                            <p className="text-sm">{document.description}</p>
-                        </div>
-
-                        {/* フッター: 最終更新とアクションボタン */}
-                        <div className="mt-6 pt-6 border-t flex items-center justify-between">
-                            <div className="flex items-center text-sm text-muted-foreground">
-                                <Clock className="h-4 w-4 mr-1" />
-                                <span>最終更新: {document.uploadedAt}</span>
-                            </div>
-                            <div className="flex gap-2">
-                                <Button variant="outline">
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    PDFで開く
-                                </Button>
-                                <Button>
-                                    <Download className="h-4 w-4 mr-2" />
-                                    ダウンロード
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </TabsContent>
-
-            {/* タブコンテンツ: 関連書類 */}
-            <TabsContent value="related" className="mt-4">
-                <Card>
-                    <CardContent className="p-6">
-                        {/* 関連書類がある場合のリスト表示 */}
-                        {document.relatedDocuments.length > 0 ? (
-                                <div className="space-y-4"></div>
-                                    <h3 className="text-sm font-medium">関連書類</h3>
-                                    {/* 関連書類のマッピング */}
-                        {document.relatedDocuments.map((relDoc) => {
-                            // 関連書類の完全な情報を取得
-                            const fullDoc = getRelatedDocument(relDoc.id)
-                            if (!fullDoc) return null
-
-                            return (
-                                <Card
-                                    key={relDoc.id}
-                                    className="overflow-hidden cursor-pointer"
-                                    onClick={() => navigateToDocument(relDoc.id)}
-                                >
-                                    <CardContent className="p-4"></CardContent>
-                                    <div className="flex items-center justify-between">
-                                        {/* 関連書類の基本情報 */}
-                                        <div className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <h4 className="font-medium text-sm">{relDoc.title}</h4>
-                                                <p className="text-xs text-muted-foreground">{fullDoc.building}</p>
+                                                <Avatar className="h-6 w-6">
+                                                    <AvatarImage src={document.uploadedBy.avatar} alt={document.uploadedBy.name} />
+                                                    <AvatarFallback>{document.uploadedBy.initials}</AvatarFallback>
+                                                </Avatar>
+                                                <span className="text-sm">{document.uploadedBy.name}</span>
                                             </div>
                                         </div>
-                                        {/* 関連書類のメタデータと移動アイコン */}
-                                        <div className="flex items-center gap-2">
-                                            <div className="text-xs text-muted-foreground">{fullDoc.uploadedAt}</div>
-                                            <ChevronLeft className="h-4 w-4 text-muted-foreground rotate-180" />
+                                    </div>
+                                </div>
+
+                                {/* 右カラム: ファイル情報、タグ */}
+                                <div className="space-y-4">
+                                    {/* ファイル情報 */}
+                                    <div className="flex items-start gap-3">
+                                        <FileType className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                        <div>
+                                            <h3 className="text-sm font-medium">ファイル情報</h3>
+                                            <p className="text-sm">形式: {document.type}</p>
+                                            <p className="text-sm">サイズ: {document.fileSize}</p>
+                                            <p className="text-sm">ページ数: {document.pages}ページ</p>
                                         </div>
                                     </div>
-                                </CardContent>
+
+                                    {/* タグ情報 */}
+                                    <div className="flex items-start gap-3">
+                                        <Tag className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                        <div>
+                                            <h3 className="text-sm font-medium">タグ</h3>
+                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                {document.tags.map((tag, i) => (
+                                                    <Badge key={i} variant="outline">
+                                                        {tag}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* 説明文セクション */}
+                            <div className="mt-6 pt-6 border-t">
+                                <h3 className="text-sm font-medium mb-2">説明</h3>
+                                <p className="text-sm">{document.description}</p>
+                            </div>
+
+                            {/* フッター: 最終更新とアクションボタン */}
+                            <div className="mt-6 pt-6 border-t flex items-center justify-between">
+                                <div className="flex items-center text-sm text-muted-foreground">
+                                    <Clock className="h-4 w-4 mr-1" />
+                                    <span>最終更新: {document.uploadedAt}</span>
+                                </div>
+                                <div className="flex gap-2">
+                                    <Button variant="outline">
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        PDFで開く
+                                    </Button>
+                                    <Button>
+                                        <Download className="h-4 w-4 mr-2" />
+                                        ダウンロード
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                {/* タブコンテンツ: 関連書類 */}
+                <TabsContent value="related" className="mt-4">
+                    <Card>
+                        <CardContent className="p-6">
+                            {/* 関連書類がある場合のリスト表示 */}
+                            {document.relatedDocuments.length > 0 ? (
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-medium">関連書類</h3>
+                                    {/* 関連書類のマッピング */}
+                                    {document.relatedDocuments.map((relDoc) => {
+                                        const fullDoc = relatedDocsData[relDoc.id];
+                                        return (
+                                            <Card
+                                                key={relDoc.id}
+                                                className="overflow-hidden cursor-pointer"
+                                                onClick={() => navigateToDocument(relDoc.id)}
+                                            >
+                                                <CardContent className="p-4">
+                                                    <div className="flex items-center justify-between">
+                                                        {/* 関連書類の基本情報 */}
+                                                        <div className="flex items-center gap-2">
+                                                            <FileText className="h-4 w-4 text-muted-foreground" />
+                                                            <div>
+                                                                <h4 className="font-medium text-sm">{relDoc.title}</h4>
+                                                                <p className="text-xs text-muted-foreground">{fullDoc?.building || '不明'}</p>
+                                                            </div>
+                                                        </div>
+                                                        {/* 関連書類のメタデータと移動アイコン */}
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="text-xs text-muted-foreground">{fullDoc?.uploadedAt || '不明'}</div>
+                                                            <ChevronLeft className="h-4 w-4 text-muted-foreground rotate-180" />
+                                                        </div>
+                                                    </div>
+                                                </CardContent>
                                             </Card>
-                )
+                                        );
                                     })}
+                                </div>
+                            ) : (
+                                // 関連書類がない場合のメッセージ
+                                <div className="text-center py-8 text-muted-foreground">関連書類はありません</div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
-    ) : (
-        // 関連書類がない場合のメッセージ
-        <div className="text-center py-8 text-muted-foreground">関連書類はありません</div>
-    )
-}
-                        </CardContent >
-                    </Card >
-                </TabsContent >
-            </Tabs >
-        </div >
     )
 }
