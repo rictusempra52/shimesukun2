@@ -1,15 +1,16 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import {
     User,
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
     signInWithPopup,
     signOut,
-    onAuthStateChanged
+    onAuthStateChanged,
+    Auth
 } from 'firebase/auth';
-import { auth, googleProvider } from '@/lib/firebase';
+import { auth as firebaseAuth, googleProvider } from '@/lib/firebase';
 
 /**
  * 認証コンテキストの型定義
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @returns {Promise} - Firebase認証操作のPromise
      */
     const signup = (email: string, password: string) => {
-        return createUserWithEmailAndPassword(auth, email, password);
+        return createUserWithEmailAndPassword(firebaseAuth, email, password);
     };
 
     /**
@@ -84,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @returns {Promise} - Firebase認証操作のPromise
      */
     const login = (email: string, password: string) => {
-        return signInWithEmailAndPassword(auth, email, password);
+        return signInWithEmailAndPassword(firebaseAuth, email, password);
     };
 
     /**
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @returns {Promise} - Firebase認証操作のPromise
      */
     const loginWithGoogle = () => {
-        return signInWithPopup(auth, googleProvider);
+        return signInWithPopup(firebaseAuth, googleProvider);
     };
 
     /**
@@ -107,7 +108,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @returns {Promise} - Firebase認証操作のPromise
      */
     const logout = () => {
-        return signOut(auth);
+        return signOut(firebaseAuth);
     };
 
     /**
@@ -123,15 +124,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('AuthProvider: 認証状態の監視を開始します');
 
             try {
-                if (!auth) {
+                if (!firebaseAuth) {
                     throw new Error('Firebaseの認証オブジェクトが初期化されていません');
                 }
 
                 // Firebaseの初期化状態を確認
-                console.log('AuthProvider: Firebase認証オブジェクトの状態:', auth ? '利用可能' : '未初期化');
+                console.log('AuthProvider: Firebase認証オブジェクトの状態:', firebaseAuth ? '利用可能' : '未初期化');
 
                 // Firebase認証の状態変化を監視する関数をセット
-                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
                     console.log('AuthProvider: 認証状態が変更されました', user ? `ユーザーID: ${user.uid}` : 'ユーザーなし');
                     setCurrentUser(user); // ユーザー情報を更新
                     setLoading(false);    // 読み込み完了フラグをセット

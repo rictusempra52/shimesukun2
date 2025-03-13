@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 
@@ -26,8 +26,8 @@ if (typeof window !== "undefined") {
 
 // Firebase初期化
 let app;
-let auth;
-let googleProvider;
+let auth: Auth;
+let googleProvider: GoogleAuthProvider;
 let db;
 let storage;
 
