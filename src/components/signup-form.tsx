@@ -82,9 +82,9 @@ export function SignupForm() {
             setLoading(true); // ローディング状態を開始
             await loginWithGoogle(); // Google認証を実行
             router.push('/'); // 成功時はトップページへリダイレクト
-        } catch (err) {
-            // エラーが発生した場合はユーザーに通知
-            setError('Googleログインに失敗しました。再度お試しください。');
+        } catch (err: any) {
+            // エラーが発生した場合はユーザーに通知 - デバッグ用に詳細情報を表示
+            setError(`Googleログインに失敗しました。エラー: ${err.code || 'unknown'} - ${err.message || '詳細不明'}`);
             console.error(err);
         } finally {
             setLoading(false); // ローディング状態を終了
