@@ -1,9 +1,27 @@
+import { Document, RelatedDocument } from "@/types/document";
 import { documentsData } from "@/lib/document-data";
 import {
   getAllDocuments as getFirebaseDocuments,
   getDocumentById as getFirebaseDocumentById,
 } from "@/lib/firebase/documents";
-import { Document } from "@/types/document";
+
+/**
+ * ドキュメントデータを統一形式に変換する共通関数
+ * @param doc 処理対象のドキュメント
+ * @returns 統一形式のドキュメント
+ */
+function normalizeDocument(doc: any): Document {
+  return {
+    ...doc,
+    id: doc.id.toString(),
+    relatedDocuments: Array.isArray(doc.relatedDocuments)
+      ? doc.relatedDocuments.map((relatedDoc: any) => ({
+          id: relatedDoc.id?.toString() || "",
+          title: relatedDoc.title || "",
+        }))
+      : [],
+  } as Document;
+}
 
 /**
  * 設定されたデータソースに応じて全ドキュメントを取得
@@ -15,24 +33,10 @@ export async function getAllDocuments(
   if (dataSource === "firebase") {
     // Firebase からデータ取得し、型変換
     const firebaseDocuments = await getFirebaseDocuments();
-    return firebaseDocuments.map((doc) => ({
-      ...doc,
-      id: doc.id.toString(),
-      relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
-        id: relatedDoc.id.toString(),
-        title: relatedDoc.title,
-      })),
-    })) as Document[];
+    return firebaseDocuments.map(normalizeDocument);
   } else {
-    // モックデータから取得し、id及びrelatedDocumentsのidも文字列に変換
-    return documentsData.map((doc) => ({
-      ...doc,
-      id: doc.id.toString(),
-      relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
-        id: relatedDoc.id.toString(),
-        title: relatedDoc.title,
-      })),
-    })) as Document[];
+    // モックデータから取得し、型変換
+    return documentsData.map(normalizeDocument);
   }
 }
 
@@ -46,33 +50,12 @@ export async function getDocumentById(
   dataSource: "firebase" | "mock"
 ): Promise<Document | null> {
   if (dataSource === "firebase") {
-    // Firebase からデータ取得し、型変換
     const firebaseDocument = await getFirebaseDocumentById(id);
-    return firebaseDocument
-      ? ({
-          ...firebaseDocument,
-          id: firebaseDocument.id.toString(),
-          relatedDocuments: firebaseDocument.relatedDocuments.map(
-            (relatedDoc) => ({
-              id: relatedDoc.id.toString(),
-              title: relatedDoc.title,
-            })
-          ),
-        } as Document)
-      : null;
+    return firebaseDocument ? normalizeDocument(firebaseDocument) : null;
   } else {
     // モックデータから取得
     const numId = parseInt(id);
     const doc = documentsData.find((doc) => doc.id === numId);
-    return doc
-      ? ({
-          ...doc,
-          id: doc.id.toString(),
-          relatedDocuments: doc.relatedDocuments.map((relatedDoc) => ({
-            id: relatedDoc.id.toString(),
-            title: relatedDoc.title,
-          })),
-        } as Document)
-      : null;
+    return doc ? normalizeDocument(doc) : null;
   }
 }
