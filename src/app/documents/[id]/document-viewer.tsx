@@ -8,23 +8,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { FileText, Download, Eye, ChevronLeft, Building2, Calendar, User, FileType, Tag, Clock } from "lucide-react"
-import { documents } from "@/components/document-list"
+import { documentsData } from "@/components/document-list"
 
 interface DocumentViewerProps {
     documentId: string
-    initialDocument: (typeof documents)[0] | null
+    initialDocument: (typeof documentsData)[0] | null
 }
 
 export function DocumentViewer({ documentId, initialDocument }: DocumentViewerProps) {
     const router = useRouter()
-    const [document, setDocument] = useState<(typeof documents)[0] | null>(initialDocument)
+    const [document, setDocument] = useState<(typeof documentsData)[0] | null>(initialDocument)
     const [loading, setLoading] = useState(!initialDocument)
 
     useEffect(() => {
         if (!initialDocument) {
             // initialDocumentがない場合のみAPIからデータを取得
             const docId = Number.parseInt(documentId)
-            const foundDoc = documents.find((doc) => doc.id === docId)
+            const foundDoc = documentsData.find((doc) => doc.id === docId)
 
             if (foundDoc) {
                 setDocument(foundDoc)
@@ -36,7 +36,7 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
 
     // 関連書類を取得
     const getRelatedDocument = (id: number) => {
-        return documents.find((doc) => doc.id === id)
+        return documentsData.find((doc) => doc.id === id)
     }
 
     // 前のページに戻る
