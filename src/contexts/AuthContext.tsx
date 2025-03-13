@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @param {string} password - 設定するパスワード
      * @returns {Promise} - Firebase認証操作のPromise
      */
-    const signup = (email: string, password: string) => {
+    const signup = (email: string, password: string): Promise<any> => {
         return createUserWithEmailAndPassword(firebaseAuth, email, password);
     };
 
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * @param {string} password - ユーザーのパスワード
      * @returns {Promise} - Firebase認証操作のPromise
      */
-    const login = (email: string, password: string) => {
+    const login = (email: string, password: string): Promise<any> => {
         return signInWithEmailAndPassword(firebaseAuth, email, password);
     };
 
@@ -96,7 +96,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * 
      * @returns {Promise} - Firebase認証操作のPromise
      */
-    const loginWithGoogle = () => {
+    const loginWithGoogle = (): Promise<any> => {
         return signInWithPopup(firebaseAuth, googleProvider);
     };
 
@@ -107,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * 
      * @returns {Promise} - Firebase認証操作のPromise
      */
-    const logout = () => {
+    const logout = (): Promise<any> => {
         return signOut(firebaseAuth);
     };
 

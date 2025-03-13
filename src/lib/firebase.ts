@@ -1,7 +1,7 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+import { getFirestore, Firestore } from "firebase/firestore";
+import { getStorage, FirebaseStorage } from "firebase/storage";
 
 // Firebaseの設定情報
 const firebaseConfig = {
@@ -28,8 +28,8 @@ if (typeof window !== "undefined") {
 let app;
 let auth: Auth;
 let googleProvider: GoogleAuthProvider;
-let db;
-let storage;
+let db: Firestore;
+let storage: FirebaseStorage;
 
 try {
   if (typeof window !== "undefined") {
@@ -44,6 +44,13 @@ try {
 } catch (error) {
   console.error("Firebaseの初期化に失敗しました:", error);
   // エラーをキャッチしても、クライアントでは処理を続行可能にする
+  if (typeof window !== "undefined") {
+    // クライアントサイドでのみダミーオブジェクトを用意
+    auth = {} as Auth;
+    googleProvider = {} as GoogleAuthProvider;
+    db = {} as Firestore;
+    storage = {} as FirebaseStorage;
+  }
 }
 
 export { auth, googleProvider, db, storage };
