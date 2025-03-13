@@ -50,7 +50,12 @@ export default function DashboardPage() {
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-10 border-b bg-background">
         <div className="flex h-16 items-center px-4 sm:px-6">
-          <h1 className="text-lg font-semibold">書類管理システム</h1>
+            <h1 
+            className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
+            onClick={() => setCurrentView("index")}
+            >
+            書類管理システム
+            </h1>
           <div className="ml-auto flex items-center space-x-4">
             <SearchBar onSearch={setSearchQuery} />
             <UserNav />
