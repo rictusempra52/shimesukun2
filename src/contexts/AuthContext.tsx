@@ -119,8 +119,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      * アンマウント時に監視を解除します。
      */
     useEffect(() => {
-        // クライアントサイドでのみ実行されるようにする
-        if (typeof window !== 'undefined') {
+        let unsubscribe: () => void = () => { };
+
+        const setupAuth = async () => {
+            // クライアントサイドでのみ実行されるようにする
+            if (typeof window === 'undefined') return;
+
             console.log('AuthProvider: 認証状態の監視を開始します');
 
             try {
@@ -131,8 +135,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 // Firebaseの初期化状態を確認
                 console.log('AuthProvider: Firebase認証オブジェクトの状態:', firebaseAuth ? '利用可能' : '未初期化');
 
+                // 現在のユーザー状態を即座に確認（初期状態のために）
+                const currentUser = firebaseAuth.currentUser;
+                console.log('AuthProvider: 初期ユーザー状態:', currentUser ? `ユーザーID: ${currentUser.uid}` : 'ユーザーなし');
+
+                if (currentUser) {
+                    setCurrentUser(currentUser);
+                }
+
                 // Firebase認証の状態変化を監視する関数をセット
-                const unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+                unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
                     console.log('AuthProvider: 認証状態が変更されました', user ? `ユーザーID: ${user.uid}` : 'ユーザーなし');
                     setCurrentUser(user); // ユーザー情報を更新
                     setLoading(false);    // 読み込み完了フラグをセット
@@ -141,23 +153,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setInitError(error.message);
                     setLoading(false);
                 });
-
-                // コンポーネントのクリーンアップ時に監視を解除
-                return () => {
-                    console.log('AuthProvider: 認証状態の監視を解除します');
-                    unsubscribe();
-                };
             } catch (error) {
                 console.error('AuthProvider: 認証初期化エラー', error);
                 setInitError(error instanceof Error ? error.message : '認証の初期化に失敗しました');
                 setLoading(false);
-                return () => { }; // エラー時の空のクリーンアップ関数
+            } finally {
+                // いずれにしてもloadingは終了させる
+                setTimeout(() => {
+                    if (loading) setLoading(false);
+                }, 5000);
             }
-        } else {
-            // サーバーサイドではローディング状態のまま
-            return () => { };
-        }
-    }, []);
+        };
+
+        setupAuth();
+
+        return () => {
+            console.log('AuthProvider: 認証状態の監視を解除します');
+            unsubscribe();
+        };
+    }, [loading]);
 
     // コンテキストで提供する値をまとめる
     const value = {
