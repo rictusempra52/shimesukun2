@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     // データソース設定をクッキーから取得（クライアントのローカルストレージは参照できないため）
     const cookieStore = cookies();
     const dataSource =
-      (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
+      ((await cookieStore).get("dataSource")?.value as "firebase" | "mock") ||
       "firebase";
 
     // 統一インターフェースでデータを取得
