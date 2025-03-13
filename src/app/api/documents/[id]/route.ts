@@ -2,15 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+// 正しい型定義
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const { id } = params;
+    const { id } = context.params;
 
     // データソース設定をクッキーから取得
-    const cookieStore = await cookies(); // awaitを追加
+    const cookieStore = await cookies();
     const dataSource =
       (cookieStore.get("dataSource")?.value as "firebase" | "mock") ||
       "firebase";

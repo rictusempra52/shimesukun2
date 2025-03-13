@@ -6,9 +6,13 @@ import { useDataSource } from "@/contexts/data-source-context";
 export const createApiFetcher = () => {
   // フェッチャー関数を返す
   return async (url: string) => {
-    // ブラウザのローカルストレージからデータソース設定を取得
-    const dataSource =
-      (localStorage.getItem("dataSource") as string) || "firebase";
+    // デフォルト値を設定
+    let dataSource = "firebase";
+
+    // ブラウザ環境かどうかを確認してからlocalStorageにアクセス
+    if (typeof window !== "undefined") {
+      dataSource = (localStorage.getItem("dataSource") as string) || "firebase";
+    }
 
     const res = await fetch(url, {
       headers: {
