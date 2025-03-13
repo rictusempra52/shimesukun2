@@ -41,23 +41,47 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
 
     // 関連書類の完全情報の状態を管理
     const [relatedDocsData, setRelatedDocsData] = useState<Record<string, Document | null>>({});
+    // 関連書類の読み込み状態を管理
+    const [isLoadingRelated, setIsLoadingRelated] = useState(false);
 
     // 関連書類のデータを取得するuseEffect
     useEffect(() => {
-        if (data?.document?.relatedDocuments?.length > 0) {
-            data.document.relatedDocuments.forEach(async (relDoc) => {
+        const relatedDocs = data?.document?.relatedDocuments;
+        if (relatedDocs && relatedDocs.length > 0) {
+            setIsLoadingRelated(true);
+
+            const fetchRelatedDocs = async () => {
                 try {
-                    const docData = await fetcher(`/api/documents/${relDoc.id}`);
-                    setRelatedDocsData(prev => ({
-                        ...prev,
-                        [relDoc.id]: docData.document
-                    }));
+                    const promises = relatedDocs.map(async (relDoc) => {
+                        try {
+                            const docData = await fetcher(`/api/documents/${relDoc.id}`);
+                            return { id: relDoc.id, data: docData.document };
+                        } catch (error) {
+                            console.error(`関連書類(ID:${relDoc.id})取得エラー:`, error);
+                            return { id: relDoc.id, data: null };
+                        }
+                    });
+
+                    const results = await Promise.allSettled(promises);
+                    const newRelatedDocsData: Record<string, Document | null> = {};
+
+                    results.forEach((result, index) => {
+                        if (result.status === 'fulfilled' && result.value) {
+                            newRelatedDocsData[result.value.id] = result.value.data;
+                        }
+                    });
+
+                    setRelatedDocsData(newRelatedDocsData);
                 } catch (error) {
-                    console.error("関連書類取得エラー:", error);
+                    console.error("関連書類取得処理エラー:", error);
+                } finally {
+                    setIsLoadingRelated(false);
                 }
-            });
+            };
+
+            fetchRelatedDocs();
         }
-    }, [data?.document?.relatedDocuments]);
+    }, [data?.document?.relatedDocuments, fetcher]);
 
     // 前のページに戻る
     const goBack = () => {
@@ -288,17 +312,27 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                 <TabsContent value="related" className="mt-4">
                     <Card>
                         <CardContent className="p-6">
+                            {/* ローディング中の表示 */}
+                            {isLoadingRelated && (
+                                <div className="flex justify-center py-8">
+                                    <div className="animate-pulse text-center">
+                                        <div className="h-4 w-32 bg-muted rounded mb-4 mx-auto"></div>
+                                        <div className="h-10 w-64 bg-muted rounded mx-auto"></div>
+                                    </div>
+                                </div>
+                            )}
+
                             {/* 関連書類がある場合のリスト表示 */}
-                            {document.relatedDocuments.length > 0 ? (
+                            {!isLoadingRelated && data?.document?.relatedDocuments?.length > 0 ? (
                                 <div className="space-y-4">
                                     <h3 className="text-sm font-medium">関連書類</h3>
                                     {/* 関連書類のマッピング */}
-                                    {document.relatedDocuments.map((relDoc) => {
+                                    {data.document.relatedDocuments.map((relDoc) => {
                                         const fullDoc = relatedDocsData[relDoc.id];
                                         return (
                                             <Card
                                                 key={relDoc.id}
-                                                className="overflow-hidden cursor-pointer"
+                                                className="overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"
                                                 onClick={() => navigateToDocument(relDoc.id)}
                                             >
                                                 <CardContent className="p-4">
@@ -311,7 +345,6 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                                                                 <p className="text-xs text-muted-foreground">{fullDoc?.building || '不明'}</p>
                                                             </div>
                                                         </div>
-                                                        {/* 関連書類のメタデータと移動アイコン */}
                                                         <div className="flex items-center gap-2">
                                                             <div className="text-xs text-muted-foreground">{fullDoc?.uploadedAt || '不明'}</div>
                                                             <ChevronLeft className="h-4 w-4 text-muted-foreground rotate-180" />
@@ -324,7 +357,7 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                                 </div>
                             ) : (
                                 // 関連書類がない場合のメッセージ
-                                <div className="text-center py-8 text-muted-foreground">関連書類はありません</div>
+                                !isLoadingRelated && <div className="text-center py-8 text-muted-foreground">関連書類はありません</div>
                             )}
                         </CardContent>
                     </Card>

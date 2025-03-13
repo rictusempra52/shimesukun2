@@ -1,40 +1,64 @@
 "use client"
 
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-// データソースの種類
-export type DataSource = 'firebase' | 'mock';
+// データソース型定義
+type DataSource = 'firebase' | 'mock';
 
-// コンテキストの型定義
+// コンテキストの型
 interface DataSourceContextType {
     dataSource: DataSource;
     setDataSource: (source: DataSource) => void;
 }
 
-// コンテキストの作成
-const DataSourceContext = createContext<DataSourceContextType | undefined>(undefined);
+// デフォルト値の設定
+const defaultContext: DataSourceContextType = {
+    dataSource: 'firebase',
+    setDataSource: () => { },
+};
+
+// コンテキスト作成
+const DataSourceContext = createContext<DataSourceContextType>(defaultContext);
 
 /**
- * データソースプロバイダー
- * アプリ全体でデータソース設定を共有するためのプロバイダーコンポーネント
+ * データソースプロバイダーのProps型
  */
-export function DataSourceProvider({ children }: { children: React.ReactNode }) {
-    // ローカルストレージから初期値を取得（デフォルトはfirebase）
-    const [dataSource, setDataSourceState] = useState<DataSource>('firebase');
+interface DataSourceProviderProps {
+    children: ReactNode;
+    initialDataSource?: DataSource;
+}
 
-    // 初回レンダリング時にローカルストレージから設定を読み込み
+/**
+ * データソース設定を管理するプロバイダーコンポーネント
+ */
+export function DataSourceProvider({
+    children,
+    initialDataSource = 'firebase'
+}: DataSourceProviderProps) {
+    // データソースの状態管理
+    const [dataSource, setDataSourceState] = useState<DataSource>(initialDataSource);
+
+    // データソース変更時に localStorage に保存
+    const setDataSource = (source: DataSource) => {
+        try {
+            localStorage.setItem('dataSource', source);
+            setDataSourceState(source);
+        } catch (error) {
+            console.error('データソース設定の保存に失敗しました:', error);
+        }
+    };
+
+    // マウント時に localStorage から設定を読み込む
     useEffect(() => {
-        const savedSource = localStorage.getItem('dataSource') as DataSource;
-        if (savedSource && (savedSource === 'firebase' || savedSource === 'mock')) {
-            setDataSourceState(savedSource);
+        try {
+            const savedDataSource = localStorage.getItem('dataSource') as DataSource | null;
+            if (savedDataSource && (savedDataSource === 'firebase' || savedDataSource === 'mock')) {
+                setDataSourceState(savedDataSource);
+            }
+        } catch (error) {
+            console.error('データソース設定の読み込みに失敗しました:', error);
         }
     }, []);
-
-    // データソースを変更して設定を保存する関数
-    const setDataSource = (source: DataSource) => {
-        setDataSourceState(source);
-        localStorage.setItem('dataSource', source);
-    };
 
     return (
         <DataSourceContext.Provider value={{ dataSource, setDataSource }}>
@@ -44,12 +68,14 @@ export function DataSourceProvider({ children }: { children: React.ReactNode }) 
 }
 
 /**
- * データソース設定を利用するためのカスタムフック
+ * データソース設定を取得・更新するカスタムフック
  */
 export function useDataSource() {
     const context = useContext(DataSourceContext);
+
     if (context === undefined) {
         throw new Error('useDataSource must be used within a DataSourceProvider');
     }
+
     return context;
 }
