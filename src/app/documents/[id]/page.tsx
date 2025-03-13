@@ -4,10 +4,10 @@ import { getDocumentById } from '@/lib/data/documents'
 import { cookies } from "next/headers";
 import { Document } from '@/types/document'
 
-// Next.js 15の型定義に合わせて更新
+// Next.js 15.2.2の型定義に完全に合わせる
 type Props = {
-  params: Promise<{ id: string }> // paramsをPromiseに変更
-  searchParams: { [key: string]: string | string[] | undefined }
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> // searchParamsもPromiseに修正
 }
 
 // サーバーサイドでドキュメントを取得する関数
@@ -36,6 +36,7 @@ export default async function DocumentPage({
   searchParams
 }: Props) {
   const { id } = await params // awaitを追加
+  const searchParamsData = await searchParams // searchParamsもawaitする
   const document = await getDocument(id)
 
   return <DocumentViewer initialDocument={document} documentId={id} />
