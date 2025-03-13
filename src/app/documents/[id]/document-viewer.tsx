@@ -83,7 +83,7 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
     // エラー時の表示
     if (error) {
         return (
-            <div className="container mx-auto py-8 px-4"></div>
+            <div className="container mx-auto py-8 px-4">
                 <Button variant="ghost" onClick={goBack} className="mb-4">
                     <ChevronLeft className="h-4 w-4 mr-2" />
                     戻る
@@ -95,7 +95,7 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                         書類一覧に戻る
                     </Button>
                 </div>
-            </div >
+            </div>
         )
     }
 
