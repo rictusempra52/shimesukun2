@@ -4,24 +4,7 @@ import {
   getAllDocuments as getFirebaseDocuments,
   getDocumentById as getFirebaseDocumentById,
 } from "@/lib/firebase/documents";
-
-/**
- * ドキュメントデータを統一形式に変換する共通関数
- * @param doc 処理対象のドキュメント
- * @returns 統一形式のドキュメント
- */
-function normalizeDocument(doc: any): Document {
-  return {
-    ...doc,
-    id: doc.id.toString(),
-    relatedDocuments: Array.isArray(doc.relatedDocuments)
-      ? doc.relatedDocuments.map((relatedDoc: any) => ({
-          id: relatedDoc.id?.toString() || "",
-          title: relatedDoc.title || "",
-        }))
-      : [],
-  } as Document;
-}
+import { normalizeDocument } from "./document-normalizer";
 
 /**
  * 設定されたデータソースに応じて全ドキュメントを取得

@@ -3,6 +3,9 @@ import { DocumentList } from '@/components/document-list';
 import { cookies } from "next/headers";
 import { documentsData } from '@/lib/document-data';
 
+// normalizeDocument関数をインポート
+import { normalizeDocument } from '@/lib/data/document-normalizer';
+
 // サーバーコンポーネントでデータを取得
 export default async function DocumentsPage() {
     // クッキーからデータソース設定を取得（デフォルトはfirebase）
@@ -23,7 +26,7 @@ export default async function DocumentsPage() {
             console.log("WARNING: Firebaseからのデータ取得に失敗しました。代わりにモックデータを使用します。");
         }
 
-        // エラーが発生した場合はモックデータを使用
-        return <DocumentList initialDocuments={dataSource === 'mock' ? [] : documentsData} />;
+        // エラーが発生した場合はモックデータを使用（型を適切に変換）
+        return <DocumentList initialDocuments={dataSource === 'mock' ? [] : documentsData.map(doc => normalizeDocument(doc))} />;
     }
 }
