@@ -13,7 +13,8 @@ export default function Home() {
   // 注意: フックは常にトップレベルで呼び出す
   const auth = useAuth();
   const currentUser = auth?.currentUser;
-  const loading = auth?.loading || true;
+  // ローディング状態を取得　初期値はtrue　
+  const loading = auth?.loading ?? true;
   const initError = auth?.initError;
 
   // クライアントサイドでのみレンダリングされるようにする
