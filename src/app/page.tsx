@@ -9,10 +9,28 @@ export default function Home() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
 
+  // 注意: フックは常にトップレベルで呼び出す
+  const auth = useAuth();
+  const currentUser = auth?.currentUser;
+  const loading = auth?.loading || true;
+  const initError = auth?.initError;
+
   // クライアントサイドでのみレンダリングされるようにする
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // 認証状態の監視
+  useEffect(() => {
+    if (isClient && !loading && !currentUser) {
+      console.log('Home: 認証されていないため、ログインページへリダイレクトします');
+      router.push('/login');
+    }
+
+    if (isClient && currentUser) {
+      console.log('Home: 認証済みユーザー:', currentUser.uid);
+    }
+  }, [currentUser, loading, router, isClient]);
 
   // サーバーサイドレンダリング時やハイドレーション中はローディング表示
   if (!isClient) {
@@ -28,10 +46,7 @@ export default function Home() {
     );
   }
 
-  // クライアントサイドでのみ実行される部分
-  const auth = useAuth();
-
-  // 認証状態が取得できない場合
+  // 認証コンテキストがまだ提供されていない場合（エラー状態）
   if (!auth) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -45,22 +60,6 @@ export default function Home() {
       </div>
     );
   }
-
-  const { currentUser, loading, initError } = auth;
-
-  // 以下は元のコードと同じ
-  useEffect(() => {
-    console.log('Home: 認証状態', {
-      loading,
-      currentUser: currentUser ? `ID: ${currentUser.uid}` : 'なし',
-      initError,
-    });
-
-    if (!loading && !currentUser) {
-      console.log('Home: 認証されていないため、ログインページへリダイレクトします');
-      router.push('/login');
-    }
-  }, [currentUser, loading, initError, router]);
 
   // 初期ローディング表示
   if (loading) {
