@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -34,17 +34,74 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
       fallbackData: initialDocuments.length ? { documents: initialDocuments } : undefined,
       revalidateOnFocus: true,
       revalidateOnReconnect: true,
+      onError: (err) => {
+        console.error('データ取得エラー:', err);
+      }
     }
   );
 
+  // 安全にコンポーネントがマウントされているかを追跡
+  const isMounted = useRef(true);
+
+  // コンポーネントのアンマウント時に変数を設定
+  useEffect(() => {
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      // コンポーネントがマウントされている場合のみ状態を更新
+      if (isMounted.current) {
+        setViewMode(window.innerWidth < 640 ? "card" : "table");
+      }
+    }
+
+    handleResize();
+
+    window.addEventListener("resize", handleResize);
+
+    // クリーンアップ関数を追加
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  // 安全な早期リターン
   if (isLoading && !initialDocuments.length) {
     return <div className="py-8 text-center">書類データを読み込み中...</div>;
   }
 
   if (error) {
-    return <div className="py-8 text-center text-red-500">データの読み込みに失敗しました。ページを再読み込みしてください。</div>;
+    console.error('データ取得エラー:', error);
+    return (
+      <div className="py-8 text-center">
+        <p className="text-red-500">データの読み込みに失敗しました。</p>
+        <Button
+          variant="outline"
+          className="mt-4"
+          onClick={() => window.location.reload()}
+        >
+          再読み込み
+        </Button>
+        <Button
+          variant="secondary"
+          className="mt-4 ml-2"
+          onClick={() => {
+            // モックデータに切り替え
+            localStorage.setItem("dataSource", "mock");
+            console.log("INFO: Firebaseが空/接続失敗のため、モックデータに切り替えました。");
+            window.location.reload();
+          }}
+        >
+          モックデータを使用
+        </Button>
+      </div>
+    );
   }
 
+  // 安全なデータ取得
   const documents = data?.documents || [];
 
   const filteredDocuments = documents.filter((doc) => {
@@ -59,18 +116,6 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
 
     return matchesSearch && matchesBuilding && matchesType
   })
-
-  useEffect(() => {
-    const handleResize = () => {
-      setViewMode(window.innerWidth < 640 ? "card" : "table")
-    }
-
-    handleResize()
-
-    window.addEventListener("resize", handleResize)
-
-    return () => window.removeEventListener("resize", handleResize)
-  }, [])
 
   const navigateToDocumentDetails = (docId: string) => {
     router.push(`/documents/${docId}`)

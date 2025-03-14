@@ -72,6 +72,60 @@ function Component() {
 }
 ```
 
+### エラー: React エラー #310 - イベントリスナーでのクリーンアップ問題
+
+**症状**:
+
+- 「書類データを読み込み中」表示から進まない
+- クリック時に「Error: Minified React error #310」が表示される
+
+**原因**:
+コンポーネントがアンマウントされた後に状態更新が試行されている。主にイベントリスナーのクリーンアップ不足や非同期操作で発生。
+
+**解決策**:
+
+1. イベントリスナーのクリーンアップを確認:
+
+   ```jsx
+   useEffect(() => {
+     const handleEvent = () => {
+       /* ... */
+     };
+     window.addEventListener("event", handleEvent);
+     return () => {
+       window.removeEventListener("event", handleEvent);
+     };
+   }, []);
+   ```
+
+2. コンポーネントのマウント状態を追跡:
+
+   ```jsx
+   const isMounted = useRef(true);
+   useEffect(() => {
+     return () => {
+       isMounted.current = false;
+     };
+   }, []);
+   // 状態更新前に確認
+   if (isMounted.current) setState(newValue);
+   ```
+
+3. 非同期操作の安全な処理:
+   ```jsx
+   useEffect(() => {
+     let isActive = true;
+     const fetchData = async () => {
+       // ...
+       if (isActive) setState(result);
+     };
+     fetchData();
+     return () => {
+       isActive = false;
+     };
+   }, []);
+   ```
+
 ## Firebase 関連の問題
 
 ### エラー: Firebase is not initialized
