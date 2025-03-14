@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# シメスくん - マンション書類管理システム
 
-## Getting Started
+マンションの書類をデジタル化し、効率的に管理・検索するための Web アプリケーションです。OCR の活用や横断検索、AI による提案機能を備えています。
 
-First, run the development server:
+## 主な機能
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- 📄 **書類アップロード・管理**: PDF・画像ファイルのアップロードと OCR によるテキスト抽出
+- 🔍 **高度な検索機能**: キーワード検索とマンション横断検索
+- 🤖 **AI 質問応答**: 書類内容に基づく質問応答と関連情報の提案
+- 👥 **ユーザー・権限管理**: マンション別のアクセス権限管理
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 技術スタック
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **フロントエンド**: TypeScript, Next.js (App Router), Tailwind CSS
+- **バックエンド**: Firebase (Authentication, Firestore, Storage)
+- **UI**: Radix UI, shadcn/ui
+- **その他**: OCR, Web Speech API（音声認識）
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 開発環境のセットアップ
 
-## Learn More
+1. リポジトリのクローン
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   git clone https://github.com/yourusername/shimesukun.git
+   cd shimesukun
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+2. 依存パッケージのインストール
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. 環境変数の設定
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   - `.env.local.example` を `.env.local` にコピーし、必要な値を設定
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. 開発サーバーの起動
+
+   ```bash
+   npm run dev
+   ```
+
+5. ブラウザで [http://localhost:3000](http://localhost:3000) にアクセス
+
+## デプロイ
+
+Vercel を使用したデプロイ方法は [DEPLOYMENT.md](./docs/DEPLOYMENT.md) を参照してください。
+
+## 注意事項
+
+- Firebase 認証を使用しているため、初回起動時に適切な環境変数の設定が必要です
+- クライアントコンポーネントとサーバーコンポーネントの区別に注意してください（詳細は [ARCHITECTURE.md](./docs/ARCHITECTURE.md) を参照）
+
+## ライセンス
+
+このプロジェクトは [MIT License](./LICENSE) の下で公開されています。
