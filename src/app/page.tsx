@@ -5,15 +5,20 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardPage from '@/components/dashboard-page';
 
+/**
+ * ホームページコンポーネント
+ * 
+ * 認証状態に基づいて以下の表示を切り替えます：
+ * - 未認証時：ログインページへリダイレクト
+ * - 認証済み：ダッシュボードの表示
+ */
 export default function Home() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  const [forceRender, setForceRender] = useState(false); // 強制再レンダリング用
 
-  // 注意: フックは常にトップレベルで呼び出す
+  // 認証情報の取得
   const auth = useAuth();
   const currentUser = auth?.currentUser;
-  // ローディング状態を取得　初期値はtrue　
   const loading = auth?.loading ?? true;
   const initError = auth?.initError;
 
@@ -22,35 +27,13 @@ export default function Home() {
     setIsClient(true);
   }, []);
 
-  // デバッグ用：認証状態変化のログ
-  useEffect(() => {
-    if (isClient) {
-      console.log('Home: 認証状態変化検知', {
-        loading,
-        currentUser: currentUser?.uid,
-        initError
-      });
-    }
-  }, [isClient, loading, currentUser, initError]);
-
-  // 認証状態の監視
+  // 未認証ユーザーをログインページへリダイレクト
   useEffect(() => {
     if (isClient && !loading && !currentUser) {
       console.log('Home: 認証されていないため、ログインページへリダイレクトします');
       router.push('/login');
     }
   }, [isClient, loading, currentUser, router]);
-
-  // 認証完了後も画面が更新されない場合のための強制再レンダリング
-  useEffect(() => {
-    if (isClient && !loading && currentUser) {
-      console.log('認証完了後の強制再レンダリングを試みます');
-      const timer = setTimeout(() => {
-        setForceRender(prev => !prev);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-  }, [isClient, loading, currentUser]);
 
   // 認証コンテキストがまだ提供されていない場合（エラー状態）
   if (!auth) {
@@ -121,7 +104,6 @@ export default function Home() {
   }
 
   // 認証済みの場合はダッシュボードを表示
-  console.log('ダッシュボードを表示します', { forceRender });
-  return <DashboardPage key={forceRender ? "force-render" : "normal"} />;
+  return <DashboardPage />;
 }
 
