@@ -157,6 +157,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     clearTimeout(authTimeout);
 
                     console.log('AuthProvider: 認証状態が変更されました', user ? `ユーザーID: ${user.uid}` : 'ユーザーなし');
+                    console.log('AuthProvider: loading状態を更新します', { before: loading, after: false });
+
                     setCurrentUser(user);
                     setLoading(false);
                 }, (error) => {
