@@ -1,7 +1,20 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth, GoogleAuthProvider, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
+import { initializeApp, getApps, FirebaseApp } from "firebase/app";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  Auth,
+  connectAuthEmulator,
+} from "firebase/auth";
+import {
+  getFirestore,
+  Firestore,
+  connectFirestoreEmulator,
+} from "firebase/firestore";
+import {
+  getStorage,
+  FirebaseStorage,
+  connectStorageEmulator,
+} from "firebase/storage";
 
 // Firebaseの設定情報
 const firebaseConfig = {
@@ -25,31 +38,57 @@ if (typeof window !== "undefined") {
 }
 
 // Firebase初期化
-let app;
+let app: FirebaseApp;
 let auth: Auth;
 let googleProvider: GoogleAuthProvider;
 let db: Firestore;
 let storage: FirebaseStorage;
 
-try {
-  if (typeof window !== "undefined") {
+// Firebase実装の初期化関数
+function initializeFirebase() {
+  try {
     console.log("Firebaseの初期化を試みています...");
-    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+
+    // すでに初期化されている場合は既存のインスタンスを使用
+    if (getApps().length > 0) {
+      app = getApps()[0];
+      console.log("既存のFirebaseインスタンスを使用します");
+    } else {
+      // 新しくインスタンスを作成
+      app = initializeApp(firebaseConfig);
+      console.log("新しいFirebaseインスタンスを作成しました");
+    }
+
+    // 各サービスの初期化
     auth = getAuth(app);
     googleProvider = new GoogleAuthProvider();
     db = getFirestore(app);
     storage = getStorage(app);
+
+    // GoogleログインのUXを改善
+    googleProvider.setCustomParameters({
+      prompt: "select_account",
+    });
+
     console.log("Firebaseの初期化が完了しました");
+    return true;
+  } catch (error) {
+    console.error("Firebaseの初期化に失敗しました:", error);
+    return false;
   }
-} catch (error) {
-  console.error("Firebaseの初期化に失敗しました:", error);
-  // エラーをキャッチしても、クライアントでは処理を続行可能にする
-  if (typeof window !== "undefined") {
-    // クライアントサイドでのみダミーオブジェクトを用意
+}
+
+// クライアントサイドでのみ初期化を実行
+if (typeof window !== "undefined") {
+  const initialized = initializeFirebase();
+
+  if (!initialized) {
+    // 初期化に失敗した場合は、ダミーオブジェクトを作成
     auth = {} as Auth;
     googleProvider = {} as GoogleAuthProvider;
     db = {} as Firestore;
     storage = {} as FirebaseStorage;
+    console.error("Firebase初期化失敗: ダミーオブジェクトを使用します");
   }
 }
 

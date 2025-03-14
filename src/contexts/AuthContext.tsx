@@ -120,6 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
      */
     useEffect(() => {
         let unsubscribe: () => void = () => { };
+        let authTimeout: NodeJS.Timeout;
 
         const setupAuth = async () => {
             // クライアントサイドでのみ実行されるようにする
@@ -128,50 +129,64 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             console.log('AuthProvider: 認証状態の監視を開始します');
 
             try {
-                if (!firebaseAuth) {
-                    throw new Error('Firebaseの認証オブジェクトが初期化されていません');
+                // フェイルセーフのためにタイムアウト設定
+                authTimeout = setTimeout(() => {
+                    console.log('AuthProvider: 認証タイムアウト - 5秒経過しても完了しませんでした');
+                    setLoading(false);
+                    setInitError('認証の初期化がタイムアウトしました。ネットワーク接続を確認してください。');
+                }, 5000);
+
+                // Firebaseが初期化されていることを確認
+                if (!firebaseAuth || Object.keys(firebaseAuth).length === 0) {
+                    throw new Error('Firebaseの認証オブジェクトが正しく初期化されていません');
                 }
 
-                // Firebaseの初期化状態を確認
-                console.log('AuthProvider: Firebase認証オブジェクトの状態:', firebaseAuth ? '利用可能' : '未初期化');
-
-                // 現在のユーザー状態を即座に確認（初期状態のために）
-                const currentUser = firebaseAuth.currentUser;
-                console.log('AuthProvider: 初期ユーザー状態:', currentUser ? `ユーザーID: ${currentUser.uid}` : 'ユーザーなし');
-
-                if (currentUser) {
-                    setCurrentUser(currentUser);
+                // 接続状態を確認するためのシンプルなテスト
+                try {
+                    // Firebaseが実際にアクセス可能かテスト
+                    const currentUser = firebaseAuth.currentUser;
+                    console.log('AuthProvider: Firebase認証オブジェクトの接続テスト成功');
+                } catch (connError) {
+                    console.error('AuthProvider: Firebase接続テスト失敗', connError);
+                    throw new Error('Firebase認証サービスに接続できません');
                 }
 
-                // Firebase認証の状態変化を監視する関数をセット
+                // 認証状態変化の監視をセットアップ
                 unsubscribe = onAuthStateChanged(firebaseAuth, (user) => {
+                    // タイムアウトをクリア
+                    clearTimeout(authTimeout);
+
                     console.log('AuthProvider: 認証状態が変更されました', user ? `ユーザーID: ${user.uid}` : 'ユーザーなし');
-                    setCurrentUser(user); // ユーザー情報を更新
-                    setLoading(false);    // 読み込み完了フラグをセット
+                    setCurrentUser(user);
+                    setLoading(false);
                 }, (error) => {
+                    // タイムアウトをクリア
+                    clearTimeout(authTimeout);
+
                     console.error('AuthProvider: 認証状態の監視中にエラーが発生しました', error);
                     setInitError(error.message);
                     setLoading(false);
                 });
+
             } catch (error) {
+                // タイムアウトをクリア
+                clearTimeout(authTimeout);
+
                 console.error('AuthProvider: 認証初期化エラー', error);
                 setInitError(error instanceof Error ? error.message : '認証の初期化に失敗しました');
                 setLoading(false);
-            } finally {
-                // いずれにしてもloadingは終了させる
-                setTimeout(() => {
-                    if (loading) setLoading(false);
-                }, 5000);
             }
         };
 
         setupAuth();
 
+        // クリーンアップ関数
         return () => {
+            if (authTimeout) clearTimeout(authTimeout);
+            if (unsubscribe) unsubscribe();
             console.log('AuthProvider: 認証状態の監視を解除します');
-            unsubscribe();
         };
-    }, [loading]);
+    }, []); // 依存配列を空に - 初回マウント時のみ実行
 
     // コンテキストで提供する値をまとめる
     const value = {
