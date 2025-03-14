@@ -8,6 +8,7 @@ import DashboardPage from '@/components/dashboard-page';
 export default function Home() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [forceRender, setForceRender] = useState(false); // 強制再レンダリング用
 
   // 注意: フックは常にトップレベルで呼び出す
   const auth = useAuth();
@@ -20,31 +21,35 @@ export default function Home() {
     setIsClient(true);
   }, []);
 
+  // デバッグ用：認証状態変化のログ
+  useEffect(() => {
+    if (isClient) {
+      console.log('Home: 認証状態変化検知', {
+        loading,
+        currentUser: currentUser?.uid,
+        initError
+      });
+    }
+  }, [isClient, loading, currentUser, initError]);
+
   // 認証状態の監視
   useEffect(() => {
     if (isClient && !loading && !currentUser) {
       console.log('Home: 認証されていないため、ログインページへリダイレクトします');
       router.push('/login');
     }
+  }, [isClient, loading, currentUser, router]);
 
-    if (isClient && currentUser) {
-      console.log('Home: 認証済みユーザー:', currentUser.uid);
+  // 認証完了後も画面が更新されない場合のための強制再レンダリング
+  useEffect(() => {
+    if (isClient && !loading && currentUser) {
+      console.log('認証完了後の強制再レンダリングを試みます');
+      const timer = setTimeout(() => {
+        setForceRender(prev => !prev);
+      }, 500);
+      return () => clearTimeout(timer);
     }
-  }, [currentUser, loading, router, isClient]);
-
-  // サーバーサイドレンダリング時やハイドレーション中はローディング表示
-  if (!isClient) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="animate-pulse flex space-x-2 mb-4">
-          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
-          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
-          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
-        </div>
-        <p className="text-sm text-gray-500">読み込み中...</p>
-      </div>
-    );
-  }
+  }, [isClient, loading, currentUser]);
 
   // 認証コンテキストがまだ提供されていない場合（エラー状態）
   if (!auth) {
@@ -61,7 +66,21 @@ export default function Home() {
     );
   }
 
-  // 初期ローディング表示
+  // まだクライアントサイドでない場合（サーバーサイドレンダリング時）
+  if (!isClient) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <div className="animate-pulse flex space-x-2 mb-4">
+          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
+          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
+          <div className="h-3 w-3 bg-blue-500 rounded-full"></div>
+        </div>
+        <p className="text-sm text-gray-500">初期化中...</p>
+      </div>
+    );
+  }
+
+  // 認証処理中の場合
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center">
@@ -101,6 +120,7 @@ export default function Home() {
   }
 
   // 認証済みの場合はダッシュボードを表示
-  return <DashboardPage />;
+  console.log('ダッシュボードを表示します', { forceRender });
+  return <DashboardPage key={forceRender ? "force-render" : "normal"} />;
 }
 
