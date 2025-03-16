@@ -1,6 +1,9 @@
+// gemini.ts
+// AI回答を生成するための関数を提供します。
+// この関数は、Google Generative AI APIを使用して質問に回答を生成します。
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// この関数はサーバーサイドでのみ使用されるべきです
 export async function askBuildingManagementQuestion(
   question: string,
   documentContext?: string
