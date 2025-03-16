@@ -17,6 +17,7 @@ import { FileText, Download, Eye, ChevronLeft, Building2, Calendar, User, FileTy
 import { Document } from "@/types/document"
 import useSWR from 'swr'
 import { useApiFetcher } from "@/lib/api-fetcher"
+import { AiAssistant } from "@/components/ai-assistant"
 
 /**
  * DocumentViewerコンポーネントのプロパティ
@@ -175,6 +176,7 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                     <TabsTrigger value="preview">プレビュー</TabsTrigger>
                     <TabsTrigger value="details">詳細情報</TabsTrigger>
                     <TabsTrigger value="related">関連書類</TabsTrigger>
+                    <TabsTrigger value="ai">AIアシスタント</TabsTrigger>
                 </TabsList>
 
                 {/* タブコンテンツ: プレビュー */}
@@ -361,6 +363,11 @@ export function DocumentViewer({ documentId, initialDocument }: DocumentViewerPr
                             )}
                         </CardContent>
                     </Card>
+                </TabsContent>
+
+                {/* タブコンテンツ: AIアシスタント */}
+                <TabsContent value="ai" className="mt-4">
+                    <AiAssistant documentId={documentId} documentTitle={document.title} />
                 </TabsContent>
             </Tabs>
         </div>
