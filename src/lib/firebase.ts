@@ -47,10 +47,16 @@ if (typeof window !== "undefined") {
 
 // Firebase初期化
 let app: FirebaseApp;
-let auth: Auth;
-let googleProvider: GoogleAuthProvider;
-let db: Firestore;
-let storage: FirebaseStorage;
+let auth: Auth = {} as Auth; // 初期値を空オブジェクトに
+let googleProvider: GoogleAuthProvider = {} as GoogleAuthProvider;
+let db: Firestore = {} as Firestore;
+let storage: FirebaseStorage = {} as FirebaseStorage;
+
+// コレクション参照の変数を宣言
+let usersCollection: any;
+let buildingsCollection: any;
+let documentsCollection: any;
+let settingsCollection: any;
 
 // Firebase実装の初期化関数
 function initializeFirebase() {
@@ -88,30 +94,31 @@ function initializeFirebase() {
 
 // クライアントサイドでのみ初期化を実行
 if (typeof window !== "undefined") {
-  const initialized = initializeFirebase();
+  try {
+    // Firebase の初期化
+    app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    googleProvider = new GoogleAuthProvider();
+    db = getFirestore(app);
+    storage = getStorage(app);
 
-  if (!initialized) {
-    // 初期化に失敗した場合は、ダミーオブジェクトを作成
-    auth = {} as Auth;
-    googleProvider = {} as GoogleAuthProvider;
-    db = {} as Firestore;
-    storage = {} as FirebaseStorage;
+    // コレクション参照もクライアント側でのみ初期化
+    usersCollection = collection(db, "users");
+    buildingsCollection = collection(db, "buildings");
+    documentsCollection = collection(db, "documents");
+    settingsCollection = collection(db, "settings");
+
+    // 開発環境のみエミュレーターに接続
+    if (process.env.NODE_ENV === "development") {
+      connectAuthEmulator(auth, "http://localhost:9099");
+      connectFirestoreEmulator(db, "localhost", 8080);
+      connectStorageEmulator(storage, "localhost", 9199);
+    }
+  } catch (error) {
+    // 初期化に失敗した場合もダミーのコレクション参照を用意
     console.error("Firebase初期化失敗: ダミーオブジェクトを使用します");
   }
 }
-
-// 開発環境のみエミュレーターに接続
-if (process.env.NODE_ENV === "development") {
-  connectAuthEmulator(auth, "http://localhost:9099");
-  connectFirestoreEmulator(db, "localhost", 8080);
-  connectStorageEmulator(storage, "localhost", 9199);
-}
-
-// コレクションの参照
-const usersCollection = collection(db, "users");
-const buildingsCollection = collection(db, "buildings");
-const documentsCollection = collection(db, "documents");
-const settingsCollection = collection(db, "settings");
 
 // ユーザー関連の関数
 export async function getUserData(uid: string): Promise<User | null> {
