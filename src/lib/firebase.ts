@@ -4,6 +4,7 @@ import {
   GoogleAuthProvider,
   Auth,
   connectAuthEmulator,
+  User as FirebaseUser,
 } from "firebase/auth";
 import {
   getFirestore,
@@ -21,7 +22,7 @@ import {
   FirebaseStorage,
   connectStorageEmulator,
 } from "firebase/storage";
-import { User } from "../types/user";
+import { AppUserData, createAppUserDataFromFirebaseUser } from "../types/user";
 import { AppSettings } from "../types/settings";
 
 // Firebaseの設定情報
@@ -121,11 +122,11 @@ if (typeof window !== "undefined") {
 }
 
 // ユーザー関連の関数
-export async function getUserData(uid: string): Promise<User | null> {
+export async function getUserData(uid: string): Promise<AppUserData | null> {
   try {
     const userDoc = await getDoc(doc(usersCollection, uid));
     if (userDoc.exists()) {
-      return userDoc.data() as User;
+      return userDoc.data() as AppUserData;
     }
     return null;
   } catch (error) {
@@ -134,26 +135,15 @@ export async function getUserData(uid: string): Promise<User | null> {
   }
 }
 
-export async function createUserData(userData: Partial<User>): Promise<void> {
-  if (!userData.uid) throw new Error("User ID is required");
-
-  const newUser: User = {
-    uid: userData.uid,
-    displayName: userData.displayName || "",
-    email: userData.email || "",
-    photoURL: userData.photoURL,
-    initials: getInitials(userData.displayName || ""),
-    role: "user", // デフォルトは一般ユーザー
-    buildingAccess: {},
-    preferences: {
-      theme: "system",
-      notifications: true,
-    },
-    lastLogin: Timestamp.now(),
-    createdAt: Timestamp.now(),
-  };
-
-  await setDoc(doc(usersCollection, userData.uid), newUser);
+export async function createUserData(
+  firebaseUser: FirebaseUser,
+  additionalData?: Partial<AppUserData>
+): Promise<void> {
+  const newUser = createAppUserDataFromFirebaseUser(
+    firebaseUser,
+    additionalData
+  );
+  await setDoc(doc(usersCollection, firebaseUser.uid), newUser);
 }
 
 // 設定関連の関数
@@ -170,16 +160,6 @@ export async function getAppSettings(
     console.error("Error fetching app settings:", error);
     return null;
   }
-}
-
-// ユーティリティ関数
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
 }
 
 export { auth, googleProvider, db, storage };

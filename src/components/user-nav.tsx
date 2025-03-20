@@ -11,6 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from '@/contexts/AuthContext';
+// User 型のインポートを追加
+import { User, UserRole } from '@/types/user';
 
 /**
  * ユーザーナビゲーションコンポーネント
@@ -35,6 +37,9 @@ export function UserNav() {
       console.error("ログアウトに失敗しました", error);
     }
   };
+
+  // 管理者権限のチェックヘルパー関数
+  const isAdmin = currentUser && (currentUser as User).role === 'admin';
 
   return (
     <DropdownMenu>
@@ -61,14 +66,15 @@ export function UserNav() {
             <p className="text-xs leading-none text-muted-foreground">{currentUser?.email}</p>
           </div>
         </DropdownMenuLabel>
-        {/* 管理者用設定 */}
-        {currentUser?. && (
-          <DropdownMenuItem href="/admin" className="text-sm">
+        {/* 管理者用設定 - ここを修正 */}
+        {isAdmin && (
+          <DropdownMenuItem onClick={() => window.location.href = "/admin"}>
             管理者ページ
           </DropdownMenuItem>
         )}
 
         {/* 区切り線 */}
+
         <DropdownMenuSeparator />
 
         {/* ログアウトメニュー項目 */}
