@@ -11,8 +11,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useAuth } from '@/contexts/AuthContext';
-// User 型のインポートを追加
-import { User, UserRole } from '@/types/user';
+// 型のインポートを修正
+import { AppUser, AppUserData, UserRole } from '@/types/user';
 
 /**
  * ユーザーナビゲーションコンポーネント
@@ -38,8 +38,8 @@ export function UserNav() {
     }
   };
 
-  // 管理者権限のチェックヘルパー関数
-  const isAdmin = currentUser && (currentUser as User).role === 'admin';
+  // 管理者権限のチェックヘルパー関数 - 型をAppUserに修正
+  const isAdmin = currentUser && (currentUser as AppUser).appUserData?.role === 'admin';
 
   return (
     <DropdownMenu>
