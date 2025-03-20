@@ -51,6 +51,7 @@ export async function getDocumentById(
   id: string,
   dataSource: "firebase" | "mock"
 ): Promise<Document | null> {
+  // Firebase データソースの場合
   if (dataSource === "firebase") {
     try {
       const firebaseDocument = await getFirebaseDocumentById(id);
@@ -72,6 +73,7 @@ export async function getDocumentById(
       const mockDoc = documentsData.find((doc) => doc.id === numId);
       return mockDoc ? normalizeDocument(mockDoc) : null;
     }
+    // モックデータの場合
   } else {
     console.log(`INFO: モックデータからID(${id})のドキュメントを取得します。`);
     const numId = parseInt(id);

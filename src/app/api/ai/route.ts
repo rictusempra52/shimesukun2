@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
       const document = await getDocumentById(documentId, dataSource);
       if (document) {
         documentContext = `タイトル: ${document.title}
-内容: ${document.text ?? "内容なし"} 
-日付: ${document.date}
+内容: ${document.content ?? "内容なし"} 
+日付: ${document.uploadedAt}
 マンション名: ${document.building}`;
       }
     }
