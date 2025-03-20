@@ -45,6 +45,7 @@ export async function getAllDocuments(
  * 設定されたデータソースに応じて特定のドキュメントを取得
  * @param id ドキュメントID
  * @param dataSource データソース設定
+ * @returns ドキュメント情報
  */
 export async function getDocumentById(
   id: string,

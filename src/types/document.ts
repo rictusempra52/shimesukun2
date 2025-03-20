@@ -19,6 +19,7 @@ export interface Document {
   pages: number; // ページ数
   previewUrl?: string; // プレビューURL（オプショナル）
   relatedDocuments: RelatedDocument[]; // 関連書類の配列
+  content: string; // content プロパティを追加
 }
 
 /**
