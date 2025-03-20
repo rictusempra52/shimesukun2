@@ -1,23 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { askBuildingManagementQuestion } from "@/lib/gemini";
+// import { askBuildingManagementQuestion } from "@/lib/gemini"; // 古いGemini APIを使った関数
+import { askDifyBuildingManagementQuestion } from "@/lib/dify"; // 新しいDify APIを使った関数
 import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
 export async function POST(request: NextRequest) {
   try {
-    // リクエストボディからデータを取得
-    const body = await request.json();
-    const { question, documentId } = body;
+    const { question, documentId } = await request.json();
 
     if (!question) {
       return NextResponse.json(
-        { error: "質問が入力されていません" },
+        { error: "質問が指定されていません" },
         { status: 400 }
       );
     }
 
-    // 関連する文書コンテキストを取得（オプション）
-    let documentContext;
+    let documentContext = "";
+
+    // ドキュメントIDが指定されている場合、そのドキュメントの内容を取得
     if (documentId) {
       // データソース設定をクッキーから取得
       const cookieStore = await cookies();
@@ -34,15 +34,18 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Gemini APIに質問を送信
-    const answer = await askBuildingManagementQuestion(
+    // Dify APIに質問を送信
+    const result = await askDifyBuildingManagementQuestion(
       question,
       documentContext
     );
 
     return NextResponse.json({
-      answer,
-      timestamp: new Date().toISOString(),
+      answer: result.answer,
+      sources: result.sources,
+      relatedInfo: result.relatedInfo,
+      examples: result.examples,
+      timestamp: result.timestamp,
     });
   } catch (error) {
     console.error("AI処理エラー:", error);

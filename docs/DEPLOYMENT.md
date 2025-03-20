@@ -7,6 +7,7 @@
 - [Vercel アカウント](https://vercel.com/signup)
 - [GitHub アカウント](https://github.com/join)
 - [Firebase プロジェクト](https://console.firebase.google.com/)
+- [Dify アカウント](https://dify.ai/) - AI 質問応答機能に使用
 
 ## デプロイ手順
 
@@ -21,6 +22,10 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=xxxxxxxxxxxx
 NEXT_PUBLIC_FIREBASE_APP_ID=1:xxxxxxxxxxxx:web:xxxxxxxxxxxx
+
+# Dify API関連の環境変数
+DIFY_API_KEY=your-dify-api-key
+DIFY_API_ENDPOINT=https://api.dify.ai/v1 # または自己ホスティングのエンドポイント
 ```
 
 ### 2. Vercel でのデプロイ
@@ -40,6 +45,28 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:xxxxxxxxxxxx:web:xxxxxxxxxxxx
 
 2. **Firebase セキュリティルールの確認**:
    - Firestore、Storage のセキュリティルールが適切に設定されていることを確認します
+
+### 4. Dify の設定
+
+1. **Dify アカウントの作成**:
+
+   - [Dify.ai](https://dify.ai/) にアクセスしてアカウントを作成します
+   - または Dify を自己ホスティングする場合は、[GitHub リポジトリ](https://github.com/langgenius/dify) の手順に従ってインストールします
+
+2. **アプリケーションの作成**:
+
+   - Dify ダッシュボードで「Create Application」をクリックします
+   - アプリケーションタイプとして「Completion App」または「Chat App」を選択します
+   - マンション管理に関連するプロンプトテンプレートを設定します
+
+3. **API キーの取得**:
+
+   - 作成したアプリケーションの Settings ページから「API Reference」を開きます
+   - 「API Key」タブで API キーをコピーし、環境変数 `DIFY_API_KEY` に設定します
+
+4. **ナレッジベースの作成 (オプション)**:
+   - 「Knowledge Base」タブで新しいナレッジベースを作成します
+   - マンション管理に関連する文書をアップロードして、AI が参照できるようにします
 
 ## 一般的な問題と解決策
 
@@ -75,6 +102,17 @@ NEXT_PUBLIC_FIREBASE_APP_ID=1:xxxxxxxxxxxx:web:xxxxxxxxxxxx
 2. React Hooks のルール違反を確認します
    - Hooks は常にコンポーネントのトップレベルで呼び出す
    - 条件付きでフックを呼び出さない
+
+### Dify API 関連のエラー
+
+**症状**: 「Failed to fetch data from Dify API」などのエラーが表示される
+
+**解決策**:
+
+- Dify API キーが正しく設定されているか確認します
+- API エンドポイントが正しいか確認します
+- Dify のダッシュボードでアプリケーションのステータスを確認します
+- ネットワークタブでリクエスト/レスポンスを調査します
 
 ## 継続的デプロイ
 
