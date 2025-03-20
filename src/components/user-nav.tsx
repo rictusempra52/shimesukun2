@@ -61,6 +61,12 @@ export function UserNav() {
             <p className="text-xs leading-none text-muted-foreground">{currentUser?.email}</p>
           </div>
         </DropdownMenuLabel>
+        {/* 管理者用設定 */}
+        {currentUser?. && (
+          <DropdownMenuItem href="/admin" className="text-sm">
+            管理者ページ
+          </DropdownMenuItem>
+        )}
 
         {/* 区切り線 */}
         <DropdownMenuSeparator />

@@ -9,12 +9,20 @@ import {
   getFirestore,
   Firestore,
   connectFirestoreEmulator,
+  collection,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  Timestamp,
 } from "firebase/firestore";
 import {
   getStorage,
   FirebaseStorage,
   connectStorageEmulator,
 } from "firebase/storage";
+import { User } from "../types/user";
+import { AppSettings } from "../types/settings";
 
 // Firebaseの設定情報
 const firebaseConfig = {
@@ -90,6 +98,81 @@ if (typeof window !== "undefined") {
     storage = {} as FirebaseStorage;
     console.error("Firebase初期化失敗: ダミーオブジェクトを使用します");
   }
+}
+
+// 開発環境のみエミュレーターに接続
+if (process.env.NODE_ENV === "development") {
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectStorageEmulator(storage, "localhost", 9199);
+}
+
+// コレクションの参照
+const usersCollection = collection(db, "users");
+const buildingsCollection = collection(db, "buildings");
+const documentsCollection = collection(db, "documents");
+const settingsCollection = collection(db, "settings");
+
+// ユーザー関連の関数
+export async function getUserData(uid: string): Promise<User | null> {
+  try {
+    const userDoc = await getDoc(doc(usersCollection, uid));
+    if (userDoc.exists()) {
+      return userDoc.data() as User;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching user data:", error);
+    return null;
+  }
+}
+
+export async function createUserData(userData: Partial<User>): Promise<void> {
+  if (!userData.uid) throw new Error("User ID is required");
+
+  const newUser: User = {
+    uid: userData.uid,
+    displayName: userData.displayName || "",
+    email: userData.email || "",
+    photoURL: userData.photoURL,
+    initials: getInitials(userData.displayName || ""),
+    role: "user", // デフォルトは一般ユーザー
+    buildingAccess: {},
+    preferences: {
+      theme: "system",
+      notifications: true,
+    },
+    lastLogin: Timestamp.now(),
+    createdAt: Timestamp.now(),
+  };
+
+  await setDoc(doc(usersCollection, userData.uid), newUser);
+}
+
+// 設定関連の関数
+export async function getAppSettings(
+  settingId = "global"
+): Promise<AppSettings | null> {
+  try {
+    const settingDoc = await getDoc(doc(settingsCollection, settingId));
+    if (settingDoc.exists()) {
+      return settingDoc.data() as AppSettings;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error fetching app settings:", error);
+    return null;
+  }
+}
+
+// ユーティリティ関数
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 }
 
 export { auth, googleProvider, db, storage };
