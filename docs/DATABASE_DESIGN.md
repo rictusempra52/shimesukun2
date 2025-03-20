@@ -11,6 +11,15 @@
 
 シメスくんでは以下の主要コレクションを使用します：
 
+```mermaid
+graph TD;
+    A[buildings] --> B[documents];
+    A --> C[users];
+    A --> D[settings];
+    B --> E[users];
+    C --> F[settings];
+```
+
 ```
 firestore/
 ├── buildings/            # マンション情報
