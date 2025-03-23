@@ -4,7 +4,7 @@
 
 // 環境変数からAPIキーとエンドポイントを取得
 const apiKey = process.env.DIFY_API_KEY;
-const apiEndpoint = process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1";
+const apiEndpoint = process.env.DIFY_API_ENDPOINT;
 
 /**
  * Difyのチャットコンプリーションエンドポイントにリクエストを送信
