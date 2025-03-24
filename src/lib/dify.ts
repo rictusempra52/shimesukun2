@@ -19,9 +19,7 @@ export async function askDifyBuildingManagementQuestion(
   chatHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ) {
   if (!apiKey) {
-    throw new Error(
-      "Dify APIキーが設定されていません。環境変数を確認してください。"
-    );
+    throw new Error(`Dify APIキー${apiKey}。環境変数を確認してください。`);
   }
 
   try {
