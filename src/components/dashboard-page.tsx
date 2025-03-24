@@ -98,7 +98,7 @@ export default function DashboardPage() {
       </header>
 
       {/* メインコンテンツエリア */}
-      <main className="flex-1 space-y-4 p-4 sm:p-6 md:p-8"></main>
+      {/* <main className="flex-1 space-y-4 p-4 sm:p-6 md:p-8"></main> */}
       {/* 統計カード - ドキュメント数やストレージ使用量などの概要 */}
       <StatsCards />
 
