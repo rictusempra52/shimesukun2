@@ -11,7 +11,6 @@ import { UserNav } from "@/components/user-nav"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { askDifyBuildingManagementQuestion } from "@/lib/dify"
-import { Alert, AlertCircle, AlertDescription } from "@/components/ui/alert"
 
 /**
  * ダッシュボードページコンポーネント
@@ -39,7 +38,6 @@ export default function DashboardPage() {
     examples: string     // 他マンションの事例
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false) // 読み込み状態
-  const [error, setError] = useState<string | null>(null);
 
   /**
    * AIに質問する処理
@@ -47,6 +45,7 @@ export default function DashboardPage() {
    * ユーザーの質問をDify APIに送信し、回答を取得します。
    * 処理中はローディング状態を表示し、エラーが発生した場合は
    * エラーメッセージをアラートで表示します。
+   * 
    */
   const handleAskQuestion = async () => {
     // 質問が空の場合は何もしない
@@ -72,7 +71,7 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("AIリクエストエラー:", error);
       // エラー処理（オプションでエラー表示用のステートを追加）
-      setError(`エラーが発生しました: ${(error as Error).message}`);
+      alert(`エラーが発生しました: ${(error as Error).message}`);
     } finally {
       // 読み込み状態を解除
       setIsLoading(false);
@@ -252,6 +251,7 @@ export default function DashboardPage() {
                     <Button variant="outline" className="w-full text-center" onClick={() => { }}>
                       もっと見る
                     </Button>
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -336,25 +336,12 @@ export default function DashboardPage() {
                             <div className="animate-pulse h-3 w-3 rounded-full bg-primary"></div>
                             <p className="text-sm text-muted-foreground">AIが回答を生成しています...</p>
                           </div>
+                        ) : aiResponse ? (
+                          // AI回答の表示
+                          <p>{aiResponse.answer}</p>
                         ) : (
-                          <>
-                            {/* AI回答表示部分 */}
-                            {aiResponse ? (
-                              // AI回答の表示
-                              <p className="whitespace-pre-wrap">{aiResponse.answer}</p>
-                            ) : !isLoading && (
-                              // 初期状態の説明
-                              <p>質問を入力すると、AIがアップロードされた書類から回答を生成します。</p>
-                            )}
-
-                            {/* エラーメッセージ表示 */}
-                            {error && (
-                              <Alert variant="destructive" className="mt-4">
-                                <AlertCircle className="h-4 w-4" />
-                                <AlertDescription>{error}</AlertDescription>
-                              </Alert>
-                            )}
-                          </>
+                          // 初期状態の説明
+                          <p>質問を入力すると、AIがアップロードされた書類から回答を生成します。</p>
                         )}
                       </div>
                     </div>
@@ -409,6 +396,7 @@ export default function DashboardPage() {
                                   }, 100)
                                 }}
                               >
+                                「消防設備点検報告書」
                               </Button>
                             )}
                             {aiResponse.sources.includes("(2023-12-15)") && " (2023-12-15)"}
@@ -465,6 +453,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="text-center p-6 text-muted-foreground">
                   <p>ユーザー管理機能は準備中です</p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -479,6 +468,7 @@ export default function DashboardPage() {
               <CardContent>
                 <div className="text-center p-6 text-muted-foreground">
                   <p>システム設定機能は準備中です</p>
+                </div>
               </CardContent>
             </Card>
           )}
@@ -492,13 +482,14 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-center p-6 text-muted-foreground">
-                  <p>操作ログ機能は準備中です</CardContent>
-                </Card>
-                    )}
-              </div>
-                )}
-            </main>
-            </div >
-      )
-      }
+                  <p>操作ログ機能は準備中です</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
