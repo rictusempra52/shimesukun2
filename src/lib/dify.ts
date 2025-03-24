@@ -3,8 +3,8 @@
 // この関数は、Difyサービスを使用して質問に回答を生成します。
 
 // 環境変数からAPIキーとエンドポイントを取得
-const apiKey = process.env.DIFY_API_KEY; // 環境変数からDify APIキーを取得
-const apiEndpoint = process.env.DIFY_API_ENDPOINT; // 環境変数からDify APIエンドポイントのURLを取得
+const apiKey = process.env.DIFY_API_KEY!; // 環境変数からDify APIキーを取得
+const apiEndpoint = process.env.DIFY_API_ENDPOINT!; // 環境変数からDify APIエンドポイントのURLを取得
 
 /**
  * Difyのチャットコンプリーションエンドポイントにリクエストを送信
