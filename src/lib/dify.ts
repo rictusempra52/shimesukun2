@@ -29,6 +29,7 @@ export async function askDifyBuildingManagementQuestion(
     const endpoint = `${apiEndpoint}/chat-messages`;
 
     // リクエストボディの構築
+    // DifyのAPIリクエスト構造に合わせて適宜調整
     const requestBody: any = {
       query: question,
       response_mode: "blocking", // 同期モード
