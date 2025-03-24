@@ -11,6 +11,8 @@ import { UserNav } from "@/components/user-nav"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { askDifyBuildingManagementQuestion } from "@/lib/dify"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle } from "lucide-react"
 
 /**
  * ダッシュボードページコンポーネント
@@ -38,6 +40,7 @@ export default function DashboardPage() {
     examples: string     // 他マンションの事例
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false) // 読み込み状態
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * AIに質問する処理
@@ -70,8 +73,7 @@ export default function DashboardPage() {
       });
     } catch (error) {
       console.error("AIリクエストエラー:", error);
-      // エラー処理（オプションでエラー表示用のステートを追加）
-      alert(`エラーが発生しました: ${(error as Error).message}`);
+      setError((error as Error).message);
     } finally {
       // 読み込み状態を解除
       setIsLoading(false);
@@ -339,12 +341,20 @@ export default function DashboardPage() {
                         ) : aiResponse ? (
                           // AI回答の表示
                           <p>{aiResponse.answer}</p>
-                        ) : (
+                        ) : !isLoading && (
                           // 初期状態の説明
                           <p>質問を入力すると、AIがアップロードされた書類から回答を生成します。</p>
                         )}
                       </div>
                     </div>
+
+                    {/* エラーメッセージ表示 */}
+                    {error && (
+                      <Alert variant="destructive" className="mt-4">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
 
                     {/* 根拠箇所セクション */}
                     <div className="space-y-2">
