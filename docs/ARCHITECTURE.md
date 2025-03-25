@@ -78,6 +78,40 @@ Next.js 13 以降の App Router では、コンポーネントは**デフォル�
 - メタデータが検索エンジンに正しく提供される
 - クライアントバンドルのサイズが小さくなる
 
+## Firebase 統合
+
+### 初期化プロセス
+
+Firebase の初期化は`src/lib/firebase.ts`で行われています。以下のサービスを使用しています：
+
+1. **Firebase Authentication**: ユーザー認証管理
+2. **Firestore**: NoSQL データベース
+3. **Firebase Storage**: 書類ファイルの保存
+
+初期化はクライアントサイドでのみ行われ、SSR 時には実行されません。
+
+```javascript
+// クライアントサイドでのみ初期化
+if (typeof window !== "undefined") {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  // ...その他の初期化処理
+}
+```
+
+### 開発環境のエミュレーター設定
+
+開発環境では、Firebase Local Emulator に接続してオフラインでの開発を可能にしています：
+
+```javascript
+// 開発環境のみエミュレーターに接続
+if (process.env.NODE_ENV === "development") {
+  connectAuthEmulator(auth, "http://localhost:9099");
+  connectFirestoreEmulator(db, "localhost", 8080);
+  connectStorageEmulator(storage, "localhost", 9199);
+}
+```
+
 ## 認証フロー
 
 1. ユーザーがアプリにアクセス

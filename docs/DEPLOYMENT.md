@@ -9,6 +9,43 @@
 - [Firebase プロジェクト](https://console.firebase.google.com/)
 - [Dify アカウント](https://dify.ai/) - AI 質問応答機能に使用
 
+## Firebase 設定
+
+### 必要な環境変数
+
+以下の環境変数を`.env.local`ファイルに設定する必要があります：
+
+```
+NEXT_PUBLIC_FIREBASE_API_KEY=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
+```
+
+### Firebase Local Emulator のセットアップ
+
+開発環境では、Firebase Local Emulator を使用することをお勧めします：
+
+1. Firebase CLI をインストール
+
+   ```bash
+   npm install -g firebase-tools
+   ```
+
+2. エミュレーターを起動
+
+   ```bash
+   firebase emulators:start
+   ```
+
+3. エミュレーターのデフォルトポート
+   - Authentication: 9099
+   - Firestore: 8080
+   - Storage: 9199
+
 ## デプロイ手順
 
 ### 1. 環境変数の準備

@@ -152,6 +152,39 @@ Firebase の初期化が適切に行われていないか、環境変数が設�
 3. Network タブで API リクエストのエラーを確認します
 4. タイムアウト処理を実装して、応答がない場合にユーザーに通知します
 
+### エラー: Firebase 環境変数が設定されていない
+
+**症状**: コンソールに「Firebase 設定情報が設定されているか: ❌」のようなメッセージが表示される
+
+**解決策**:
+
+1. プロジェクトのルートに`.env.local`ファイルを作成
+2. 必要な Firebase 環境変数を設定（DEPLOYMENT.md を参照）
+3. 開発サーバーを再起動
+
+### エラー: Missing or insufficient permissions
+
+**症状**: Firestore の操作で権限エラーが発生する
+
+**解決策**:
+
+1. Firebase Console でセキュリティルールを確認
+2. 開発環境ではエミュレーターを使用しているか確認
+3. ユーザー認証が正しく行われているか確認
+
+### エラー: Firebase Emulator 接続エラー
+
+**症状**: エミュレーターへの接続に失敗する
+
+**解決策**:
+
+1. エミュレーターが起動しているか確認（`firebase emulators:start`）
+2. 正しいポートを使用しているか確認:
+   - Authentication: 9099
+   - Firestore: 8080
+   - Storage: 9199
+3. ファイアウォールの設定を確認
+
 ## クライアント/サーバーコンポーネントの問題
 
 ### エラー: "Component cannot be used as a Client Component"

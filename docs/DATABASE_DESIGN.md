@@ -35,6 +35,14 @@ firestore/
     └── {settingId}/      # 設定ドキュメント
 ```
 
+## ユーティリティ関数
+
+以下のユーティリティ関数を使用してデータベースとやり取りします：
+
+- `getUserData(uid)`: ユーザー情報を取得
+- `createUserData(firebaseUser, additionalData)`: ユーザー情報を作成
+- `getAppSettings(settingId)`: アプリケーション設定を取得
+
 ## ドキュメント構造
 
 ### buildings コレクション
