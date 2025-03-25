@@ -6,8 +6,6 @@ const { serverSchema } = require("./schema")
 // サーバー側で使う環境変数を検証
 const _serverEnv = serverSchema.safeParse(process.env);
 
-console.log('🚀 サーバー環境変数:', _serverEnv.data);
-
 // 検証に失敗した場合の処理（ブラウザ対応版）
 if (!_serverEnv.success) {
     console.error(
