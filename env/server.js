@@ -1,4 +1,5 @@
 // @ts-check
+require('dotenv').config()
 const { clientEnv } = require('./client.js')
 const { serverSchema } = require("./schema")
 
@@ -11,11 +12,13 @@ if (!_serverEnv.success) {
         '❌ サーバー環境変数が無効です:',
         JSON.stringify(_serverEnv.error.format(), null, 4)
     );
+
     
     // ブラウザ環境では終了せず、サーバーサイドのみ終了する
     if (typeof window === 'undefined') {
         process.exit(1);
     }
+    process.exit(1);
 }
 
 // クライアント側用に定義した値も使用できるようマージしてエクスポート
