@@ -15,6 +15,5 @@ export async function fetchDifyResponse(query: string): Promise<any> {
   if (!response.ok) {
     throw new Error("Dify API request failed");
   }
-
   return response.json();
 }
