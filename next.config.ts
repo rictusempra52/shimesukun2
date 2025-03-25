@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
 
   // 環境変数を使用して設定
   env: {
-    NODE_ENV: serverEnv.NODE_ENV,
+    // NODE_ENV: serverEnv.NODE_ENV,
     SITE_URL: serverEnv.NEXT_PUBLIC_SITE_URL,
   },
 
