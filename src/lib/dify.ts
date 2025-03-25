@@ -122,3 +122,25 @@ function extractExamples(response: any): string {
   }
   return "類似事例はありません。"; // 事例がない場合のデフォルトメッセージ
 }
+
+/**
+ * Dify APIを呼び出す関数
+ * @param {string} query - 質問内容
+ * @returns {Promise<any>} - APIのレスポンス
+ */
+export async function fetchDifyResponse(query: string): Promise<any> {
+  const response = await fetch(`${serverEnv.DIFY_API_ENDPOINT}/query`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${serverEnv.DIFY_API_KEY}`,
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Dify API request failed");
+  }
+
+  return response.json();
+}
