@@ -13,15 +13,14 @@ if (!_serverEnv.success) {
         JSON.stringify(_serverEnv.error.format(), null, 4)
     );
 
-    
+
     // ブラウザ環境では終了せず、サーバーサイドのみ終了する
     if (typeof window === 'undefined') {
         process.exit(1);
     }
-    process.exit(1);
 }
 
 // クライアント側用に定義した値も使用できるようマージしてエクスポート
-module.exports.serverEnv = _serverEnv.success 
+module.exports.serverEnv = _serverEnv.success
     ? { ..._serverEnv.data, ...clientEnv }
     : { ...clientEnv }; // 失敗した場合もクライアント環境変数だけは返す
