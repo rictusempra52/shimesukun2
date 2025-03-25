@@ -2,9 +2,12 @@
 // Dify APIを利用してAI回答を生成するための関数を提供します。
 // この関数は、Difyサービスを使用して質問に回答を生成します。
 
+// 検証済み環境変数をインポート
+const { serverEnv } = require("../../env/server");
+
 // 環境変数からAPIキーとエンドポイントを取得
-const apiKey = process.env.DIFY_API_KEY!; // 環境変数からDify APIキーを取得
-const apiEndpoint = process.env.DIFY_API_ENDPOINT!; // 環境変数からDify APIエンドポイントのURLを取得
+const apiKey = serverEnv.DIFY_API_KEY; // 検証済み環境変数からDify APIキーを取得
+const apiEndpoint = serverEnv.DIFY_API_ENDPOINT; // 検証済み環境変数からDify APIエンドポイントのURLを取得
 
 /**
  * Difyのチャットコンプリーションエンドポイントにリクエストを送信
