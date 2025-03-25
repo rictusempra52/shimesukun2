@@ -1,4 +1,5 @@
 // @ts-check
+require('dotenv').config()
 const { clientEnv } = require('./client.js')
 const { serverSchema } = require("./schema")
 
