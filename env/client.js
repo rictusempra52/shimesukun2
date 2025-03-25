@@ -7,7 +7,7 @@ const _clientEnv = clientSchema.safeParse(clientEnv)
 // 検証に失敗した場合はビルドエラーにする
 if (!_clientEnv.success) {
     console.error(
-        '❌ Invalid public environment variables:',
+        '❌ 公開環境変数が無効です:',
         JSON.stringify(_clientEnv.error.format(), null, 4)
     )
     process.exit(1)
@@ -17,7 +17,7 @@ if (!_clientEnv.success) {
 for (let key of Object.keys(_clientEnv.data)) {
     if (!key.startsWith('NEXT_PUBLIC_')) {
         console.error(
-            `❌ Invalid public environment variable name: ${key}. It must begin with 'NEXT_PUBLIC_'`
+            `❌ 公開環境変数名が無効です: ${key}。'NEXT_PUBLIC_' で始まる必要があります`
         )
         process.exit(1)
     }
