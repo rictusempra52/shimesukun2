@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+// @ts-check
+const { serverEnv } = require("./env/server");
 
 const nextConfig: NextConfig = {
   // 静的ページ生成からログイン関連ページを除外
