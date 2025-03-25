@@ -9,13 +9,29 @@ export async function POST(req: NextRequest) {
   try {
     // Dify APIを呼び出して回答を取得
     const response = await fetchDifyResponse(query);
-    // 成功した場合、レスポンスをJSON形式で返す
-    return NextResponse.json(response);
+
+    // キャッシュを無効化するためのヘッダーを設定
+    const headers = {
+      "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
+      Pragma: "no-cache",
+    };
+
+    // 成功した場合、レスポンスをJSON形式で返す（キャッシュ無効化ヘッダー付き）
+    return NextResponse.json(response, {
+      headers,
+      status: 200,
+    });
   } catch (error) {
-    // エラーが発生した場合、エラーメッセージを含むレスポンスを返す
+    // エラーが発生した場合、エラーメッセージを含むレスポンスを返す（キャッシュ無効化ヘッダー付き）
     return NextResponse.json(
       { error: "Dify API request failed" },
-      { status: 500 }
+      {
+        headers: {
+          "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
+          Pragma: "no-cache",
+        },
+        status: 500,
+      }
     );
   }
 }
