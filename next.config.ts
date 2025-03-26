@@ -8,8 +8,14 @@ const nextConfig: NextConfig = {
 
   // 環境変数を使用して設定
   env: {
-    // NODE_ENV: serverEnv.NODE_ENV,
-    SITE_URL: serverEnv.NEXT_PUBLIC_SITE_URL,
+    // サーバーサイドでのみ使用する環境変数
+    NODE_ENV: serverEnv.NODE_ENV,
+    SECRET_TOKEN: serverEnv.SECRET_TOKEN,
+    DIFY_API_KEY: serverEnv.DIFY_API_KEY,
+    DIFY_API_ENDPOINT: serverEnv.DIFY_API_ENDPOINT,
+
+    // クライアントサイドで使用する環境変数
+    NEXT_PUBLIC_SITE_URL: serverEnv.NEXT_PUBLIC_SITE_URL,
   },
 
   // Next.js 15.2.2でサポートされているオプション

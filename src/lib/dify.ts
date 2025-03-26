@@ -6,8 +6,8 @@
 const { serverEnv } = require("../../env/server");
 
 // 環境変数からAPIキーとエンドポイントを取得
-const apiKey = serverEnv.DIFY_API_KEY; // 検証済み環境変数からDify APIキーを取得
-const apiEndpoint = serverEnv.DIFY_API_ENDPOINT; // 検証済み環境変数からDify APIエンドポイントのURLを取得
+const apiKey = serverEnv.DIFY_API_KEY;
+const apiEndpoint = serverEnv.DIFY_API_ENDPOINT;
 
 /**
  * Difyのチャットコンプリーションエンドポイントにリクエストを送信
@@ -129,11 +129,11 @@ function extractExamples(response: any): string {
  * @returns {Promise<any>} - APIのレスポンス
  */
 export async function fetchDifyResponse(query: string): Promise<any> {
-  const response = await fetch(`${serverEnv.DIFY_API_ENDPOINT}/query`, {
+  const response = await fetch(`${apiEndpoint}/query`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${serverEnv.DIFY_API_KEY}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({ query }),
   });
