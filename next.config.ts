@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
   // 環境変数を使用して設定
   env: {
     // サーバーサイドでのみ使用する環境変数
-    NODE_ENV: serverEnv.NODE_ENV,
     SECRET_TOKEN: serverEnv.SECRET_TOKEN,
     DIFY_API_KEY: serverEnv.DIFY_API_KEY,
     DIFY_API_ENDPOINT: serverEnv.DIFY_API_ENDPOINT,
