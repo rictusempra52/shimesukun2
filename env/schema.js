@@ -5,10 +5,10 @@ const { z } = require('zod')
  * サーバー側で使う環境変数のスキーマを定義
  */
 const serverSchema = z.object({
-    NODE_ENV: z.enum(['development', 'test', 'production']),
-    SECRET_TOKEN: z.string().regex(/[a-zA-Z0-9]{32}/), // 32文字英数字
-    DIFY_API_KEY: z.string().min(1),
-    DIFY_API_ENDPOINT: z.string().url(),
+    NEXT_APP_NODE_ENV: z.enum(['development', 'test', 'production']),
+    NEXT_APP_SECRET_TOKEN: z.string().regex(/[a-zA-Z0-9]{32}/), // 32文字英数字
+    NEXT_APP_DIFY_API_KEY: z.string().min(1),
+    NEXT_APP_DIFY_API_ENDPOINT: z.string().url(),
 })
 
 /**
