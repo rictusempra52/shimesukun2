@@ -5,9 +5,9 @@ const { serverEnv } = require("./env/server");
 const nextConfig: NextConfig = {
   output: "standalone",
 
-  // 不要な環境変数設定を削除
   env: {
-    NEXT_PUBLIC_SITE_URL: serverEnv.NEXT_PUBLIC_SITE_URL, // クライアント側のみ
+    DIFY_API_KEY: serverEnv.DIFY_API_KEY,
+    DIFY_API_ENDPOINT: serverEnv.DIFY_API_ENDPOINT,
   },
 
   experimental: {
