@@ -15,7 +15,6 @@ const serverSchema = z.object({
  * クライアント側に公開するには、`NEXT_PUBLIC_` プレフィックスをつける
  */
 const clientSchema = z.object({
-    // Firebase クライアント設定
     NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1),
     NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1),
