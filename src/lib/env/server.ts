@@ -10,7 +10,11 @@ export const serverEnv = (() => {
   try {
     return envSchema.parse(process.env);
   } catch (error) {
-    console.error("Invalid server environment variables:", error.errors);
+    if (error instanceof z.ZodError) {
+      console.error("Invalid server environment variables:", error.errors);
+    } else {
+      console.error("Unknown error during environment validation:", error);
+    }
     throw new Error("Server environment variables validation failed");
   }
 })();
