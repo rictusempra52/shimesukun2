@@ -2,51 +2,28 @@
 // AI回答を生成するための関数を提供します。
 // この関数は、Google Generative AI APIを使用して質問に回答を生成します。
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { serverEnv } from "./env/server";
 
-export async function askBuildingManagementQuestion(
-  question: string,
-  documentContext?: string
-) {
-  // APIキーの取得と検証（サーバーサイドのみ）
-  const apiKey = process.env.GEMINI_API_KEY;
+const GEMINI_API_ENDPOINT = `${serverEnv.DIFY_API_ENDPOINT}/ask`;
 
-  if (!apiKey) {
-    throw new Error(
-      "Gemini APIキーが設定されていません。環境変数を確認してください。"
-    );
-  }
-
+export async function askGemini(question: string) {
   try {
-    // APIキーを使用してクライアントを初期化
-    const genAI = new GoogleGenerativeAI(apiKey);
+    const response = await fetch(GEMINI_API_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serverEnv.GEMINI_API_KEY}`,
+      },
+      body: JSON.stringify({ question }),
+    });
 
-    // Gemini Pro モデルを使用
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-
-    // プロンプトの構築
-    let prompt = `あなたはマンション管理のプロフェッショナルアシスタントです。
-以下の質問に対して、マンション管理組合の役員や区分所有者向けに、
-わかりやすく丁寧に回答してください。
-専門用語を使用する場合は、簡単な説明を添えてください。
-
-質問: ${question}`;
-
-    // 文書コンテキストがある場合は追加
-    if (documentContext) {
-      prompt += `\n\n参考資料:\n${documentContext}`;
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.statusText}`);
     }
 
-    // 生成リクエストの実行
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-
-    return text;
+    return await response.json();
   } catch (error) {
-    console.error("Gemini API呼び出しエラー:", error);
-    throw new Error(
-      "AI回答の生成に失敗しました。しばらく経ってから再度お試しください。"
-    );
+    console.error("Error in Gemini API request:", error);
+    throw error;
   }
 }
