@@ -48,6 +48,9 @@ export async function askDifyBuildingManagementQuestion(
       body: JSON.stringify(payload),
     });
 
+    // デバッグのためのログ追加
+    console.log("Dify API レスポンス:", JSON.stringify(response, null, 2));
+
     // レスポンスのContent-Typeをチェック
     const contentType = response.headers.get("content-type");
     if (contentType && contentType.includes("text/html")) {
