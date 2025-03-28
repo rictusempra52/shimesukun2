@@ -16,6 +16,7 @@
    - [エラー: "AI 回答の生成に失敗しました"](#エラー-ai-回答の生成に失敗しました)
    - [エラー: "CORS policy" または "No 'Access-Control-Allow-Origin' header"](#エラー-cors-policy-または-no-access-control-allow-origin-header)
    - [回答品質に関する問題](#回答品質に関する問題)
+   - [エラー: 必須パラメータが不足している](#エラー-必須パラメータが不足している)
 
 ## 認証関連のエラー
 
@@ -224,8 +225,14 @@ Firebase エミュレーターのデータベース設定にルールファイ�
 **解決策**:
 
 1. `.env.local` ファイルに `DIFY_API_KEY=あなたのDifyAPIキー` を追加する
-2. Vercel にデプロイする場合は、プロジェクト設定の環境変数セクションでキーを追加する
-3. サーバーを再起動して環境変数を反映させる
+2. サーバー側では `NEXT_PUBLIC_` プレフィックスのない環境変数を使用することを確認する
+   - サーバーコンポーネント内では `process.env.DIFY_API_KEY` を使用
+   - クライアントコンポーネント内では `process.env.NEXT_PUBLIC_DIFY_API_KEY` を使用
+3. アプリケーションを再起動して環境変数を反映させる
+4. Vercel にデプロイする場合は、プロジェクト設定の環境変数セクションでキーを追加する
+
+**注意**:
+サーバーサイドコンポーネント（"use server"）では、`NEXT_PUBLIC_` プレフィックスのない環境変数を使用する必要があります。一方、クライアントサイドコンポーネントでは環境変数名に `NEXT_PUBLIC_` プレフィックスが必要です。
 
 ### エラー: "AI 回答の生成に失敗しました"
 
@@ -261,3 +268,44 @@ Firebase エミュレーターのデータベース設定にルールファイ�
 2. ナレッジベースにより多くの関連文書を追加する
 3. Dify アプリケーションの設定で使用するモデル（GPT-4, Claude など）を変更する
 4. 質問の前処理と回答の後処理ロジックを調整する
+
+### エラー: 必須パラメータが不足している
+
+**エラーメッセージ:**
+
+```
+Dify API エラー: question is required in input form
+```
+
+**原因:**
+Dify API にリクエストを送信する際に、`query` パラメータが不足しているため発生します。
+
+**解決策:**
+
+1. **コード修正:**
+
+   - `src/lib/dify.ts` ファイルで、リクエストペイロードに `query` パラメータを追加します。
+   - 修正例:
+     ```typescript
+     const payload = {
+       inputs: { question: question.trim() },
+       query: question.trim(), // 必須パラメータとして追加
+       response_mode: "streaming",
+       conversation_id: conversationId,
+       user: "user-001",
+     };
+     ```
+
+2. **入力バリデーションの追加:**
+
+   - 質問内容が空でないことを確認するバリデーションを追加します。
+     ```typescript
+     if (!question || question.trim() === "") {
+       throw new Error("質問内容を入力してください。");
+     }
+     ```
+
+3. **エラー処理の改善:**
+   - API エラー時に詳細なエラーメッセージを表示するようにします。
+
+これにより、Dify API が要求する必須パラメータが正しく送信され、エラーが解消されます。

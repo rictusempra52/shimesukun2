@@ -7,70 +7,57 @@ const apiEndpoint = process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1";
 /**
  * Difyのチャットコンプリーションエンドポイントにリクエストを送信
  * @param question ユーザーからの質問
- * @param documentContext 関連文書のコンテキスト（オプション）
- * @param chatHistory 過去のチャット履歴（オプション）
+ * @param conversationId 過去のチャット履歴のID（オプション）
  * @returns AIからの回答
  */
 export async function askDifyBuildingManagementQuestion(
   question: string,
-  documentContext?: string,
-  chatHistory?: Array<{ role: "user" | "assistant"; content: string }>
+  conversationId?: string
 ) {
-  if (!apiKey) {
-    throw new Error(
-      `Dify APIキーが設定されていません。環境変数を確認してください。`
-    );
+  if (!question || question.trim() === "") {
+    throw new Error("質問内容を入力してください。");
   }
 
   try {
-    const endpoint = `${apiEndpoint}/chat-messages`;
+    if (!apiKey) {
+      throw new Error("Dify API キーが設定されていません");
+    }
 
-    const requestBody: any = {
-      query: question,
-      response_mode: "blocking",
-      conversation_id: "",
-      user: "end-user",
-      inputs: {},
+    // リクエストペイロードに query パラメータを追加
+    const payload = {
+      inputs: { question: question.trim() },
+      query: question.trim(), // 必須パラメータとして追加
+      response_mode: "streaming",
+      conversation_id: conversationId,
+      user: "user-001",
     };
 
-    if (documentContext) {
-      requestBody.inputs.context = documentContext;
-    }
-
-    if (chatHistory && chatHistory.length > 0) {
-      requestBody.conversation_id = "existing-conversation-id";
-    }
-
-    const response = await fetch(endpoint, {
+    const response = await fetch("https://api.dify.ai/v1/ask", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify(payload),
     });
 
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(
-        `Dify API エラー: ${errorData.message || response.statusText}`
+        `Dify API エラー: ${errorData.message || "不明なエラー"}`
       );
     }
 
-    const data = await response.json();
-
-    return {
-      answer: data.answer || data.text,
-      sources: data.sources || [],
-      relatedInfo: extractRelatedInfo(data),
-      examples: extractExamples(data),
-      timestamp: new Date().toISOString(),
-    };
+    return await response.json();
   } catch (error) {
     console.error("Dify API呼び出しエラー:", error);
-    throw new Error(
-      "AI回答の生成に失敗しました。しばらく経ってから再度お試しください。"
-    );
+
+    const errorMessage =
+      error instanceof Error
+        ? `AI回答の生成に失敗しました: ${error.message}`
+        : "AI回答の生成に失敗しました。しばらく経ってから再度お試しください。";
+
+    throw new Error(errorMessage);
   }
 }
 
