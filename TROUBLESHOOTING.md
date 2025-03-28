@@ -9,7 +9,9 @@
    - [メールアドレスが既に使用されている](#メールアドレスが既に使用されている)
    - [ログイン失敗エラー](#ログイン失敗エラー)
    - [Firebase エミュレーター接続エラー](#firebase-エミュレーター接続エラー)
-2. [Dify API 関連のトラブル](#dify-api-関連のトラブル)
+2. [Firebase エミュレーター関連の問題](#firebase-エミュレーター関連の問題)
+   - [エラー: データベースルールが設定されていない](#エラー-データベースルールが設定されていない)
+3. [Dify API 関連のトラブル](#dify-api-関連のトラブル)
    - [エラー: "Dify API キーが設定されていません"](#エラー-dify-api-キーが設定されていません)
    - [エラー: "AI 回答の生成に失敗しました"](#エラー-ai-回答の生成に失敗しました)
    - [エラー: "CORS policy" または "No 'Access-Control-Allow-Origin' header"](#エラー-cors-policy-または-no-access-control-allow-origin-header)
@@ -161,6 +163,57 @@ Firebase エミュレーターに接続する際の設定が正しくない場�
 
 5. **ブラウザのキャッシュクリア:**
    - ブラウザのキャッシュをクリアして再試行してください。
+
+## Firebase エミュレーター関連の問題
+
+### エラー: データベースルールが設定されていない
+
+**エラーメッセージ:**
+
+```
+firebase.json:2:3: Expected 'rules' property.
+Failed to load initial Database Emulator rules
+```
+
+**原因:**
+Firebase エミュレーターのデータベース設定にルールファイルが指定されていない場合に発生します。
+
+**解決策:**
+
+1. **firebase.json の修正:**
+
+   `firebase.json` ファイルに以下の設定を追加します：
+
+   ```json
+   {
+     "database": {
+       "rules": "database.rules.json"
+     }
+   }
+   ```
+
+2. **データベースルールファイルの作成:**
+
+   プロジェクトルートに `database.rules.json` ファイルを作成し、以下の内容を記述します：
+
+   ```json
+   {
+     "rules": {
+       ".read": "auth != null",
+       ".write": "auth != null"
+     }
+   }
+   ```
+
+3. **エミュレーターの再起動:**
+
+   修正後、以下のコマンドでエミュレーターを再起動します：
+
+   ```bash
+   firebase emulators:start
+   ```
+
+これでエラーが解消されるはずです。
 
 ## Dify API 関連のトラブル
 
