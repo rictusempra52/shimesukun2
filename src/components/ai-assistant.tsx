@@ -70,7 +70,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                     className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
                                         }`}
                                 >
-                                    <div
+                                    <かｒ
                                         className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-muted"
@@ -166,7 +166,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
             ) : (
             <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
-        </div>
+        </card>
                                 </div >
                             ))
 }
