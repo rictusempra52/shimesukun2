@@ -198,7 +198,7 @@ export function SignupForm() {
                         />
                     </div>
                     <Button
-                        // type="submit"
+                        type="submit"
                         className="w-full"
                         disabled={loading || success || isOffline}
                     >
