@@ -7,14 +7,26 @@ const envSchema = z.object({
 });
 
 export const serverEnv = (() => {
+  const isProd = process.env.NODE_ENV === "production";
+
   try {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
       console.error("Invalid server environment variables:", error.errors);
-    } else {
-      console.error("Unknown error during environment validation:", error);
+
+      if (!isProd) {
+        throw new Error("Server environment variables validation failed");
+      }
+
+      console.warn("Using fallback values for missing environment variables");
+      return {
+        DIFY_API_KEY: process.env.DIFY_API_KEY || "",
+        DIFY_API_ENDPOINT:
+          process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1",
+        GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
+      };
     }
-    throw new Error("Server environment variables validation failed");
+    throw error;
   }
 })();
