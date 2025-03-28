@@ -32,7 +32,11 @@ export async function askDifyBuildingManagementQuestion(
       user: "user-001",
     };
 
-    const response = await fetch("https://api.dify.ai/v1/ask", {
+    // 環境変数から取得したAPIエンドポイントを使用
+    const url = `${apiEndpoint}/ask`;
+    console.log(`Dify API リクエスト送信先: ${url}`);
+
+    const response = await fetch(url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -41,13 +45,38 @@ export async function askDifyBuildingManagementQuestion(
       body: JSON.stringify(payload),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
+    // レスポンスのContent-Typeをチェック
+    const contentType = response.headers.get("content-type");
+    if (contentType && contentType.includes("text/html")) {
+      // HTMLが返ってきた場合のエラー処理
+      const htmlContent = await response.text();
+      const errorMessage = htmlContent.includes("<title>")
+        ? htmlContent.match(/<title>(.*?)<\/title>/)?.[1] ||
+          "HTMLエラーページが返されました"
+        : "HTMLエラーページが返されました";
       throw new Error(
-        `Dify API エラー: ${errorData.message || "不明なエラー"}`
+        `Dify API は有効なJSONではなくHTMLを返しました: ${errorMessage}`
       );
     }
 
+    if (!response.ok) {
+      try {
+        const errorData = await response.json();
+        throw new Error(
+          `Dify API エラー: ${
+            errorData.message || errorData.error || "不明なエラー"
+          }`
+        );
+      } catch (jsonError) {
+        // JSONパースに失敗した場合
+        const text = await response.text();
+        throw new Error(
+          `Dify API エラー (${response.status}): ${text.substring(0, 100)}...`
+        );
+      }
+    }
+
+    // 正常なJSONレスポンス
     return await response.json();
   } catch (error) {
     console.error("Dify API呼び出しエラー:", error);
