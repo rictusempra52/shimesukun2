@@ -90,7 +90,45 @@ export async function askDifyBuildingManagementQuestion(
     }
 
     // 正常なJSONレスポンス
-    return await response.json();
+    const jsonResponse = await response.json();
+    console.log("Dify APIからのJSON応答:", jsonResponse);
+
+    // 修正: answerフィールドが存在し、文字列の場合はそれをパースする
+    if (jsonResponse.answer && typeof jsonResponse.answer === "string") {
+      try {
+        // 文字列からJSONオブジェクトとしてパース
+        return JSON.parse(jsonResponse.answer);
+      } catch (e) {
+        console.log("回答の文字列パースに失敗:", e);
+        // パース失敗時はテキストとして返す
+        return { 回答要点: jsonResponse.answer };
+      }
+    }
+
+    // answer.messageプロパティに回答がある場合
+    if (jsonResponse.answer && jsonResponse.answer.message) {
+      try {
+        // 文字列からJSONオブジェクトとしてパース
+        return JSON.parse(jsonResponse.answer.message);
+      } catch (e) {
+        console.log("回答のmessageパースに失敗:", e);
+        // テキストとして返す
+        return { 回答要点: jsonResponse.answer.message };
+      }
+    }
+
+    // dataプロパティに回答がある場合
+    if (jsonResponse.data) {
+      return jsonResponse;
+    }
+
+    // 既にパースされた回答オブジェクトの場合
+    if (jsonResponse.回答要点) {
+      return jsonResponse;
+    }
+
+    // それ以外の構造の場合は元のレスポンスを返す
+    return jsonResponse;
   } catch (error) {
     console.error("Dify API呼び出しエラー:", error);
 

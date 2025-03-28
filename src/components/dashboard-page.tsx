@@ -76,8 +76,15 @@ export default function DashboardPage() {
       // Dify APIを呼び出して回答を取得
       const response = await askDifyBuildingManagementQuestion(question);
 
+      // デバッグ用：レスポンス全体をコンソールに出力
+      console.log("APIからの返答:", response);
+
+      // レスポンスがdata配下にある場合とそうでない場合の両方に対応
+      const aiResponseData = response.data ? response.data : response;
+
       // 回答をステートに設定
-      setAiResponse(response);
+      setAiResponse(aiResponseData);
+      console.log("セットされた回答:", aiResponseData);
 
     } catch (error) {
       console.error("AIリクエストエラー:", error);
@@ -347,8 +354,18 @@ export default function DashboardPage() {
                             <p className="text-sm text-muted-foreground">AIが回答を生成しています...</p>
                           </div>
                         ) : aiResponse ? (
-                          // AI回答の表示
-                          <p>{aiResponse.回答要点}</p>
+                          // AI回答の表示（修正：デバッグ情報を追加）
+                          <>
+                            <p>{aiResponse.回答要点 || '回答が正しく表示できません。'}</p>
+                            {!aiResponse.回答要点 && (
+                              <div className="mt-2 p-2 bg-destructive/10 rounded text-xs">
+                                <p>デバッグ情報: 回答オブジェクトの内容</p>
+                                <pre className="overflow-auto max-h-32 text-xs mt-1">
+                                  {JSON.stringify(aiResponse, null, 2)}
+                                </pre>
+                              </div>
+                            )}
+                          </>
                         ) : (
                           // 初期状態の説明
                           <p>質問を入力すると、AIがアップロードされた書類から回答を生成します。</p>

@@ -85,33 +85,43 @@ function initializeFirebase() {
       prompt: "select_account",
     });
 
-    // 開発環境のみエミュレーターに接続
+    // コレクション参照もクライアント側でのみ初期化
+    usersCollection = collection(db, "users");
+    buildingsCollection = collection(db, "buildings");
+    documentsCollection = collection(db, "documents");
+    settingsCollection = collection(db, "settings");
+
+    // 開発環境のみエミュレーターに接続（修正版）
     if (process.env.NODE_ENV === "development") {
       try {
-        // エミュレーターに接続する前に待機
-        setTimeout(() => {
-          try {
-            console.log("Firebaseエミュレーターに接続を試みます...");
+        console.log("Firebaseエミュレーターに接続を試みます...");
 
-            // 認証エミュレーターに接続（URLを正確に指定）
-            connectAuthEmulator(auth, "http://127.0.0.1:9099", {
-              disableWarnings: false,
-            });
+        // エミュレーターのホスト設定
+        const emulatorHost = "127.0.0.1"; // localhost ではなく IP アドレスを使用
 
-            // その他のエミュレーターに接続
-            connectFirestoreEmulator(db, "127.0.0.1", 8080);
-            connectStorageEmulator(storage, "127.0.0.1", 9199);
+        // Firebaseサービス別のエミュレーターに接続
+        // 認証エミュレーター
+        connectAuthEmulator(auth, `http://${emulatorHost}:9099`, {
+          disableWarnings: true,
+        });
 
-            console.log("Firebaseエミュレーターへの接続が完了しました");
-          } catch (emulatorError) {
-            console.error("エミュレーター接続エラー:", emulatorError);
-          }
-        }, 1000); // 1秒待機してからエミュレーターに接続
-      } catch (timeoutError) {
-        console.error(
-          "エミュレーター接続のタイムアウト設定に失敗:",
-          timeoutError
-        );
+        // Firestoreエミュレーター
+        connectFirestoreEmulator(db, emulatorHost, 8080);
+
+        // Storageエミュレーター
+        connectStorageEmulator(storage, emulatorHost, 9199);
+
+        console.log("Firebaseエミュレーターへの接続が完了しました");
+      } catch (emulatorError) {
+        console.error("エミュレーター接続エラー:", emulatorError);
+        // より詳細なエラー情報を表示
+        if (emulatorError instanceof Error) {
+          console.error(
+            "エラーの詳細:",
+            emulatorError.message,
+            emulatorError.stack
+          );
+        }
       }
     }
   } catch (error) {
