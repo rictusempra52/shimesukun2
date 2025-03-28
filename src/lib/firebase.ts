@@ -85,11 +85,38 @@ function initializeFirebase() {
       prompt: "select_account",
     });
 
-    console.log("Firebaseの初期化が完了しました");
-    return true;
+    // 開発環境のみエミュレーターに接続
+    if (process.env.NODE_ENV === "development") {
+      try {
+        // エミュレーターに接続する前に待機
+        setTimeout(() => {
+          try {
+            console.log("Firebaseエミュレーターに接続を試みます...");
+
+            // 認証エミュレーターに接続（URLを正確に指定）
+            connectAuthEmulator(auth, "http://127.0.0.1:9099", {
+              disableWarnings: false,
+            });
+
+            // その他のエミュレーターに接続
+            connectFirestoreEmulator(db, "127.0.0.1", 8080);
+            connectStorageEmulator(storage, "127.0.0.1", 9199);
+
+            console.log("Firebaseエミュレーターへの接続が完了しました");
+          } catch (emulatorError) {
+            console.error("エミュレーター接続エラー:", emulatorError);
+          }
+        }, 1000); // 1秒待機してからエミュレーターに接続
+      } catch (timeoutError) {
+        console.error(
+          "エミュレーター接続のタイムアウト設定に失敗:",
+          timeoutError
+        );
+      }
+    }
   } catch (error) {
-    console.error("Firebaseの初期化に失敗しました:", error);
-    return false;
+    // 初期化に失敗した場合もダミーのコレクション参照を用意
+    console.error("Firebase初期化失敗: ダミーオブジェクトを使用します", error);
   }
 }
 
