@@ -367,23 +367,23 @@ export default function DashboardPage() {
                     )}
 
                     {/* 実行プランセクション */}
-                    {aiResponse && (
+                    {aiResponse && aiResponse.実行プラン && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium">実行プラン</h3>
                         <div className="p-3 bg-muted rounded-md space-y-3">
-                          {aiResponse.実行プラン.すぐに実行すべきこと && (
+                          {aiResponse.実行プラン?.すぐに実行すべきこと && (
                             <div>
                               <h4 className="text-xs font-semibold">すぐに実行すべきこと</h4>
                               <p className="text-sm">{aiResponse.実行プラン.すぐに実行すべきこと}</p>
                             </div>
                           )}
-                          {aiResponse.実行プラン.中期的に検討すべきこと && (
+                          {aiResponse.実行プラン?.中期的に検討すべきこと && (
                             <div>
                               <h4 className="text-xs font-semibold">中期的に検討すべきこと</h4>
                               <p className="text-sm">{aiResponse.実行プラン.中期的に検討すべきこと}</p>
                             </div>
                           )}
-                          {aiResponse.実行プラン.長期的に準備すべきこと && (
+                          {aiResponse.実行プラン?.長期的に準備すべきこと && (
                             <div>
                               <h4 className="text-xs font-semibold">長期的に準備すべきこと</h4>
                               <p className="text-sm">{aiResponse.実行プラン.長期的に準備すべきこと}</p>
@@ -394,17 +394,17 @@ export default function DashboardPage() {
                     )}
 
                     {/* 注意点とリスクセクション */}
-                    {aiResponse && (
+                    {aiResponse && aiResponse.注意点とリスク && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium">注意点とリスク</h3>
                         <div className="p-3 bg-muted rounded-md space-y-3">
-                          {aiResponse.注意点とリスク.想定されるトラブルや注意点 && (
+                          {aiResponse.注意点とリスク?.想定されるトラブルや注意点 && (
                             <div>
                               <h4 className="text-xs font-semibold">想定されるトラブルや注意点</h4>
                               <p className="text-sm">{aiResponse.注意点とリスク.想定されるトラブルや注意点}</p>
                             </div>
                           )}
-                          {aiResponse.注意点とリスク.法的リスクや責任の所在 && (
+                          {aiResponse.注意点とリスク?.法的リスクや責任の所在 && (
                             <div>
                               <h4 className="text-xs font-semibold">法的リスクや責任の所在</h4>
                               <p className="text-sm">{aiResponse.注意点とリスク.法的リスクや責任の所在}</p>
@@ -415,23 +415,23 @@ export default function DashboardPage() {
                     )}
 
                     {/* 管理実務上のポイントセクション */}
-                    {aiResponse && (
+                    {aiResponse && aiResponse.管理実務上のポイント && (
                       <div className="space-y-2">
                         <h3 className="text-sm font-medium">管理実務上のポイント</h3>
                         <div className="p-3 bg-muted rounded-md space-y-3">
-                          {aiResponse.管理実務上のポイント.書類作成保管に関するアドバイス && (
+                          {aiResponse.管理実務上のポイント?.書類作成保管に関するアドバイス && (
                             <div>
                               <h4 className="text-xs font-semibold">書類作成・保管に関するアドバイス</h4>
                               <p className="text-sm">{aiResponse.管理実務上のポイント.書類作成保管に関するアドバイス}</p>
                             </div>
                           )}
-                          {aiResponse.管理実務上のポイント.区分所有者への説明方法 && (
+                          {aiResponse.管理実務上のポイント?.区分所有者への説明方法 && (
                             <div>
                               <h4 className="text-xs font-semibold">区分所有者への説明方法</h4>
                               <p className="text-sm">{aiResponse.管理実務上のポイント.区分所有者への説明方法}</p>
                             </div>
                           )}
-                          {aiResponse.管理実務上のポイント.意思決定プロセスの進め方 && (
+                          {aiResponse.管理実務上のポイント?.意思決定プロセスの進め方 && (
                             <div>
                               <h4 className="text-xs font-semibold">意思決定プロセスの進め方</h4>
                               <p className="text-sm">{aiResponse.管理実務上のポイント.意思決定プロセスの進め方}</p>
