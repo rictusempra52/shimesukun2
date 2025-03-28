@@ -166,9 +166,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
             ) : (
             <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
-        </card>
-                                </div >
-                            ))
+        </Card>
+        )
 }
 {
     isLoading && (
