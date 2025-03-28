@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 // @ts-check
-const { serverEnv } = require("./env/server");
+const { serverEnv } = require("./src/lib/env/server");
 
 const nextConfig: NextConfig = {
   output: "standalone",
