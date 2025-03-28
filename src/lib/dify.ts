@@ -14,11 +14,13 @@ export async function askDifyBuildingManagementQuestion(
   question: string,
   conversationId?: string
 ) {
+  // 質問内容が空の場合はエラーをスロー
   if (!question || question.trim() === "") {
     throw new Error("質問内容を入力してください。");
   }
 
   try {
+    // APIキーが設定されていない場合はエラーをスロー
     if (!apiKey) {
       throw new Error("Dify API キーが設定されていません");
     }
@@ -27,13 +29,14 @@ export async function askDifyBuildingManagementQuestion(
     const payload = {
       inputs: { question: question.trim() },
       query: question.trim(), // 必須パラメータとして追加
-      response_mode: "streaming",
+      response_mode: "blocking", // streamingではなくblockingに変更
       conversation_id: conversationId,
       user: "user-001",
     };
 
-    // 環境変数から取得したAPIエンドポイントを使用
-    const url = `${apiEndpoint}/ask`;
+    // Dify APIのドキュメントに基づいて正しいエンドポイントを使用
+    // ストリーミングモードの場合は /chat-messages、ブロッキングモードの場合は /completion-messages が一般的
+    const url = `${apiEndpoint}/chat-messages`;
     console.log(`Dify API リクエスト送信先: ${url}`);
 
     const response = await fetch(url, {
@@ -50,10 +53,17 @@ export async function askDifyBuildingManagementQuestion(
     if (contentType && contentType.includes("text/html")) {
       // HTMLが返ってきた場合のエラー処理
       const htmlContent = await response.text();
+      console.error(
+        "Dify API から返されたHTMLレスポンス:",
+        htmlContent.substring(0, 500)
+      );
+      // エラーページのタイトルを取得
       const errorMessage = htmlContent.includes("<title>")
-        ? htmlContent.match(/<title>(.*?)<\/title>/)?.[1] ||
+        ? // タイトルタグが存在する場合はタイトルを取得
+          htmlContent.match(/<title>(.*?)<\/title>/)?.[1] ||
           "HTMLエラーページが返されました"
-        : "HTMLエラーページが返されました";
+        : // タイトルタグが存在しない場合はエラーメッセージ全体を取得
+          "HTMLエラーページが返されました";
       throw new Error(
         `Dify API は有効なJSONではなくHTMLを返しました: ${errorMessage}`
       );
