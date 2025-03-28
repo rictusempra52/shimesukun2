@@ -1,6 +1,6 @@
 "use server"; // サーバーサイド専用コードと明示
 
-const { serverEnv } = require("../../../env/server");
+const { serverEnv } = require("@/lib/env/server");
 
 // 環境変数から安全にAPIキーとエンドポイントを取得
 const apiKey = serverEnv.DIFY_API_KEY;
