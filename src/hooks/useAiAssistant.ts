@@ -8,8 +8,27 @@ import { askAI } from "@/lib/client/dify"; // クライアント用の関数を�
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
-  content: string;
+  content: string; 
   timestamp: string;
+  structuredContent?: {
+    回答要点: string;
+    法的・実務的根拠: string;
+    実行プラン: {
+      すぐに実行すべきこと: string;
+      中期的に検討すべきこと: string;
+      長期的に準備すべきこと: string;
+    };
+    注意点とリスク: {
+      想定されるトラブルや注意点: string;
+      法的リスクや責任の所在: string;
+    };
+    管理実務上のポイント: {
+      書類作成・保管に関するアドバイス: string;
+      区分所有者への説明方法: string;
+      意思決定プロセスの進め方: string;
+    };
+    参考事例: string;
+  };
 }
 
 /**
@@ -26,8 +45,9 @@ export function useAiAssistant(documentId?: string) {
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
-        content: data.answer,
-        timestamp: data.timestamp,
+        content: data.回答要点 || "回答が生成できませんでした。",
+        timestamp: new Date().toISOString(),
+        structuredContent: data,
       };
       setMessages((prev) => [...prev, assistantMessage]);
     },

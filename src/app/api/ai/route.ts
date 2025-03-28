@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { fetchDifyResponse } from "@/lib/server/dify"; // サーバー側の関数をインポート
+import { askDifyBuildingManagementQuestion } from "@/lib/dify";
 
 /**
  * AIの質問応答APIエンドポイント
@@ -8,7 +8,7 @@ import { fetchDifyResponse } from "@/lib/server/dify"; // サーバー側の関�
 export async function POST(req: NextRequest) {
   try {
     const { query } = await req.json();
-    const response = await fetchDifyResponse(query);
+    const response = await askDifyBuildingManagementQuestion(query);
 
     return NextResponse.json(response, {
       headers: {

@@ -34,10 +34,24 @@ export default function DashboardPage() {
   // AI質問応答機能のための状態管理
   const [question, setQuestion] = useState("") // ユーザーの質問文
   const [aiResponse, setAiResponse] = useState<{
-    answer: string       // AIの回答
-    sources: string      // 回答の根拠となる書類情報
-    relatedInfo: string  // 関連情報
-    examples: string     // 他マンションの事例
+    回答要点: string,
+    法的実務的根拠: string,
+    実行プラン: {
+      すぐに実行すべきこと: string,
+      中期的に検討すべきこと: string,
+      長期的に準備すべきこと: string,
+    },
+    注意点とリスク: {
+      想定されるトラブルや注意点: string,
+      法的リスクや責任の所在: string,
+    },
+    管理実務上のポイント: {
+      書類作成保管に関するアドバイス: string,
+      区分所有者への説明方法: string,
+      意思決定プロセスの進め方: string,
+    },
+    参考事例: string,
+    sources?: string,  // 後方互換性のため
   } | null>(null)
   const [isLoading, setIsLoading] = useState(false) // 読み込み状態
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +62,6 @@ export default function DashboardPage() {
    * ユーザーの質問をDify APIに送信し、回答を取得します。
    * 処理中はローディング状態を表示し、エラーが発生した場合は
    * エラーメッセージをアラートで表示します。
-   * 
    */
   const handleAskQuestion = async () => {
     // 質問が空の場合は何もしない
@@ -56,23 +69,18 @@ export default function DashboardPage() {
 
     // 読み込み中状態に設定
     setIsLoading(true);
+    setError(null);
     setAiResponse(null); // 既存の回答をクリア
 
-    // Dify APIを呼び出して回答を取得
-    const response = await askDifyBuildingManagementQuestion(question);
     try {
+      // Dify APIを呼び出して回答を取得
+      const response = await askDifyBuildingManagementQuestion(question);
 
       // 回答をステートに設定
-      setAiResponse({
-        // 回答内容、根拠となる書類、関連情報、他マンション事例をステートに設定
-        answer: response.answer,
-        // sourcesは配列なので文字列に変換してステートに設定
-        sources: response.metadata.retriever_resources.join(', '),
-        relatedInfo: response.relatedInfo,
-        examples: response.examples
-      });
+      setAiResponse(response);
+
     } catch (error) {
-      console.error("AIリクエストエラー:", error, response);
+      console.error("AIリクエストエラー:", error);
       setError((error as Error).message);
     } finally {
       // 読み込み状態を解除
@@ -326,9 +334,9 @@ export default function DashboardPage() {
 
                   {/* AIからの回答表示エリア */}
                   <div className="rounded-lg border p-4 space-y-4">
-                    {/* 回答セクション */}
+                    {/* 回答要点セクション */}
                     <div className="space-y-2">
-                      <h3 className="text-sm font-medium">回答</h3>
+                      <h3 className="text-sm font-medium">回答要点</h3>
                       <div className="p-3 bg-muted rounded-md">
                         {/* ローディング表示 */}
                         {isLoading ? (
@@ -340,13 +348,108 @@ export default function DashboardPage() {
                           </div>
                         ) : aiResponse ? (
                           // AI回答の表示
-                          <p>{aiResponse.answer}</p>
-                        ) : !isLoading && (
+                          <p>{aiResponse.回答要点}</p>
+                        ) : (
                           // 初期状態の説明
                           <p>質問を入力すると、AIがアップロードされた書類から回答を生成します。</p>
                         )}
                       </div>
                     </div>
+
+                    {/* 法的・実務的根拠セクション */}
+                    {aiResponse && aiResponse.法的実務的根拠 && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium">法的・実務的根拠</h3>
+                        <div className="p-3 bg-muted rounded-md">
+                          <p className="text-sm">{aiResponse.法的実務的根拠}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 実行プランセクション */}
+                    {aiResponse && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium">実行プラン</h3>
+                        <div className="p-3 bg-muted rounded-md space-y-3">
+                          {aiResponse.実行プラン.すぐに実行すべきこと && (
+                            <div>
+                              <h4 className="text-xs font-semibold">すぐに実行すべきこと</h4>
+                              <p className="text-sm">{aiResponse.実行プラン.すぐに実行すべきこと}</p>
+                            </div>
+                          )}
+                          {aiResponse.実行プラン.中期的に検討すべきこと && (
+                            <div>
+                              <h4 className="text-xs font-semibold">中期的に検討すべきこと</h4>
+                              <p className="text-sm">{aiResponse.実行プラン.中期的に検討すべきこと}</p>
+                            </div>
+                          )}
+                          {aiResponse.実行プラン.長期的に準備すべきこと && (
+                            <div>
+                              <h4 className="text-xs font-semibold">長期的に準備すべきこと</h4>
+                              <p className="text-sm">{aiResponse.実行プラン.長期的に準備すべきこと}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 注意点とリスクセクション */}
+                    {aiResponse && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium">注意点とリスク</h3>
+                        <div className="p-3 bg-muted rounded-md space-y-3">
+                          {aiResponse.注意点とリスク.想定されるトラブルや注意点 && (
+                            <div>
+                              <h4 className="text-xs font-semibold">想定されるトラブルや注意点</h4>
+                              <p className="text-sm">{aiResponse.注意点とリスク.想定されるトラブルや注意点}</p>
+                            </div>
+                          )}
+                          {aiResponse.注意点とリスク.法的リスクや責任の所在 && (
+                            <div>
+                              <h4 className="text-xs font-semibold">法的リスクや責任の所在</h4>
+                              <p className="text-sm">{aiResponse.注意点とリスク.法的リスクや責任の所在}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 管理実務上のポイントセクション */}
+                    {aiResponse && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium">管理実務上のポイント</h3>
+                        <div className="p-3 bg-muted rounded-md space-y-3">
+                          {aiResponse.管理実務上のポイント.書類作成保管に関するアドバイス && (
+                            <div>
+                              <h4 className="text-xs font-semibold">書類作成・保管に関するアドバイス</h4>
+                              <p className="text-sm">{aiResponse.管理実務上のポイント.書類作成保管に関するアドバイス}</p>
+                            </div>
+                          )}
+                          {aiResponse.管理実務上のポイント.区分所有者への説明方法 && (
+                            <div>
+                              <h4 className="text-xs font-semibold">区分所有者への説明方法</h4>
+                              <p className="text-sm">{aiResponse.管理実務上のポイント.区分所有者への説明方法}</p>
+                            </div>
+                          )}
+                          {aiResponse.管理実務上のポイント.意思決定プロセスの進め方 && (
+                            <div>
+                              <h4 className="text-xs font-semibold">意思決定プロセスの進め方</h4>
+                              <p className="text-sm">{aiResponse.管理実務上のポイント.意思決定プロセスの進め方}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 参考事例セクション */}
+                    {aiResponse && aiResponse.参考事例 && (
+                      <div className="space-y-2">
+                        <h3 className="text-sm font-medium">参考事例</h3>
+                        <div className="p-3 bg-muted rounded-md">
+                          <p className="text-sm">{aiResponse.参考事例}</p>
+                        </div>
+                      </div>
+                    )}
 
                     {/* エラーメッセージ表示 */}
                     {error && (
@@ -355,98 +458,6 @@ export default function DashboardPage() {
                         <AlertDescription>{error}</AlertDescription>
                       </Alert>
                     )}
-
-                    {/* 根拠箇所セクション */}
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium">根拠箇所</h3>
-                      <div className="p-3 bg-muted rounded-md">
-                        {/* 回答の根拠となる書類へのリンク表示 */}
-                        {aiResponse ? (
-                          <p className="text-sm">
-                            参照資料:{" "}
-                            {aiResponse.sources.includes("管理組合総会議事録") && (
-                              <Button
-                                variant="link"
-                                className="p-0 h-auto text-sm font-medium text-blue-600 hover:underline"
-                                onClick={() => {
-                                  setCurrentView("documents")
-                                  setTimeout(() => {
-                                    window.location.href = "/documents/1"
-                                  }, 100)
-                                }}
-                              >
-                                「管理組合総会議事録」
-                              </Button>
-                            )}
-                            {aiResponse.sources.includes("管理組合総会議事録") &&
-                              aiResponse.sources.includes("修繕工事見積書") &&
-                              ", "}
-                            {aiResponse.sources.includes("修繕工事見積書") && (
-                              <Button
-                                variant="link"
-                                className="p-0 h-auto text-sm font-medium text-blue-600 hover:underline"
-                                onClick={() => {
-                                  setCurrentView("documents")
-                                  setTimeout(() => {
-                                    window.location.href = "/documents/2"
-                                  }, 100)
-                                }}
-                              >
-                                「修繕工事見積書」
-                              </Button>
-                            )}
-                            {aiResponse.sources.includes("消防設備点検報告書") && (
-                              <Button
-                                variant="link"
-                                className="p-0 h-auto text-sm font-medium text-blue-600 hover:underline"
-                                onClick={() => {
-                                  setCurrentView("documents")
-                                  setTimeout(() => {
-                                    window.location.href = "/documents/3"
-                                  }, 100)
-                                }}
-                              >
-                                「消防設備点検報告書」
-                              </Button>
-                            )}
-                            {aiResponse.sources.includes("(2023-12-15)") && " (2023-12-15)"}
-                            {aiResponse.sources.includes("(2023-12-10)") && " (2023-12-10)"}
-                          </p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            回答の根拠となる書類の該当箇所が表示されます。
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 関連情報セクション */}
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium">関連情報</h3>
-                      <div className="p-3 bg-muted rounded-md">
-                        {aiResponse ? (
-                          <p className="text-sm">{aiResponse.relatedInfo}</p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            質問に関連する可能性のある追加情報が表示されます。
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 他マンション事例セクション */}
-                    <div className="space-y-2">
-                      <h3 className="text-sm font-medium">他マンション事例</h3>
-                      <div className="p-3 bg-muted rounded-md">
-                        {aiResponse ? (
-                          <p className="text-sm">{aiResponse.examples}</p>
-                        ) : (
-                          <p className="text-sm text-muted-foreground">
-                            類似の状況における他のマンションの事例が表示されます。
-                          </p>
-                        )}
-                      </div>
-                    </div>
                   </div>
                 </div>
               </CardContent>

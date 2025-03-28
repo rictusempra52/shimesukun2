@@ -71,16 +71,107 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                         }`}
                                 >
                                     <div
-                                        className={`max-w-[80%] rounded-lg p-3 ${message.role === "user"
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted"
+                                        className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted"
                                             }`}
                                     >
-                                        <div className="whitespace-pre-wrap">{message.content}</div>
-                                    </div>
-                                </div>
-                            ))}
-                            {isLoading && (
+                                        {message.role === "user" ? (
+                                            <div className="whitespace-pre-wrap">{message.content}</div>
+                                        ) : message.structuredContent ? (
+                                            <div className="space-y-4">
+                                                <h4 className="font-medium">回答要点</h4>
+                                                <p className="whitespace-pre-wrap text-sm">{message.structuredContent.回答要点}</p>
+
+                                                {message.structuredContent.法的・実務的根拠 && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">法的・実務的根拠</h4>
+                                                        <p className="text-sm whitespace-pre-wrap">{message.structuredContent.法的・実務的根拠}</p>
+                                                    </div>
+                                                )}
+
+                                                {message.structuredContent.実行プラン && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">実行プラン</h4>
+                                                        {message.structuredContent.実行プラン.すぐに実行すべきこと && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">すぐに実行すべきこと</h5>
+                                                                <p className="text-sm">{message.structuredContent.実行プラン.すぐに実行すべきこと}</p>
+                                                            </div>
+                                                        )}
+                                                        {message.structuredContent.実行プラン.中期的に検討すべきこと && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">中期的に検討すべきこと</h5>
+                                                                <p className="text-sm">{message.structuredContent.実行プラン.中期的に検討すべきこと}</p>
+                                                            </div>
+                                                        )}
+                                                        {message.structuredContent.実行プラン.長期的に準備すべきこと && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">長期的に準備すべきこと</h5>
+                                                                <p className="text-sm">{message.structuredContent.実行プラン.長期的に準備すべきこと}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {message.structuredContent.注意点とリスク && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">注意点とリスク</h4>
+                                                        {message.structuredContent.注意点とリスク.想定されるトラブルや注意点 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">想定されるトラブルや注意点</h5>
+                                                                <p className="text-sm">{message.structuredContent.注意点とリスク.想定されるトラブルや注意点}</p>
+                                                            </div>
+                                                        )}
+                                                        {message.structuredContent.注意点とリスク.法的リスクや責任の所在 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">法的リスクや責任の所在</h5>
+                                                                <p className="text-sm">{message.structuredContent.注意点とリスク.法的リスクや責任の所在}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {message.structuredContent.管理実務上のポイント && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">管理実務上のポイント</h4>
+                                                        {message.structuredContent.管理実務上のポイント.書類作成・保管に関するアドバイス && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">書類作成・保管に関するアドバイス</h5>
+                                                                <p className="text-sm">{message.structuredContent.管理実務上のポイント.書類作成・保管に関するアドバイス}</p>
+                                                            </div>
+                                        )}
+                                        {message.structuredContent.管理実務上のポイント.区分所有者への説明方法 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">区分所有者への説明方法</h5>
+                                                                <p className="text-sm">{message.structuredContent.管理実務上のポイント.区分所有者への説明方法}</p>
+                                                            </div>
+                                                        )}
+                                    {message.structuredContent.管理実務上のポイント.意思決定プロセスの進め方 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">意思決定プロセスの進め方</h5>
+                                                                <p className="text-sm">{message.structuredContent.管理実務上のポイント.意思決定プロセスの進め方}</p>
+                                                            </div>
+                            )}
+                        </div>
+                    )}
+
+                    {message.structuredContent.参考事例 && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">参考事例</h4>
+                                                        <p className="text-sm">{message.structuredContent.参考事例}</p>
+                                                    </div>
+                                                )}
+            </div>
+            ) : (
+            <div className="whitespace-pre-wrap">{message.content}</div>
+                                        )}
+        </div>
+                                </div >
+                            ))
+}
+{
+    isLoading && (
                                 <div className="flex justify-start">
                                     <div className="max-w-[80%] rounded-lg p-3 bg-muted">
                                         <div className="flex items-center gap-2">
@@ -90,42 +181,45 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                             <span className="text-sm text-muted-foreground ml-1">考え中...</span>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-                        </div>
+                                </div >
+                            )
+}
+                        </div >
                     )}
-                    {error && (
+{
+    error && (
                         <Alert variant="destructive" className="my-4">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{(error as Error).message}</AlertDescription>
-                        </Alert>
-                    )}
-                </ScrollArea>
-            </CardContent>
+                        </Alert >
+                    )
+}
+                </ScrollArea >
+            </CardContent >
 
-            <CardFooter className="border-t p-2">
-                <form onSubmit={handleSubmit} className="flex w-full gap-2">
-                    <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={clearChat}
-                        title="会話をクリア"
-                    >
-                        <Trash className="h-4 w-4" />
-                    </Button>
-                    <Input
-                        placeholder="質問を入力してください..."
-                        value={question}
-                        onChange={(e) => setQuestion(e.target.value)}
-                        disabled={isLoading}
-                        className="flex-grow"
-                    />
-                    <Button type="submit" size="icon" disabled={!question.trim() || isLoading}>
-                        <Send className="h-4 w-4" />
-                    </Button>
-                </form>
-            </CardFooter>
-        </Card>
+    <CardFooter className="border-t p-2">
+        <form onSubmit={handleSubmit} className="flex w-full gap-2">
+            <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={clearChat}
+                title="会話をクリア"
+            >
+                <Trash className="h-4 w-4" />
+            </Button>
+            <Input
+                placeholder="質問を入力してください..."
+                value={question}
+                onChange={(e) => setQuestion(e.target.value)}
+                disabled={isLoading}
+                className="flex-grow"
+            />
+            <Button type="submit" size="icon" disabled={!question.trim() || isLoading}>
+                <Send className="h-4 w-4" />
+            </Button>
+        </form>
+    </CardFooter>
+        </Card >
     );
 }
