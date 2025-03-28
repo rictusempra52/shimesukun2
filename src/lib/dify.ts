@@ -20,9 +20,11 @@ export async function askDifyBuildingManagementQuestion( // マンション管�
 ) {
   if (!apiKey) {
     // APIキーが設定されていない場合のエラーハンドリング
+    // メッセージと必要なオブジェクトをスロー
+
     throw new Error(
-      `Dify APIキーが設定されていません。環境変数を確認してください。`
-    ); // APIキーがない場合にエラーをスロー
+      `Dify APIキーが設定されていません。環境変数を確認してください。DIFY_API_KEY: ${apiKey}`
+    );
   }
 
   try {
