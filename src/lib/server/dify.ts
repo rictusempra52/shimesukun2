@@ -1,8 +1,7 @@
 "use server"; // サーバーサイド専用コードと明示
 
-// 既に環境変数を直接参照する実装になっています
 const apiKey = process.env.DIFY_API_KEY || "";
-const apiEndpoint = process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1";
+const apiEndpoint = "https://api.dify.ai/v1";
 
 /**
  * Dify APIを呼び出す関数（サーバーサイド専用）
