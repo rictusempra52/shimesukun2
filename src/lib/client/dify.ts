@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Dify API を使用して質問を処理
+ * Dify API を使用して質問を処理（クライアント側から安全に呼び出せる）
  * @param {string} query - 質問内容
  * @returns {Promise<any>} - APIの応答
  */

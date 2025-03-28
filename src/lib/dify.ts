@@ -1,6 +1,4 @@
-// dify.ts
-// Dify APIを利用してAI回答を生成するための関数を提供します。
-// この関数は、Difyサービスを使用して質問に回答を生成します。
+"use server"; // サーバーサイド専用コードと明示
 
 // 環境変数から直接APIキーとエンドポイントを取得
 const apiKey = process.env.DIFY_API_KEY || "";
@@ -13,84 +11,64 @@ const apiEndpoint = process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1";
  * @param chatHistory 過去のチャット履歴（オプション）
  * @returns AIからの回答
  */
-export async function askDifyBuildingManagementQuestion( // マンション管理に関する質問をDify APIに送信する関数をエクスポート
-  question: string, // ユーザーからの質問テキスト
-  documentContext?: string, // オプション：質問に関連する文書コンテキスト
-  chatHistory?: Array<{ role: "user" | "assistant"; content: string }> // オプション：過去のチャット履歴
+export async function askDifyBuildingManagementQuestion(
+  question: string,
+  documentContext?: string,
+  chatHistory?: Array<{ role: "user" | "assistant"; content: string }>
 ) {
   if (!apiKey) {
-    // APIキーが設定されていない場合のエラーハンドリング
-    // メッセージと必要なオブジェクトをスロー
-
     throw new Error(
-      `Dify APIキーが設定されていません。環境変数を確認してください。DIFY_API_KEY: ${apiKey}`
+      `Dify APIキーが設定されていません。環境変数を確認してください。`
     );
   }
 
   try {
-    // APIリクエスト処理のtry-catchブロック開始
-    // APIリクエストの準備
-    const endpoint = `${apiEndpoint}/chat-messages`; // チャットメッセージ用のエンドポイントURLを構築
+    const endpoint = `${apiEndpoint}/chat-messages`;
 
-    // リクエストボディの構築
-    // DifyのAPIリクエスト構造に合わせて適宜調整
     const requestBody: any = {
-      // APIリクエストの本体を定義
-      query: question, // ユーザーの質問をクエリとして設定
-      response_mode: "blocking", // 同期モードで応答を待つ設定
-      conversation_id: "", // 新しい会話として扱う場合は空文字
-      user: "end-user", // エンドユーザーとして識別
-      inputs: {}, // 追加の入力パラメータを格納するオブジェクト
+      query: question,
+      response_mode: "blocking",
+      conversation_id: "",
+      user: "end-user",
+      inputs: {},
     };
 
-    // 文書コンテキストがある場合は inputs に追加
     if (documentContext) {
-      // 文書コンテキストが提供されている場合の条件分岐
-      requestBody.inputs.context = documentContext; // コンテキスト情報をリクエストに追加
+      requestBody.inputs.context = documentContext;
     }
 
-    // チャット履歴がある場合は追加
     if (chatHistory && chatHistory.length > 0) {
-      // チャット履歴が存在し、空でない場合の条件分岐
-      requestBody.conversation_id = "existing-conversation-id"; // 既存の会話IDを設定（実際には動的に生成する必要がある）
+      requestBody.conversation_id = "existing-conversation-id";
     }
 
-    // APIへのリクエスト送信
     const response = await fetch(endpoint, {
-      // fetch APIを使用してDify APIにリクエストを送信
-      method: "POST", // HTTPメソッドはPOST
+      method: "POST",
       headers: {
-        // HTTPヘッダーの設定
-        "Content-Type": "application/json", // JSONコンテンツタイプを指定
-        Authorization: `Bearer ${apiKey}`, // APIキーをBearerトークンとして認証ヘッダーに追加
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
       },
-      body: JSON.stringify(requestBody), // リクエストボディをJSON文字列に変換
+      body: JSON.stringify(requestBody),
     });
 
-    // レスポンスの処理
     if (!response.ok) {
-      // レスポンスステータスが正常でない場合のエラーハンドリング
-      const errorData = await response.json(); // エラーレスポンスのJSONを解析
-      throw new Error( // エラーメッセージを生成してスロー
+      const errorData = await response.json();
+      throw new Error(
         `Dify API エラー: ${errorData.message || response.statusText}`
       );
     }
 
-    const data = await response.json(); // 正常なレスポンスのJSONを解析
+    const data = await response.json();
 
-    // レスポンスを整形して返す
     return {
-      // 構造化されたレスポンスオブジェクトを返す
-      answer: data.answer || data.text, // 回答テキストを取得（APIの応答形式に応じて調整）
-      sources: data.sources || [], // 情報ソースをレスポンスから抽出、ない場合は空配列
-      relatedInfo: extractRelatedInfo(data), // 関連情報を抽出するヘルパー関数を呼び出し
-      examples: extractExamples(data), // 他マンションの事例を抽出するヘルパー関数を呼び出し
-      timestamp: new Date().toISOString(), // レスポンスのタイムスタンプを現在時刻で設定
+      answer: data.answer || data.text,
+      sources: data.sources || [],
+      relatedInfo: extractRelatedInfo(data),
+      examples: extractExamples(data),
+      timestamp: new Date().toISOString(),
     };
   } catch (error) {
-    // エラーをキャッチ
-    console.error("Dify API呼び出しエラー:", error); // エラーをコンソールに出力
-    throw new Error( // ユーザーフレンドリーなエラーメッセージをスロー
+    console.error("Dify API呼び出しエラー:", error);
+    throw new Error(
       "AI回答の生成に失敗しました。しばらく経ってから再度お試しください。"
     );
   }
@@ -100,26 +78,20 @@ export async function askDifyBuildingManagementQuestion( // マンション管�
  * Difyのレスポンスから関連情報を抽出
  */
 function extractRelatedInfo(response: any): string {
-  // APIレスポンスから関連情報を抽出するヘルパー関数
-  // Difyのレスポンス構造に合わせて適宜調整
   if (response.additional_reply && response.additional_reply.related_info) {
-    // 関連情報が存在するかチェック
-    return response.additional_reply.related_info; // 関連情報を返す
+    return response.additional_reply.related_info;
   }
-  return "関連情報はありません。"; // 関連情報がない場合のデフォルトメッセージ
+  return "関連情報はありません。";
 }
 
 /**
  * Difyのレスポンスから他マンションの事例を抽出
  */
 function extractExamples(response: any): string {
-  // APIレスポンスから事例を抽出するヘルパー関数
-  // Difyのレスポンス構造に合わせて適宜調整
   if (response.additional_reply && response.additional_reply.examples) {
-    // 事例情報が存在するかチェック
-    return response.additional_reply.examples; // 事例情報を返す
+    return response.additional_reply.examples;
   }
-  return "類似事例はありません。"; // 事例がない場合のデフォルトメッセージ
+  return "類似事例はありません。";
 }
 
 /**
@@ -128,6 +100,10 @@ function extractExamples(response: any): string {
  * @returns {Promise<any>} - APIのレスポンス
  */
 export async function fetchDifyResponse(query: string): Promise<any> {
+  if (!apiKey) {
+    throw new Error("Dify APIキーが設定されていません");
+  }
+
   const response = await fetch(`${apiEndpoint}/query`, {
     method: "POST",
     headers: {
@@ -138,7 +114,7 @@ export async function fetchDifyResponse(query: string): Promise<any> {
   });
 
   if (!response.ok) {
-    throw new Error("Dify API request failed");
+    throw new Error("Dify APIリクエストに失敗しました");
   }
 
   return response.json();

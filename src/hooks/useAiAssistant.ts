@@ -1,42 +1,28 @@
+"use client";
+
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { askAI } from "@/lib/client/dify"; // クライアント用の関数をインポート
 
-export type ChatMessage = {
+// ChatMessageの型定義
+export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
-};
+}
 
+/**
+ * AIアシスタント機能を提供するカスタムフック
+ */
 export function useAiAssistant(documentId?: string) {
-  // チャット履歴の状態管理
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
-  // API呼び出しのミューテーション作成
+  // API呼び出しのミューテーション
   const mutation = useMutation({
-    mutationFn: async (question: string) => {
-      const response = await fetch("/api/ai", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          question,
-          documentId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.error || "AIアシスタントとの通信に失敗しました"
-        );
-      }
-
-      return response.json();
-    },
+    mutationFn: (question: string) => askAI(question),
     onSuccess: (data) => {
-      // 成功時にAIの回答をメッセージリストに追加
+      // 成功時の処理
       const assistantMessage: ChatMessage = {
         id: `assistant-${Date.now()}`,
         role: "assistant",
