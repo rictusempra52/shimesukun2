@@ -1,14 +1,10 @@
 import type { NextConfig } from "next";
-// @ts-check
-const { serverEnv } = require("./src/lib/env/server");
 
+// 環境変数が存在するかチェックしてから使用
 const nextConfig: NextConfig = {
   output: "standalone",
 
-  env: {
-    DIFY_API_KEY: serverEnv.DIFY_API_KEY,
-    DIFY_API_ENDPOINT: serverEnv.DIFY_API_ENDPOINT,
-  },
+  // env設定は不要（サーバーサイドでは直接process.envから参照できる）
 
   experimental: {
     serverActions: {

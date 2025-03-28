@@ -1,32 +1,22 @@
-import * as z from "zod";
+// Zodに依存しない環境変数の実装
 
-const envSchema = z.object({
-  DIFY_API_KEY: z.string().nonempty("DIFY_API_KEY is required"),
-  DIFY_API_ENDPOINT: z.string().nonempty("DIFY_API_ENDPOINT is required"),
-  GEMINI_API_KEY: z.string().nonempty("GEMINI_API_KEY is required"),
-});
+export const serverEnv = {
+  // 環境変数にデフォルト値を設定
+  DIFY_API_KEY: process.env.DIFY_API_KEY || "",
+  DIFY_API_ENDPOINT: process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1",
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
 
-export const serverEnv = (() => {
-  const isProd = process.env.NODE_ENV === "production";
+  // 必要に応じて他の環境変数も追加
+};
 
-  try {
-    return envSchema.parse(process.env);
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      console.error("Invalid server environment variables:", error.errors);
+// 簡易バリデーション
+const missingVars = Object.entries(serverEnv)
+  .filter(([_, value]) => !value)
+  .map(([key]) => key);
 
-      if (!isProd) {
-        throw new Error("Server environment variables validation failed");
-      }
-
-      console.warn("Using fallback values for missing environment variables");
-      return {
-        DIFY_API_KEY: process.env.DIFY_API_KEY || "",
-        DIFY_API_ENDPOINT:
-          process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1",
-        GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
-      };
-    }
-    throw error;
-  }
-})();
+if (missingVars.length > 0) {
+  console.warn(
+    `⚠️ 以下の環境変数が設定されていません: ${missingVars.join(", ")}`
+  );
+  // 本番環境では警告のみ表示し、実行は続ける
+}
