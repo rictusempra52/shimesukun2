@@ -58,21 +58,21 @@ export default function DashboardPage() {
     setIsLoading(true);
     setAiResponse(null); // 既存の回答をクリア
 
+    // Dify APIを呼び出して回答を取得
+    const response = await askDifyBuildingManagementQuestion(question);
     try {
-      // Dify APIを呼び出して回答を取得
-      const response = await askDifyBuildingManagementQuestion(question);
 
       // 回答をステートに設定
       setAiResponse({
+        // 回答内容、根拠となる書類、関連情報、他マンション事例をステートに設定
         answer: response.answer,
-        sources: Array.isArray(response.sources)
-          ? response.sources.join(', ')
-          : response.sources.toString(),
+        // sourcesは配列なので文字列に変換してステートに設定
+        sources: response.metadata.retriever_resources.join(', '),
         relatedInfo: response.relatedInfo,
         examples: response.examples
       });
     } catch (error) {
-      console.error("AIリクエストエラー:", error);
+      console.error("AIリクエストエラー:", error, response);
       setError((error as Error).message);
     } finally {
       // 読み込み状態を解除
