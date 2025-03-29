@@ -79,8 +79,8 @@ export default function DashboardPage() {
       // デバッグ用：レスポンス全体をコンソールに出力
       console.log("APIからの返答:", response);
 
-      // レスポンスがdata配下にある場合とそうでない場合の両方に対応
-      const aiResponseData = response.data ? response.data : response;
+      // 新しいレスポンス構造に合わせて処理
+      const aiResponseData = response;
 
       // 回答をステートに設定
       setAiResponse(aiResponseData);
