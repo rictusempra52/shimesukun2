@@ -4,14 +4,13 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button"; // ボタンコンポーネント
 import { Input } from "@/components/ui/input"; // 入力フィールドコンポーネント
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card"; // カードコンポーネント群
+// カードコンポーネントのインポート部分を修正
+import { Card } from "@/components/ui/card";
+import { CardContent } from "@/components/ui/card";
+import { CardDescription } from "@/components/ui/card";
+import { CardFooter } from "@/components/ui/card";
+import { CardHeader } from "@/components/ui/card";
+import { CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area"; // スクロール可能なエリア
 import { Badge } from "@/components/ui/badge"; // バッジコンポーネント
 import { AlertCircle, Send, Sparkles, Trash } from "lucide-react"; // アイコン
