@@ -16,9 +16,9 @@ interface AiAssistantProps {
 }
 
 export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
-    const [question, setQuestion] = useState("");
-    const { messages, sendQuestion, clearChat, isLoading, error } = useAiAssistant(documentId);
-    const scrollAreaRef = useRef<HTMLDivElement>(null);
+    const [question, setQuestion] = useState(""); // 質問入力の状態管理
+    const { messages, sendQuestion, clearChat, isLoading, error } = useAiAssistant(documentId); // フックから状態と関数を取得
+    const scrollAreaRef = useRef<HTMLDivElement>(null); // スクロールエリアの参照を作成
 
     // 新しいメッセージが追加されたら自動スクロール
     useEffect(() => {
@@ -31,8 +31,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (question.trim() && !isLoading) {
-            sendQuestion(question);
-            setQuestion("");
+            sendQuestion(question); // 質問を送信
+            setQuestion(""); // 入力フィールドをクリア
         }
     };
 
@@ -71,8 +71,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                 >
                                     <Card
                                         className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
-                                                ? "bg-primary text-primary-foreground"
-                                                : "bg-muted"
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted"
                                             }`}
                                     >
                                         {message.role === "user" ? (
