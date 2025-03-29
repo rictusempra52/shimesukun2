@@ -2,6 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { askDifyBuildingManagementQuestion } from "@/lib/dify";
 
 /**
+ * APIの最大実行時間を設定
+ * デフォルトは30秒
+ */
+export const config = {
+  maxDuration: 30,
+};
+/**
  * AIの質問応答APIエンドポイント
  * クライアントからの質問をサーバーサイドのDify関数に転送
  */
