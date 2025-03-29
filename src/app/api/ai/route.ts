@@ -3,10 +3,10 @@ import { askDifyBuildingManagementQuestion } from "@/lib/dify";
 
 /**
  * APIの最大実行時間を設定
- * デフォルトは30秒
+ * デフォルトは60秒
  */
 export const config = {
-  maxDuration: 30,
+  maxDuration: 60,
 };
 /**
  * AIの質問応答APIエンドポイント
