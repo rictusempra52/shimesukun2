@@ -53,6 +53,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
             </CardHeader>
 
             <CardContent className="flex-grow overflow-hidden p-0">
+                {/*  */}
                 <ScrollArea className="h-[450px] px-4" ref={scrollAreaRef as any}>
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground">
@@ -70,7 +71,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                     className={`flex ${message.role === "user" ? "justify-end" : "justify-start"
                                         }`}
                                 >
-                                    <div
+                                    <Card
                                         className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-muted"
@@ -145,6 +146,29 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                                             <div className="mt-2">
                                                                 <h5 className="text-xs font-medium">区分所有者への説明方法</h5>
                                                                 <p className="text-sm">{message.structuredContent.管理実務上のポイント.区分所有者への説明方法}</p>
+                                                        )}
+                                                        {message.structuredContent.注意点とリスク.法的リスクや責任の所在 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">法的リスクや責任の所在</h5>
+                                                                <p className="text-sm">{message.structuredContent.注意点とリスク.法的リスクや責任の所在}</p>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {message.structuredContent.管理実務上のポイント && (
+                                                    <div className="mt-3">
+                                                        <h4 className="font-medium text-sm border-t pt-2">管理実務上のポイント</h4>
+                                                        {message.structuredContent.管理実務上のポイント.書類作成・保管に関するアドバイス && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">書類作成・保管に関するアドバイス</h5>
+                                                                <p className="text-sm">{message.structuredContent.管理実務上のポイント.書類作成・保管に関するアドバイス}</p>
+                                                            </div>
+                                                        )}
+                                                        {message.structuredContent.管理実務上のポイント.区分所有者への説明方法 && (
+                                                            <div className="mt-2">
+                                                                <h5 className="text-xs font-medium">区分所有者への説明方法</h5>
+                                                                <p className="text-sm">{message.structuredContent.管理実務上のポイント.区分所有者への説明方法}</p>
                                                             </div>
                                                         )}
                                                         {message.structuredContent.管理実務上のポイント.意思決定プロセスの進め方 && (
@@ -166,6 +190,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                         ) : (
                                             <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
+                                    </Card>
+=======
                                     </div>
                                 </div>
                             ))}
