@@ -30,7 +30,17 @@ export interface ChatMessage {
   };
 }
 
-// AIアシスタントの状態と機能を管理するカスタムフック
+/** AIアシスタントの状態と機能を管理するカスタムフック
+ * @param documentId - 関連書類のID（オプション）
+ * @returns {
+ *   messages: ChatMessage[]; // チャットメッセージの配列
+ *   sendQuestion: (question: string) => Promise<void>; // 質問を送信する関数
+ *   clearChat: () => void; // チャットをクリアする関数
+ *   isLoading: boolean; // ローディング状態
+ *   error: Error | null; // エラー情報
+ * }
+ */
+
 export function useAiAssistant(documentId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
