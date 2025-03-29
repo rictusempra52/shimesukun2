@@ -141,8 +141,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                                                 <h5 className="text-xs font-medium">書類作成・保管に関するアドバイス</h5>
                                                                 <p className="text-sm">{message.structuredContent.管理実務上のポイント.書類作成・保管に関するアドバイス}</p>
                                                             </div>
-                                        )}
-                                        {message.structuredContent.管理実務上のポイント.区分所有者への説明方法 && (
+                                                        )}
+                                                        {message.structuredContent.管理実務上のポイント.区分所有者への説明方法 && (
                                                             <div className="mt-2">
                                                                 <h5 className="text-xs font-medium">区分所有者への説明方法</h5>
                                                                 <p className="text-sm">{message.structuredContent.管理実務上のポイント.区分所有者への説明方法}</p>
@@ -191,6 +191,8 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                             <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
                                     </Card>
+=======
+                                    </div>
                                 </div>
                             ))}
                             {isLoading && (
