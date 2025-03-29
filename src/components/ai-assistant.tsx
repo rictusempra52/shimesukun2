@@ -85,7 +85,11 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                 {error && (
                     <Alert variant="destructive" className="mt-4">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{(error as Error).message}</AlertDescription>
+                        <AlertDescription>
+                            {typeof error === 'string'
+                                ? error
+                                : (error as Error).message || 'AIリクエスト中にエラーが発生しました'}
+                        </AlertDescription>
                     </Alert>
                 )}
             </div>
