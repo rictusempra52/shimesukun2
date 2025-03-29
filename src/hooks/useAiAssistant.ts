@@ -1,83 +1,97 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
-import { askAI } from "@/lib/client/dify"; // クライアント用の関数をインポート
+import { v4 as uuidv4 } from "uuid"; // UUIDを生成するために必要
 
-// ChatMessageの型定義
+// チャットメッセージの型定義
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
-  content: string; 
-  timestamp: string;
+  content: string;
   structuredContent?: {
-    回答要点: string;
-    法的・実務的根拠: string;
-    実行プラン: {
-      すぐに実行すべきこと: string;
-      中期的に検討すべきこと: string;
-      長期的に準備すべきこと: string;
+    回答要点?: string;
+    法的・実務的根拠?: string;
+    実行プラン?: {
+      すぐに実行すべきこと?: string;
+      中期的に検討すべきこと?: string;
+      長期的に準備すべきこと?: string;
     };
-    注意点とリスク: {
-      想定されるトラブルや注意点: string;
-      法的リスクや責任の所在: string;
+    注意点とリスク?: {
+      想定されるトラブルや注意点?: string;
+      法的リスクや責任の所在?: string;
     };
-    管理実務上のポイント: {
-      書類作成・保管に関するアドバイス: string;
-      区分所有者への説明方法: string;
-      意思決定プロセスの進め方: string;
+    管理実務上のポイント?: {
+      書類作成・保管に関するアドバイス?: string;
+      区分所有者への説明方法?: string;
+      意思決定プロセスの進め方?: string;
     };
-    参考事例: string;
+    参考事例?: string;
   };
 }
 
-/**
- * AIアシスタント機能を提供するカスタムフック
- */
+// AIアシスタントの状態と機能を管理するカスタムフック
 export function useAiAssistant(documentId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-
-  // API呼び出しのミューテーション
-  const mutation = useMutation({
-    mutationFn: (question: string) => askAI(question),
-    onSuccess: (data) => {
-      // 成功時の処理
-      const assistantMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: "assistant",
-        content: data.回答要点 || "回答が生成できませんでした。",
-        timestamp: new Date().toISOString(),
-        structuredContent: data,
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
-    },
-  });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
 
   // 質問を送信する関数
-  const sendQuestion = (question: string) => {
-    // ユーザーの質問をメッセージリストに追加
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      content: question,
-      timestamp: new Date().toISOString(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
+  const sendQuestion = async (question: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
 
-    // APIに質問を送信
-    mutation.mutate(question);
+      // ユーザーのメッセージをチャットに追加
+      const userMessage: ChatMessage = {
+        id: uuidv4(),
+        role: "user",
+        content: question
+      };
+      
+      setMessages(prev => [...prev, userMessage]);
+
+      // TODO: 実際のAPIリクエストを実装
+      // ここでバックエンドAPIまたはAIサービスに質問を送信し、回答を取得する
+      
+      // デモ用の仮の回答（実際の実装では削除）
+      setTimeout(() => {
+        const aiResponse: ChatMessage = {
+          id: uuidv4(),
+          role: "assistant",
+          content: `「${question}」についてお答えします。`,
+          structuredContent: {
+            回答要点: "これはデモ回答です。実際のAPIが実装されると、ここに本物の回答が表示されます。",
+            法的・実務的根拠: "区分所有法と標準管理規約に基づきます。",
+            実行プラン: {
+              すぐに実行すべきこと: "理事会で議題として取り上げる",
+              中期的に検討すべきこと: "専門家への相談を検討する",
+              長期的に準備すべきこと: "長期修繕計画への組み込み"
+            }
+          }
+        };
+        
+        setMessages(prev => [...prev, aiResponse]);
+        setIsLoading(false);
+      }, 1500);
+      
+    } catch (err) {
+      console.error("AIアシスタントエラー:", err);
+      setError(err instanceof Error ? err : new Error("AIアシスタントとの通信中にエラーが発生しました"));
+      setIsLoading(false);
+    }
   };
 
-  // 会話履歴をクリアする関数
+  // チャットをクリアする関数
   const clearChat = () => {
     setMessages([]);
+    setError(null);
   };
 
   return {
     messages,
     sendQuestion,
     clearChat,
-    isLoading: mutation.isPending,
-    error: mutation.error,
+    isLoading,
+    error
   };
 }
