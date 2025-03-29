@@ -47,16 +47,15 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
     };
 
     return (
-        // カードコンポーネントを使用してUIを構築
-        <Card className="flex flex-col">
+        <Card className="flex flex-col h-[600px]">
             {/* カードヘッダーにタイトルとドキュメントタイトルを表示 */}
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <CardTitle className="flex items-center gap-2">
-                        <Sparkles className="h-5 w-5 text-primary" /> {/* タイトル横のアイコン */}
+                        <Sparkles className="h-5 w-5 text-primary" />
                         AIアシスタント
                     </CardTitle>
-                    {documentTitle && ( // ドキュメントタイトルが存在する場合にバッジを表示
+                    {documentTitle && (
                         <Badge variant="outline" className="ml-auto">
                             書類: {documentTitle}
                         </Badge>
@@ -68,38 +67,36 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
             <CardContent className="flex-grow overflow-hidden p-0">
                 <ScrollArea className="h-[450px] px-4" ref={scrollAreaRef as any}>
                     {messages.length === 0 ? (
-                        // 初回表示時のメッセージ
+                        /* 初回表示時のメッセージ */
                         <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground">
-                            <Sparkles className="h-10 w-10 mb-2" /> {/* 初回表示用アイコン */}
+                            <Sparkles className="h-10 w-10 mb-2" />
                             <h3 className="font-medium mb-1">マンション管理について質問できます</h3>
                             <p className="text-sm">
                                 例: 「修繕積立金の値上げ方法は？」「管理組合の理事会議事録の保管期間は？」
                             </p>
                         </div>
                     ) : (
-                        // メッセージリスト
+                        /* メッセージリスト */
                         <div className="flex flex-col gap-4 py-4">
                             {messages.map((message) => (
                                 <div
-                                    key={message.id} // メッセージの一意なIDをキーに設定
-                                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`} // ユーザーとAIで配置を切り替え
+                                    key={message.id}
+                                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
                                     <Card
                                         className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
-                                            ? "bg-primary text-primary-foreground" // ユーザーのメッセージスタイル
-                                            : "bg-muted" // AIのメッセージスタイル
+                                            ? "bg-primary text-primary-foreground"
+                                            : "bg-muted"
                                             }`}
                                     >
                                         {message.role === "user" ? (
-                                            <div className="whitespace-pre-wrap">{message.content}</div> // ユーザーのメッセージ内容
+                                            <div className="whitespace-pre-wrap">{message.content}</div>
                                         ) : message.structuredContent ? (
-                                            // AIの構造化されたメッセージ内容
                                             <div className="space-y-4">
                                                 <h4 className="font-medium">回答要点</h4>
                                                 <p className="whitespace-pre-wrap text-sm">
                                                     {message.structuredContent.回答要点}
                                                 </p>
-                                                {/* 以下、構造化された内容を条件付きで表示 */}
                                                 {message.structuredContent.法的・実務的根拠 && (
                                                     <div className="mt-3">
                                                         <h4 className="font-medium text-sm border-t pt-2">法的・実務的根拠</h4>
@@ -195,20 +192,20 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                                 )}
                                             </div>
                                         ) : (
-                                            <div className="whitespace-pre-wrap">{message.content}</div> // AIの通常メッセージ内容
+                                            <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
                                     </Card>
                                 </div>
                             ))}
                             {isLoading && (
-                                // ローディング中の表示
+                                /* ローディング中の表示 */
                                 <div className="flex justify-start">
                                     <div className="max-w-[80%] rounded-lg p-3 bg-muted">
                                         <div className="flex items-center gap-2">
                                             <div className="h-2 w-2 rounded-full bg-primary animate-pulse"></div>
                                             <div className="h-2 w-2 rounded-full bg-primary animate-pulse delay-150"></div>
                                             <div className="h-2 w-2 rounded-full bg-primary animate-pulse delay-300"></div>
-                                            <span className="text-sm text-muted-foreground ml-1">考え中...</span>
+                                            <span className="text-sm text-muted-foreground">回答を生成中...</span>
                                         </div>
                                     </div>
                                 </div>
@@ -216,7 +213,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                         </div>
                     )}
                     {error && (
-                        // エラー発生時のアラート表示
+                        /* エラー発生時のアラート表示 */
                         <Alert variant="destructive" className="my-4">
                             <AlertCircle className="h-4 w-4" />
                             <AlertDescription>{(error as Error).message}</AlertDescription>
@@ -232,20 +229,20 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={clearChat} // チャット履歴をクリア
+                        onClick={clearChat}
                         title="会話をクリア"
                     >
-                        <Trash className="h-4 w-4" /> {/* ゴミ箱アイコン */}
+                        <Trash className="h-4 w-4" />
                     </Button>
                     <Input
-                        placeholder="質問を入力してください..." // 入力フィールドのプレースホルダー
-                        value={question} // 入力値をバインド
-                        onChange={(e) => setQuestion(e.target.value)} // 入力値の変更をハンドリング
-                        disabled={isLoading} // ローディング中は入力を無効化
+                        placeholder="質問を入力してください..."
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        disabled={isLoading}
                         className="flex-grow"
                     />
                     <Button type="submit" size="icon" disabled={!question.trim() || isLoading}>
-                        <Send className="h-4 w-4" /> {/* 送信アイコン */}
+                        <Send className="h-4 w-4" />
                     </Button>
                 </form>
             </CardFooter>
