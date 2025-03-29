@@ -37,7 +37,7 @@ export async function askDifyBuildingManagementQuestion(
     // Dify APIのドキュメントに基づいて正しいエンドポイントを使用
     // ストリーミングモードの場合は /chat-messages、ブロッキングモードの場合は /completion-messages が一般的
     const url = `${apiEndpoint}/chat-messages`;
-    alert(`Dify API リクエスト送信先: ${url}`);
+    console.log(`Dify API リクエスト送信先: ${url}`);
 
     const response = await fetch(url, {
       method: "POST",
@@ -49,7 +49,7 @@ export async function askDifyBuildingManagementQuestion(
     });
 
     // デバッグのためのログ追加
-    alert("Dify API レスポンス:", JSON.stringify(response, null, 2));
+    console.log("Dify API レスポンス:", JSON.stringify(response, null, 2));
 
     // レスポンスのContent-Typeをチェック
     const contentType = response.headers.get("content-type");
@@ -91,7 +91,7 @@ export async function askDifyBuildingManagementQuestion(
 
     // 正常なJSONレスポンス
     const jsonResponse = await response.json();
-    alert("Dify APIからのJSON応答:", jsonResponse);
+    console.log("Dify APIからのJSON応答:", jsonResponse);
 
     // 修正: answerフィールドが存在し、文字列の場合はそれをパースする
     if (jsonResponse.answer && typeof jsonResponse.answer === "string") {
@@ -99,7 +99,7 @@ export async function askDifyBuildingManagementQuestion(
         // 文字列からJSONオブジェクトとしてパース
         return JSON.parse(jsonResponse.answer);
       } catch (e) {
-        alert("回答の文字列パースに失敗:", e);
+        console.log("回答の文字列パースに失敗:", e);
         // パース失敗時はテキストとして返す
         return { 回答要点: jsonResponse.answer };
       }
@@ -111,7 +111,7 @@ export async function askDifyBuildingManagementQuestion(
         // 文字列からJSONオブジェクトとしてパース
         return JSON.parse(jsonResponse.answer.message);
       } catch (e) {
-        alert("回答のmessageパースに失敗:", e);
+        console.log("回答のmessageパースに失敗:", e);
         // テキストとして返す
         return { 回答要点: jsonResponse.answer.message };
       }
