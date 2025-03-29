@@ -2,20 +2,22 @@
 
 // 必要なReactフックとコンポーネントをインポート
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button"; // ボタンコンポーネント
-import { Input } from "@/components/ui/input"; // 入力フィールドコンポーネント
-// カードコンポーネントのインポート部分を修正
-import { Card } from "@/components/ui/card";
-import { CardContent } from "@/components/ui/card";
-import { CardDescription } from "@/components/ui/card";
-import { CardFooter } from "@/components/ui/card";
-import { CardHeader } from "@/components/ui/card";
-import { CardTitle } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area"; // スクロール可能なエリア
-import { Badge } from "@/components/ui/badge"; // バッジコンポーネント
-import { AlertCircle, Send, Sparkles, Trash } from "lucide-react"; // アイコン
-import { Alert, AlertDescription } from "@/components/ui/alert"; // アラートコンポーネント
-import { useAiAssistant, ChatMessage } from "@/hooks/useAiAssistant"; // AIアシスタント用のカスタムフック
+import { Button } from "./ui/button"; // 相対パスに変更
+import { Input } from "./ui/input"; // 相対パスに変更
+// カードコンポーネントも相対パスに変更
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle
+} from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area"; // 相対パスに変更
+import { Badge } from "./ui/badge"; // 相対パスに変更
+import { AlertCircle, Send, Sparkles, Trash } from "lucide-react"; // サードパーティライブラリなので変更なし
+import { Alert, AlertDescription } from "./ui/alert"; // 相対パスに変更
+import { useAiAssistant, ChatMessage } from "../hooks/useAiAssistant"; // 相対パスに変更
 
 // コンポーネントのプロパティ型定義
 interface AiAssistantProps {
