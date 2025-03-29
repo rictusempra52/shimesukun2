@@ -4,18 +4,10 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "./ui/button"; // 相対パスに変更
 import { Input } from "./ui/input"; // 相対パスに変更
-// カードコンポーネントも相対パスに変更
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle
-} from "./ui/card";
+// カードコンポーネントのインポートを削除し、必要なスタイルを適用したdivを使う
 import { ScrollArea } from "./ui/scroll-area"; // 相対パスに変更
 import { Badge } from "./ui/badge"; // 相対パスに変更
-import { AlertCircle, Send, Sparkles, Trash } from "lucide-react"; // サードパーティライブラリなので変更なし
+import { AlertCircle, Send, Sparkles, Trash } from "lucide-react";
 import { Alert, AlertDescription } from "./ui/alert"; // 相対パスに変更
 import { useAiAssistant, ChatMessage } from "../hooks/useAiAssistant"; // 相対パスに変更
 
@@ -48,24 +40,24 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
     };
 
     return (
-        <Card className="flex flex-col h-[600px]">
+        <div className="flex flex-col h-[600px] rounded-lg border bg-card text-card-foreground shadow-sm">
             {/* カードヘッダーにタイトルとドキュメントタイトルを表示 */}
-            <CardHeader>
+            <div className="flex flex-col space-y-1.5 p-6">
                 <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center gap-2">
+                    <h3 className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
                         <Sparkles className="h-5 w-5 text-primary" />
                         AIアシスタント
-                    </CardTitle>
+                    </h3>
                     {documentTitle && (
                         <Badge variant="outline" className="ml-auto">
                             書類: {documentTitle}
                         </Badge>
                     )}
                 </div>
-            </CardHeader>
+            </div>
 
             {/* カードのメインコンテンツ */}
-            <CardContent className="flex-grow overflow-hidden p-0">
+            <div className="flex-grow overflow-hidden p-0 p-6 pt-0">
                 <ScrollArea className="h-[450px] px-4" ref={scrollAreaRef as any}>
                     {messages.length === 0 ? (
                         /* 初回表示時のメッセージ */
@@ -84,7 +76,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                     key={message.id}
                                     className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
                                 >
-                                    <Card
+                                    <div
                                         className={`max-w-[90%] rounded-lg p-3 ${message.role === "user"
                                             ? "bg-primary text-primary-foreground"
                                             : "bg-muted"
@@ -195,7 +187,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                         ) : (
                                             <div className="whitespace-pre-wrap">{message.content}</div>
                                         )}
-                                    </Card>
+                                    </div>
                                 </div>
                             ))}
                             {isLoading && (
@@ -221,10 +213,10 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                         </Alert>
                     )}
                 </ScrollArea>
-            </CardContent>
+            </div>
 
             {/* カードのフッター部分 */}
-            <CardFooter className="border-t p-2">
+            <div className="flex items-center p-6 pt-0 border-t p-2">
                 <form onSubmit={handleSubmit} className="flex w-full gap-2">
                     <Button
                         type="button"
@@ -246,7 +238,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                         <Send className="h-4 w-4" />
                     </Button>
                 </form>
-            </CardFooter>
-        </Card>
+            </div>
+        </div>
     );
 }
