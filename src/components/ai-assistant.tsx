@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertCircle, Send, Sparkles, Trash } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAiAssistant } from "@/hooks/useAiAssistant";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // JSONかどうかを判断するヘルパー関数
 function isJsonString(str: string): boolean {
@@ -164,6 +165,54 @@ interface AiAssistantProps {
     documentTitle?: string;
 }
 
+// JSONレスポンスを整形して表示するコンポーネント
+function FormattedJsonResponse({ content }: { content: string }) {
+    let parsedContent;
+
+    try {
+        // 文字列としてのJSONをパースしてみる
+        parsedContent = JSON.parse(content);
+
+        // JSONオブジェクトが確認できた場合は構造化された表示を提供
+        if (typeof parsedContent === 'object' && parsedContent !== null) {
+            return (
+                <div className="space-y-4">
+                    {Object.entries(parsedContent).map(([key, value]) => {
+                        if (typeof value === 'object' && value !== null) {
+                            return (
+                                <Card key={key} className="overflow-hidden">
+                                    <CardHeader className="py-2 px-4 bg-muted">
+                                        <CardTitle className="text-sm font-medium">{key}</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="p-3 text-sm">
+                                        {Object.entries(value as Record<string, any>).map(([subKey, subValue]) => (
+                                            <div key={subKey} className="mb-2">
+                                                <div className="font-medium">{subKey}</div>
+                                                <div className="text-muted-foreground">{subValue as string}</div>
+                                            </div>
+                                        ))}
+                                    </CardContent>
+                                </Card>
+                            );
+                        }
+                        return (
+                            <div key={key} className="mb-2">
+                                <div className="font-medium">{key}</div>
+                                <div>{value as string}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+            );
+        }
+    } catch (e) {
+        // JSONとしてパースできない場合は、そのまま表示
+    }
+
+    // 通常のテキストとして表示
+    return <div className="whitespace-pre-wrap">{content}</div>;
+}
+
 // 基本的な機能を持ったAIアシスタントコンポーネント
 export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
     const [question, setQuestion] = useState("");
@@ -213,6 +262,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                                 <div className={`max-w-[90%] rounded-lg p-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
                                     {message.role === "assistant" && isJsonString(message.content) ? (
                                         <JsonDisplay content={message.content} />
+
                                     ) : (
                                         <div className="whitespace-pre-wrap">{message.content}</div>
                                     )}
