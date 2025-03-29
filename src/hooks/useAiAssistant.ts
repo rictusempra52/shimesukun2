@@ -98,6 +98,7 @@ export function useAiAssistant(documentId?: string) {
       };
 
       setMessages((prev) => [...prev, aiResponse]);
+
     } catch (err) {
       console.error("AIアシスタントエラー:", err);
       setError(
