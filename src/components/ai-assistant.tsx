@@ -29,7 +29,6 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
         }
     };
 
-    // 基本的なUIを再構築
     return (
         <div className="flex flex-col h-[600px] rounded-lg border bg-card text-card-foreground shadow-sm">
             {/* ヘッダー */}
