@@ -10,7 +10,7 @@ export interface ChatMessage {
   content: string;
   structuredContent?: {
     回答要点?: string;
-    法的・実務的根拠?: string;
+    法的実務的根拠?: string;
     実行プラン?: {
       すぐに実行すべきこと?: string;
       中期的に検討すべきこと?: string;
@@ -21,11 +21,12 @@ export interface ChatMessage {
       法的リスクや責任の所在?: string;
     };
     管理実務上のポイント?: {
-      書類作成・保管に関するアドバイス?: string;
+      書類作成保管に関するアドバイス?: string;
       区分所有者への説明方法?: string;
       意思決定プロセスの進め方?: string;
     };
     参考事例?: string;
+    links?: { title: string; url: string }[];
   };
 }
 
@@ -38,6 +39,10 @@ export function useAiAssistant(documentId?: string) {
   // 質問を送信する関数
   const sendQuestion = async (question: string) => {
     try {
+      if (!question.trim()) {
+        throw new Error("質問が入力されていません");
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -45,38 +50,52 @@ export function useAiAssistant(documentId?: string) {
       const userMessage: ChatMessage = {
         id: uuidv4(),
         role: "user",
-        content: question
+        content: question,
       };
-      
-      setMessages(prev => [...prev, userMessage]);
 
-      // TODO: 実際のAPIリクエストを実装
-      // ここでバックエンドAPIまたはAIサービスに質問を送信し、回答を取得する
-      
-      // デモ用の仮の回答（実際の実装では削除）
-      setTimeout(() => {
-        const aiResponse: ChatMessage = {
-          id: uuidv4(),
-          role: "assistant",
-          content: `「${question}」についてお答えします。`,
-          structuredContent: {
-            回答要点: "これはデモ回答です。実際のAPIが実装されると、ここに本物の回答が表示されます。",
-            法的・実務的根拠: "区分所有法と標準管理規約に基づきます。",
-            実行プラン: {
-              すぐに実行すべきこと: "理事会で議題として取り上げる",
-              中期的に検討すべきこと: "専門家への相談を検討する",
-              長期的に準備すべきこと: "長期修繕計画への組み込み"
-            }
-          }
-        };
-        
-        setMessages(prev => [...prev, aiResponse]);
-        setIsLoading(false);
-      }, 1500);
-      
+      setMessages((prev) => [...prev, userMessage]);
+
+      // /api/ai エンドポイントへリクエスト
+      let contextInfo = "";
+      if (documentId) {
+        contextInfo = `関連書類ID: ${documentId}. `;
+      }
+
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `${contextInfo}${question}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `APIリクエストに失敗しました (${response.status})`
+        );
+      }
+
+      const data = await response.json();
+
+      // AIの応答をチャットに追加
+      const aiResponse: ChatMessage = {
+        id: uuidv4(),
+        role: "assistant",
+        content: data.answer || data.text || "回答を取得できませんでした",
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
     } catch (err) {
       console.error("AIアシスタントエラー:", err);
-      setError(err instanceof Error ? err : new Error("AIアシスタントとの通信中にエラーが発生しました"));
+      setError(
+        err instanceof Error
+          ? err
+          : new Error("AIアシスタントとの通信中にエラーが発生しました")
+      );
+    } finally {
       setIsLoading(false);
     }
   };
@@ -92,6 +111,6 @@ export function useAiAssistant(documentId?: string) {
     sendQuestion,
     clearChat,
     isLoading,
-    error
+    error,
   };
 }
