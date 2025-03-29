@@ -48,7 +48,7 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
 
     return (
         // カードコンポーネントを使用してUIを構築
-        <Card className="flex flex-col h-[600px]">
+        <Card className="flex flex-col">
             {/* カードヘッダーにタイトルとドキュメントタイトルを表示 */}
             <CardHeader>
                 <div className="flex items-center justify-between">
