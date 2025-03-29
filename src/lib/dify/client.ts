@@ -30,7 +30,6 @@ export async function difyRequest(path: string, method: string, body?: any) {
   /**
    * リクエストヘッダー
    * @type {HeadersInit}
-   * @defaults {Object}
    * @property {string} Authorization - Bearer トークン
    * @property {string} Content-Type - リクエストボディの形式
    */
@@ -40,21 +39,36 @@ export async function difyRequest(path: string, method: string, body?: any) {
   };
 
   try {
+    // Fetch API を使用してリクエストを送信
     const response = await fetch(url, {
+      // method: HTTPメソッド（GET, POST, PUT, DELETEなど）
       method,
+      // headers: リクエストヘッダー（AuthorizationとContent-Type）
       headers,
+      // body: リクエストボディ（JSON形式）
       body: body ? JSON.stringify(body) : undefined,
       cache: "no-store",
     });
 
     // HTML形式のエラーレスポンスをチェック
+
+    // content-type ヘッダーを取得
     const contentType = response.headers.get("content-type");
+    // レスポンスヘッダーからContent-Typeを取得
     if (contentType && contentType.includes("text/html")) {
+      // HTML形式のレスポンスをテキストとして取得
+      // awaitがあると、非同期処理が完了するまで待機する
+      // 非同期処理とは、時間がかかる処理のこと
+      // 例えば、APIからのレスポンスを待つことなど
       const htmlContent = await response.text();
+      // HTML形式のエラーレスポンスの場合、エラーメッセージを抽出
       const errorMessage = htmlContent.includes("<title>")
-        ? htmlContent.match(/<title>(.*?)<\/title>/)?.[1] ||
+        ? // 正規表現を使用して、<title>タグの内容を抽出
+          // もし<title>タグが存在する場合、その内容を取得
+          htmlContent.match(/<title>(.*?)<\/title>/)?.[1] ||
           "HTMLエラーページが返されました"
-        : "HTMLエラーページが返されました";
+        : // もし<title>タグが存在しない場合、そのままの内容を取得
+          "HTMLエラーページが返されました";
       throw new Error(
         `Dify API は有効なJSONではなくHTMLを返しました: ${errorMessage}`
       );
