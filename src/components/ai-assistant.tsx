@@ -78,7 +78,6 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
         }
     };
 
-    // 基本的なUIを再構築
     return (
         <div className="flex flex-col h-[600px] rounded-lg border bg-card text-card-foreground shadow-sm">
             {/* ヘッダー */}
@@ -138,7 +137,11 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                 {error && (
                     <Alert variant="destructive" className="mt-4">
                         <AlertCircle className="h-4 w-4" />
-                        <AlertDescription>{(error as Error).message}</AlertDescription>
+                        <AlertDescription>
+                            {typeof error === 'string'
+                                ? error
+                                : (error as Error).message || 'AIリクエスト中にエラーが発生しました'}
+                        </AlertDescription>
                     </Alert>
                 )}
             </div>
