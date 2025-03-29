@@ -10,6 +10,155 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAiAssistant } from "@/hooks/useAiAssistant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+// JSONかどうかを判断するヘルパー関数
+function isJsonString(str: string): boolean {
+    try {
+        const json = JSON.parse(str);
+        return typeof json === 'object' && json !== null;
+    } catch (e) {
+        return false;
+    }
+}
+
+// JSON表示用コンポーネント
+interface JsonDisplayProps {
+    content: string;
+}
+
+function JsonDisplay({ content }: JsonDisplayProps) {
+    try {
+        const json = JSON.parse(content);
+
+        return (
+            <div className="text-sm space-y-4">
+                {json["回答要点"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">回答要点</h4>
+                        <p className="whitespace-pre-wrap">{json["回答要点"]}</p>
+                    </div>
+                )}
+
+                {json["法的実務的根拠"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">法的実務的根拠</h4>
+                        <p className="whitespace-pre-wrap">{json["法的実務的根拠"]}</p>
+                    </div>
+                )}
+
+                {json["実行プラン"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">実行プラン</h4>
+                        <div className="pl-4 space-y-2">
+                            {json["実行プラン"]["すぐに実行すべきこと"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ すぐに実行すべきこと</h5>
+                                    <p className="whitespace-pre-wrap">{json["実行プラン"]["すぐに実行すべきこと"]}</p>
+                                </div>
+                            )}
+                            {json["実行プラン"]["中期的に検討すべきこと"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 中期的に検討すべきこと</h5>
+                                    <p className="whitespace-pre-wrap">{json["実行プラン"]["中期的に検討すべきこと"]}</p>
+                                </div>
+                            )}
+                            {json["実行プラン"]["長期的に準備すべきこと"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 長期的に準備すべきこと</h5>
+                                    <p className="whitespace-pre-wrap">{json["実行プラン"]["長期的に準備すべきこと"]}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {json["注意点とリスク"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">注意点とリスク</h4>
+                        <div className="pl-4 space-y-2">
+                            {json["注意点とリスク"]["想定されるトラブルや注意点"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 想定されるトラブルや注意点</h5>
+                                    <p className="whitespace-pre-wrap">{json["注意点とリスク"]["想定されるトラブルや注意点"]}</p>
+                                </div>
+                            )}
+                            {json["注意点とリスク"]["法的リスクや責任の所在"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 法的リスクや責任の所在</h5>
+                                    <p className="whitespace-pre-wrap">{json["注意点とリスク"]["法的リスクや責任の所在"]}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {json["管理実務上のポイント"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">管理実務上のポイント</h4>
+                        <div className="pl-4 space-y-2">
+                            {json["管理実務上のポイント"]["書類作成・保管に関するアドバイス"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 書類作成・保管に関するアドバイス</h5>
+                                    <p className="whitespace-pre-wrap">{json["管理実務上のポイント"]["書類作成・保管に関するアドバイス"]}</p>
+                                </div>
+                            )}
+                            {json["管理実務上のポイント"]["区分所有者への説明方法"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 区分所有者への説明方法</h5>
+                                    <p className="whitespace-pre-wrap">{json["管理実務上のポイント"]["区分所有者への説明方法"]}</p>
+                                </div>
+                            )}
+                            {json["管理実務上のポイント"]["意思決定プロセスの進め方"] && (
+                                <div>
+                                    <h5 className="font-medium text-sm">■ 意思決定プロセスの進め方</h5>
+                                    <p className="whitespace-pre-wrap">{json["管理実務上のポイント"]["意思決定プロセスの進め方"]}</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {json["参考事例"] && (
+                    <div>
+                        <h4 className="font-bold mb-1 text-base">参考事例</h4>
+                        <p className="whitespace-pre-wrap">{json["参考事例"]}</p>
+                    </div>
+                )}
+
+                {/* 旧形式のJSONにも対応するためのフォールバック */}
+                {json.title && !json["回答要点"] && (
+                    <h4 className="font-medium mb-2">{json.title}</h4>
+                )}
+                {json.content && !json["回答要点"] && (
+                    <div className="whitespace-pre-wrap mb-2">{json.content}</div>
+                )}
+                {json.items && Array.isArray(json.items) && (
+                    <ul className="list-disc pl-5 space-y-1">
+                        {json.items.map((item: string, index: number) => (
+                            <li key={index}>{item}</li>
+                        ))}
+                    </ul>
+                )}
+                {json.links && Array.isArray(json.links) && (
+                    <div className="mt-3 pt-2 border-t">
+                        <p className="font-medium mb-1">参考リンク:</p>
+                        <ul className="list-disc pl-5">
+                            {json.links.map((link: { title: string, url: string }, index: number) => (
+                                <li key={index}>
+                                    <a href={link.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                        {link.title}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </div>
+        );
+    } catch (e) {
+        return <div className="whitespace-pre-wrap">{content}</div>;
+    }
+}
+
 // プロパティ型定義
 interface AiAssistantProps {
     documentId?: string;
@@ -111,8 +260,9 @@ export function AiAssistant({ documentId, documentTitle }: AiAssistantProps) {
                         {messages.map((message) => (
                             <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                                 <div className={`max-w-[90%] rounded-lg p-3 ${message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
-                                    {message.role === "assistant" ? (
-                                        <FormattedJsonResponse content={message.content} />
+                                    {message.role === "assistant" && isJsonString(message.content) ? (
+                                        <JsonDisplay content={message.content} />
+
                                     ) : (
                                         <div className="whitespace-pre-wrap">{message.content}</div>
                                     )}

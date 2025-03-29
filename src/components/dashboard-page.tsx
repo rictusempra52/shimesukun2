@@ -72,13 +72,11 @@ export default function DashboardPage() {
     setError(null);
     setAiResponse(null); // 既存の回答をクリア
 
+    // Dify APIを呼び出して回答を取得
+    const response = await askDifyBuildingManagementQuestion(question);
+    // デバッグ用：レスポンス全体をコンソールに出力
+    console.log("APIからの返答:", response);
     try {
-      // Dify APIを呼び出して回答を取得
-      const response = await askDifyBuildingManagementQuestion(question);
-
-      // デバッグ用：レスポンス全体をコンソールに出力
-      console.log("APIからの返答:", response);
-
       // レスポンスがdata配下にある場合とそうでない場合の両方に対応
       const aiResponseData = response.data ? response.data : response;
 
@@ -88,6 +86,8 @@ export default function DashboardPage() {
 
     } catch (error) {
       console.error("AIリクエストエラー:", error);
+      // API空の出力をlogに出力
+      console.log();
       setError((error as Error).message);
     } finally {
       // 読み込み状態を解除

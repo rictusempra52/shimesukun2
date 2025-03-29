@@ -62,3 +62,66 @@ Issues? Report them at https://github.com/firebase/firebase-tools/issues and att
 [info] i  ui: Stopping Emulator UI {"metadata":{"emulator":{"name":"ui"},"message":"Stopping Emulator UI"}}
 [info] i  database: Stopping Database Emulator {"metadata":{"emulator":{"name":"database"},"message":"Stopping Database Emulator"}}
 [warn] !  Database Emulator has exited upon receiving signal: SIGINT 
+[debug] [2025-03-29T09:47:23.181Z] ----------------------------------------------------------------------
+[debug] [2025-03-29T09:47:23.205Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\ryo-r\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js emulators:start
+[debug] [2025-03-29T09:47:23.207Z] CLI Version:   14.0.0
+[debug] [2025-03-29T09:47:23.208Z] Platform:      win32
+[debug] [2025-03-29T09:47:23.209Z] Node Version:  v22.12.0
+[debug] [2025-03-29T09:47:23.211Z] Time:          Sat Mar 29 2025 18:47:23 GMT+0900 (日本標準時)
+[debug] [2025-03-29T09:47:23.213Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-03-29T09:47:23.942Z] Object "/emulators/database" in "firebase.json" has unknown property: {"additionalProperty":"rules"}
+[debug] [2025-03-29T09:47:23.960Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-03-29T09:47:23.962Z] > authorizing via signed-in user (rictusempra52@gmail.com)
+[debug] [2025-03-29T09:47:24.367Z] java version "24" 2025-03-18
+
+[debug] [2025-03-29T09:47:24.368Z] Java(TM) SE Runtime Environment (build 24+36-3646)
+Java HotSpot(TM) 64-Bit Server VM (build 24+36-3646, mixed mode, sharing)
+
+[debug] [2025-03-29T09:47:24.418Z] Parsed Java major version: 24
+[info] i  emulators: Starting emulators: auth, database {"metadata":{"emulator":{"name":"hub"},"message":"Starting emulators: auth, database"}}
+[debug] [2025-03-29T09:47:24.447Z] [logging] Logging Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-29T09:47:24.448Z] [auth] Authentication Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-29T09:47:24.448Z] [database] Database Emulator only supports listening on one address (127.0.0.1). Not listening on ::1
+[debug] [2025-03-29T09:47:24.449Z] assigned listening specs for emulators {"user":{"hub":[{"address":"127.0.0.1","family":"IPv4","port":4400},{"address":"::1","family":"IPv6","port":4400}],"ui":[{"address":"127.0.0.1","family":"IPv4","port":4000},{"address":"::1","family":"IPv6","port":4000}],"logging":[{"address":"127.0.0.1","family":"IPv4","port":4500}],"auth":[{"address":"127.0.0.1","family":"IPv4","port":9099}],"database":[{"address":"127.0.0.1","family":"IPv4","port":9000}]},"metadata":{"message":"assigned listening specs for emulators"}}
+[warn] !  emulators: It seems that you are running multiple instances of the emulator suite for project shimesukun. This may result in unexpected behavior. 
+[debug] [2025-03-29T09:47:24.470Z] [hub] writing locator at C:\Users\ryo-r\AppData\Local\Temp\hub-shimesukun.json
+[debug] [2025-03-29T09:47:24.486Z] Checked if tokens are valid: false, expires at: 1743168743208
+[debug] [2025-03-29T09:47:24.487Z] Checked if tokens are valid: false, expires at: 1743168743208
+[debug] [2025-03-29T09:47:24.487Z] > refreshing access token with scopes: []
+[debug] [2025-03-29T09:47:24.490Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2025-03-29T09:47:24.491Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-29T09:47:24.723Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2025-03-29T09:47:24.724Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2025-03-29T09:47:24.735Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/shimesukun [none]
+[debug] [2025-03-29T09:47:25.156Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/shimesukun 200
+[debug] [2025-03-29T09:47:25.156Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/shimesukun {"projectId":"shimesukun","projectNumber":"726024101798","displayName":"shimesukun","name":"projects/shimesukun","resources":{"hostingSite":"shimesukun","realtimeDatabaseInstance":"shimesukun-default-rtdb"},"state":"ACTIVE","etag":"1_2694f203-2a2e-40da-84bf-68330aead675"}
+[debug] [2025-03-29T09:47:25.157Z] database rules config:  [{"instance":"shimesukun-default-rtdb","rules":"C:\\Users\\ryo-r\\OneDrive\\Documents\\Gs Academy\\docman\\shimesukun\\database.rules.json"}]
+[debug] [2025-03-29T09:47:25.164Z] Ignoring unsupported arg: projectId {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: projectId"}}
+[debug] [2025-03-29T09:47:25.165Z] Ignoring unsupported arg: auto_download {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: auto_download"}}
+[debug] [2025-03-29T09:47:25.165Z] Ignoring unsupported arg: rules {"metadata":{"emulator":{"name":"database"},"message":"Ignoring unsupported arg: rules"}}
+[debug] [2025-03-29T09:47:25.165Z] Starting Database Emulator with command {"binary":"java","args":["-Duser.language=en","-jar","C:\\Users\\ryo-r\\.cache\\firebase\\emulators\\firebase-database-emulator-v4.11.2.jar","--host","127.0.0.1","--port",9000,"--single_project_mode","Warning"],"optionalArgs":["port","host","functions_emulator_port","functions_emulator_host","single_project_mode"],"joinArgs":false,"shell":false,"port":9000} {"metadata":{"emulator":{"name":"database"},"message":"Starting Database Emulator with command {\"binary\":\"java\",\"args\":[\"-Duser.language=en\",\"-jar\",\"C:\\\\Users\\\\ryo-r\\\\.cache\\\\firebase\\\\emulators\\\\firebase-database-emulator-v4.11.2.jar\",\"--host\",\"127.0.0.1\",\"--port\",9000,\"--single_project_mode\",\"Warning\"],\"optionalArgs\":[\"port\",\"host\",\"functions_emulator_port\",\"functions_emulator_host\",\"single_project_mode\"],\"joinArgs\":false,\"shell\":false,\"port\":9000}"}}
+[info] i  database: Database Emulator logging to database-debug.log {"metadata":{"emulator":{"name":"database"},"message":"Database Emulator logging to \u001b[1mdatabase-debug.log\u001b[22m"}}
+[debug] [2025-03-29T09:47:59.374Z] >>> [apiv2][query] PUT http://127.0.0.1:9000/.settings/rules.json ns=shimesukun-default-rtdb
+[debug] [2025-03-29T09:47:59.375Z] >>> [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json "{\r\n    \"rules\": {\r\n        \".read\": \"auth != null\",\r\n        \".write\": \"auth != null\"\r\n    }\r\n}"
+[debug] [2025-03-29T09:48:02.541Z] <<< [apiv2][status] PUT http://127.0.0.1:9000/.settings/rules.json 200
+[debug] [2025-03-29T09:48:02.541Z] <<< [apiv2][body] PUT http://127.0.0.1:9000/.settings/rules.json {"status":"ok"}
+[debug] [2025-03-29T09:48:02.556Z] Could not find VSCode notification endpoint: FetchError: request to http://localhost:40001/vscode/notify failed, reason: connect ECONNREFUSED ::1:40001. If you are not running the Firebase Data Connect VSCode extension, this is expected and not an issue.
+[info] 
+┌─────────────────────────────────────────────────────────────┐
+│ ✔  All emulators ready! It is now safe to connect your app. │
+│ i  View Emulator UI at http://127.0.0.1:4000/               │
+└─────────────────────────────────────────────────────────────┘
+
+┌────────────────┬────────────────┬────────────────────────────────┐
+│ Emulator       │ Host:Port      │ View in Emulator UI            │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Authentication │ 127.0.0.1:9099 │ http://127.0.0.1:4000/auth     │
+├────────────────┼────────────────┼────────────────────────────────┤
+│ Database       │ 127.0.0.1:9000 │ http://127.0.0.1:4000/database │
+└────────────────┴────────────────┴────────────────────────────────┘
+  Emulator Hub host: 127.0.0.1 port: 4400
+  Other reserved ports: 4500
+
+Issues? Report them at https://github.com/firebase/firebase-tools/issues and attach the *-debug.log files.
+ 

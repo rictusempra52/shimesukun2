@@ -26,6 +26,7 @@ export interface ChatMessage {
       意思決定プロセスの進め方?: string;
     };
     参考事例?: string;
+    links?: { title: string; url: string }[];
   };
 }
 
@@ -38,6 +39,10 @@ export function useAiAssistant(documentId?: string) {
   // 質問を送信する関数
   const sendQuestion = async (question: string) => {
     try {
+      if (!question.trim()) {
+        throw new Error("質問が入力されていません");
+      }
+
       setIsLoading(true);
       setError(null);
 
@@ -50,27 +55,40 @@ export function useAiAssistant(documentId?: string) {
 
       setMessages((prev) => [...prev, userMessage]);
 
-      // モックレスポンスを生成（本番では実際のAPIを呼び出す）
-      setTimeout(() => {
-        const aiResponse: ChatMessage = {
-          id: uuidv4(),
-          role: "assistant",
-          content: `「${question}」についてお答えします。`,
-          structuredContent: {
-            回答要点:
-              "これはデモ回答です。実際のAPIが実装されると、ここに本物の回答が表示されます。",
-            法的実務的根拠: "区分所有法と標準管理規約に基づいています。",
-            実行プラン: {
-              すぐに実行すべきこと: "理事会で議題として検討する",
-              中期的に検討すべきこと: "専門家への相談を検討する",
-              長期的に準備すべきこと: "長期修繕計画への組み込み",
-            },
-          },
-        };
+      // /api/ai エンドポイントへリクエスト
+      let contextInfo = "";
+      if (documentId) {
+        contextInfo = `関連書類ID: ${documentId}. `;
+      }
 
-        setMessages((prev) => [...prev, aiResponse]);
-        setIsLoading(false);
-      }, 1500);
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `${contextInfo}${question}`,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error || `APIリクエストに失敗しました (${response.status})`
+        );
+      }
+
+      const data = await response.json();
+
+      // AIの応答をチャットに追加
+      const aiResponse: ChatMessage = {
+        id: uuidv4(),
+        role: "assistant",
+        content: data.answer || data.text || "回答を取得できませんでした",
+      };
+
+      setMessages((prev) => [...prev, aiResponse]);
+
     } catch (err) {
       console.error("AIアシスタントエラー:", err);
       setError(
@@ -78,6 +96,7 @@ export function useAiAssistant(documentId?: string) {
           ? err
           : new Error("AIアシスタントとの通信中にエラーが発生しました")
       );
+    } finally {
       setIsLoading(false);
     }
   };
