@@ -119,6 +119,8 @@ export async function difyFormDataRequest(path: string, formData: FormData) {
   };
 
   try {
+    // Fetch API を使用してリクエストを送信し、responseに格納
+    // fetchは、HTTPリクエストを送信するための関数
     const response = await fetch(url, {
       method: "POST",
       headers,
@@ -126,6 +128,7 @@ export async function difyFormDataRequest(path: string, formData: FormData) {
       cache: "no-store",
     });
 
+    // レスポンスがHTML形式の場合、エラーメッセージを抽出
     if (!response.ok) {
       let errorMessage = "";
       try {

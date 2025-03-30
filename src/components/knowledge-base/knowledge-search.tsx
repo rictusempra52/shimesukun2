@@ -7,7 +7,18 @@ import { getKnowledgeBases, searchKnowledgeBase } from "@/lib/client/dify";
  * ナレッジベース検索コンポーネント
  * Difyのナレッジベースを横断検索するUI
  */
+// defaultは、モジュールがエクスポートするデフォルトの値を指定します。
+// ここでは、KnowledgeSearchコンポーネントをデフォルトエクスポートしています。
+// これにより、他のファイルからこのコンポーネントをインポートする際に、
+// 名前を指定せずにインポートできるようになります。
+// 例えば、import KnowledgeSearch from './KnowledgeSearch';のようにインポートできます。
+// これは、Reactコンポーネントやユーティリティ関数など、
+// 他のモジュールをエクスポートする際に一般的なパターンです。
 export default function KnowledgeSearch() {
+    // 状態管理
+    // ナレッジベースのリスト、選択されたナレッジベース、検索結果、検索クエリ、ローディング状態、エラー状態を管理するためのuseStateフックを使用しています。
+    // useStateは、Reactの状態管理のためのフックで、コンポーネント内で状態を持つことができます。
+    // useStateは、状態の初期値を引数に取り、状態とその更新関数を返します。
     const [knowledgeBases, setKnowledgeBases] = useState<any[]>([]);
     const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string | null>(null);
     const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -18,27 +29,38 @@ export default function KnowledgeSearch() {
     const [topK, setTopK] = useState(3);
 
     // ナレッジベース一覧を取得
-    useEffect(() => {
-        async function fetchKnowledgeBases() {
-            setLoading(true);
-            setError(null);
-            try {
-                const result = await getKnowledgeBases();
-                setKnowledgeBases(result.data || []);
-                // 最初のナレッジベースを自動選択（オプション）
-                if (result.data && result.data.length > 0) {
-                    setSelectedKnowledgeBase(result.data[0].id);
-                }
-            } catch (error: any) {
-                setError(error.message || "ナレッジベースの取得に失敗しました");
-                console.error("ナレッジベース取得エラー:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
+    useEffect        (() => {
+            // 非同期関数を定義して、ナレッジベースの取得を行います。
+            // useEffect内でasync/awaitを使用することはできないため、関数を定義して呼び出します。
+            async function fetchKnowledgeBases() {
+                // 取得中であることを設定
+                setLoading(true);
+                // エラー状態をリセット
+                setError(null);
+                try {
+                    // Difyからナレッジベースのリストを取得
+                    const result = await getKnowledgeBases();
+                    // 取得したナレッジベースのリストを状態に設定
+                    setKnowledgeBases(result.data || []);
+                    // ifの条件:result.dataが存在し、かつ、lengthが0より大きい場合
+                    if (result.data && result.data.length > 0)
+                        // 最初のナレッジベースを選択
+                        setSelectedKnowledgeBase(result.data[0].id);
 
-        fetchKnowledgeBases();
-    }, []);
+                } catch (error: any) {
+                    setError(error.message || "ナレッジベースの取得に失敗しました");
+                    console.error("ナレッジベース取得エラー:", error);
+                } finally {
+                    // ローディング状態を解除
+                    setLoading(false);
+                }
+            }
+            // ナレッジベースの取得を実行
+            fetchKnowledgeBases();
+        },
+            // 依存配列:空の配列を指定することで、コンポーネントのマウント時にのみ実行されるようにします。
+            []
+        );
 
     // 検索実行
     const handleSearch = async (e: React.FormEvent) => {
