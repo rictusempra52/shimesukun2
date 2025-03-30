@@ -87,9 +87,10 @@ export async function difyRequest(path: string, method: string, body?: any) {
       }
       throw new Error(`Dify API エラー (${response.status}): ${errorMessage}`);
     }
-
+    // 返り値をJSON形式で取得
     return await response.json();
   } catch (error: any) {
+    // エラーハンドリング: エラーメッセージをコンソールに出力し、エラーをスロー
     console.error("Dify API リクエストエラー:", error);
     throw new Error(`Dify API リクエスト失敗: ${error.message}`);
   }
@@ -97,17 +98,23 @@ export async function difyRequest(path: string, method: string, body?: any) {
 
 /**
  * マルチパートフォームデータを送信するための関数
+ * マルチパートフォームデータとは、ファイルやバイナリデータを含むHTTPリクエストの形式
+ * 例えば、画像やドキュメントをアップロードする際に使用される
  * @param path - APIパス
  * @param formData - フォームデータ
  * @returns APIレスポンス
  */
 export async function difyFormDataRequest(path: string, formData: FormData) {
-  if (!DIFY_API_KEY) {
-    throw new Error("Dify API キーが設定されていません");
-  }
+  //   APIキーが設定されていない場合はエラーをスロー
+  if (!DIFY_API_KEY) throw new Error("Dify API キーが設定されていません");
 
+  //   APIエンドポイントのURLを生成
   const url = `${DIFY_API_ENDPOINT}${path}`;
+  // リクエストヘッダーを設定
+  // headersは、HTTPリクエストのヘッダー情報を格納するオブジェクト
+  // headersinitは、ヘッダーの初期値を設定するための型
   const headers: HeadersInit = {
+    // Authorizationは、Bearerトークンを使用してAPIキーを認証するためのヘッダー
     Authorization: `Bearer ${DIFY_API_KEY}`,
   };
 

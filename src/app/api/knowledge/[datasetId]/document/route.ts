@@ -63,7 +63,10 @@ export async function POST(
     // 例えば、const { name, text } = body;は、bodyオブジェクトからnameとtextを抽出しています
     const { name, text, indexingTechnique } = body;
 
+    // nameとtextが存在しない場合はエラーを返す
+    // これは、ドキュメントを作成するために必要な情報です
     if (!name || !text) {
+        // nextres
       return NextResponse.json(
         { error: "ドキュメント名とテキスト内容は必須です" },
         { status: 400 }
