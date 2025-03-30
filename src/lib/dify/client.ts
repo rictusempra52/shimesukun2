@@ -74,6 +74,9 @@ export async function difyRequest(path: string, method: string, body?: any) {
       );
     }
 
+    // レスポンスがOKでない場合、エラーメッセージを取得
+    // response.okは、HTTPレスポンスのステータスコードが200-299の範囲内であるかどうかを示すプロパティ
+    // 200-299は成功を示すステータスコード
     if (!response.ok) {
       let errorMessage = "";
       try {

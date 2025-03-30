@@ -50,7 +50,7 @@ export async function createKnowledgeBase({
   name,
   description,
   permission = "only_me",
-  indexingTechnique = "high_quality"
+  indexingTechnique = "high_quality",
 }: {
   name: string;
   description?: string;
@@ -225,9 +225,12 @@ export async function createDocumentFromFile(
  * @param documentId - ドキュメントID
  */
 export async function deleteDocument(datasetId: string, documentId: string) {
-  const response = await fetch(`/api/knowledge/${datasetId}/document/${documentId}`, {
-    method: "DELETE",
-  });
+  const response = await fetch(
+    `/api/knowledge/${datasetId}/document/${documentId}`,
+    {
+      method: "DELETE",
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();
@@ -246,9 +249,12 @@ export async function checkDocumentIndexingStatus(
   datasetId: string,
   batch: string
 ) {
-  const response = await fetch(`/api/knowledge/${datasetId}/document/status/${batch}`, {
-    method: "GET",
-  });
+  const response = await fetch(
+    `/api/knowledge/${datasetId}/document/status/${batch}`,
+    {
+      method: "GET",
+    }
+  );
 
   if (!response.ok) {
     const error = await response.json();

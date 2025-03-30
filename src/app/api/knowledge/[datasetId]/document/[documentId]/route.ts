@@ -10,16 +10,16 @@ export async function DELETE(
 ) {
   try {
     const { datasetId, documentId } = params;
-    
+
     if (!datasetId || !documentId) {
       return NextResponse.json(
         { error: "ナレッジベースIDとドキュメントIDは必須です" },
         { status: 400 }
       );
     }
-    
+
     await deleteDocument(datasetId, documentId);
-    
+
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("ドキュメント削除エラー:", error);

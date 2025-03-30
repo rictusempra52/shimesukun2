@@ -10,16 +10,16 @@ export async function GET(
 ) {
   try {
     const { datasetId, batch } = params;
-    
+
     if (!datasetId || !batch) {
       return NextResponse.json(
         { error: "ナレッジベースIDとバッチIDは必須です" },
         { status: 400 }
       );
     }
-    
+
     const result = await checkDocumentIndexingStatus(datasetId, batch);
-    
+
     return NextResponse.json(result);
   } catch (error: any) {
     console.error("インデックス状態チェックエラー:", error);

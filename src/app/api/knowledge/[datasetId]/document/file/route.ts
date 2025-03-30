@@ -19,7 +19,9 @@ export async function POST(
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const indexingTechnique = formData.get("indexingTechnique") as "high_quality" | "economy" || "high_quality";
+    const indexingTechnique =
+      (formData.get("indexingTechnique") as "high_quality" | "economy") ||
+      "high_quality";
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
