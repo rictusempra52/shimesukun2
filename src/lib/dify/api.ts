@@ -1,6 +1,9 @@
 "use server";
 
-import { difyRequest, difyFormDataRequest } from "./api-service";
+import {
+  difyKnowledgeRequest,
+  difyKnowledgeFormDataRequest,
+} from "./api-service";
 
 /**
  * ナレッジベース一覧を取得する関数
@@ -9,7 +12,7 @@ import { difyRequest, difyFormDataRequest } from "./api-service";
  * @returns ナレッジベース一覧
  */
 export async function getKnowledgeBases(page = 1, limit = 20) {
-  return difyRequest(`/datasets?page=${page}&limit=${limit}`, "GET");
+  return difyKnowledgeRequest(`/datasets?page=${page}&limit=${limit}`, "GET");
 }
 
 /**
@@ -22,7 +25,7 @@ export async function uploadDocument(datasetId: string, file: File) {
   const formData = new FormData();
   formData.append("file", file);
 
-  return difyFormDataRequest(
+  return difyKnowledgeFormDataRequest(
     `/datasets/${datasetId}/documents`,
     "POST",
     formData

@@ -4,7 +4,10 @@
 
 "use server";
 
-import { difyRequest, difyFormDataRequest } from "./api-service";
+import {
+  difyKnowledgeRequest,
+  difyKnowledgeFormDataRequest,
+} from "./api-service";
 
 /**
  * ナレッジベース内のドキュメント一覧を取得
@@ -17,35 +20,37 @@ export async function getDocuments(
   datasetId: string,
   page = 1,
   limit = 20,
-  keyword?: string
+  keyword = ""
 ) {
-  let url = `/datasets/${datasetId}/documents?page=${page}&limit=${limit}`;
+  let endpoint = `/datasets/${datasetId}/documents?page=${page}&limit=${limit}`;
   if (keyword) {
-    url += `&keyword=${encodeURIComponent(keyword)}`;
+    endpoint += `&keyword=${encodeURIComponent(keyword)}`;
   }
-  return difyRequest(url, "GET");
+  return difyKnowledgeRequest(endpoint, "GET");
 }
 
 /**
- * テキストからドキュメントを作成
+ * ドキュメントの詳細を取得
  * @param datasetId - ナレッジベースID
- * @param name - ドキュメント名
- * @param text - テキスト内容
- * @param indexingTechnique - インデックス方法
+ * @param documentId - ドキュメントID
  */
-export async function createDocumentFromText(
-  datasetId: string,
-  name: string,
-  text: string,
-  indexingTechnique: "high_quality" | "economy" = "high_quality"
-) {
-  return difyRequest(`/datasets/${datasetId}/document/create-by-text`, "POST", {
-    name,
-    text,
-    indexing_technique: indexingTechnique,
-    process_rule: { mode: "automatic" },
-    doc_form: "text_model",
-  });
+export async function getDocument(datasetId: string, documentId: string) {
+  return difyKnowledgeRequest(
+    `/datasets/${datasetId}/documents/${documentId}`,
+    "GET"
+  );
+}
+
+/**
+ * ドキュメントを削除
+ * @param datasetId - ナレッジベースID
+ * @param documentId - ドキュメントID
+ */
+export async function deleteDocument(datasetId: string, documentId: string) {
+  return difyKnowledgeRequest(
+    `/datasets/${datasetId}/documents/${documentId}`,
+    "DELETE"
+  );
 }
 
 /**
@@ -68,36 +73,9 @@ export async function createDocumentFromFile(
   formData.append("data", new Blob([dataJson], { type: "text/plain" }));
   formData.append("file", file);
 
-  return difyFormDataRequest(
+  return difyKnowledgeFormDataRequest(
     `/datasets/${datasetId}/document/create-by-file`,
     "POST",
     formData
-  );
-}
-
-/**
- * ドキュメントを削除
- * @param datasetId - ナレッジベースID
- * @param documentId - ドキュメントID
- */
-export async function deleteDocument(datasetId: string, documentId: string) {
-  return difyRequest(
-    `/datasets/${datasetId}/documents/${documentId}`,
-    "DELETE"
-  );
-}
-
-/**
- * ドキュメントインデックス作成状況を確認
- * @param datasetId - ナレッジベースID
- * @param batch - バッチID
- */
-export async function checkDocumentIndexingStatus(
-  datasetId: string,
-  batch: string
-) {
-  return difyRequest(
-    `/datasets/${datasetId}/documents/${batch}/indexing-status`,
-    "GET"
   );
 }

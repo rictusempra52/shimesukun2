@@ -3,7 +3,7 @@
 
 "use server";
 
-import { difyRequest } from "./api-service";
+import { difyKnowledgeRequest } from "./api-service";
 
 /**
  * ナレッジベースのリストを取得
@@ -11,7 +11,7 @@ import { difyRequest } from "./api-service";
  * @param limit - 取得件数
  */
 export async function getKnowledgeBases(page = 1, limit = 20) {
-  return difyRequest(`/datasets?page=${page}&limit=${limit}`, "GET");
+  return difyKnowledgeRequest(`/datasets?page=${page}&limit=${limit}`, "GET");
 }
 
 /**
@@ -26,7 +26,7 @@ export async function createKnowledgeBase(
   permission: "only_me" | "all_team_members" | "partial_members" = "only_me",
   indexingTechnique: "high_quality" | "economy" = "high_quality"
 ) {
-  return difyRequest("/datasets", "POST", {
+  return difyKnowledgeRequest("/datasets", "POST", {
     name,
     description,
     permission,
@@ -39,7 +39,7 @@ export async function createKnowledgeBase(
  * @param datasetId - ナレッジベースID
  */
 export async function deleteKnowledgeBase(datasetId: string) {
-  return difyRequest(`/datasets/${datasetId}`, "DELETE");
+  return difyKnowledgeRequest(`/datasets/${datasetId}`, "DELETE");
 }
 
 /**
@@ -59,7 +59,7 @@ export async function searchKnowledgeBase(
     | "keyword_search"
     | "full_text_search" = "hybrid_search"
 ) {
-  return difyRequest(`/datasets/${datasetId}/retrieve`, "POST", {
+  return difyKnowledgeRequest(`/datasets/${datasetId}/retrieve`, "POST", {
     query,
     retrieval_model: {
       search_method: searchMethod,
