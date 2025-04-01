@@ -19,3 +19,42 @@ export async function getKnowledgeBasesFromClient(page = 1, limit = 20) {
 
   return response.json();
 }
+
+/**
+ * ナレッジベースを検索する関数
+ * @param knowledgeBaseId ナレッジベースID
+ * @param query 検索クエリ
+ * @param topK 検索結果の上位件数
+ * @param searchMethod 検索方法
+ * @returns 検索結果
+ */
+export async function searchKnowledgeBase(
+  knowledgeBaseId: string,
+  query: string,
+  topK: number = 3,
+  searchMethod:
+    | "hybrid_search"
+    | "semantic_search"
+    | "keyword_search"
+    | "full_text_search" = "hybrid_search"
+) {
+  const response = await fetch(`/api/knowledge/search`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      knowledge_base_id: knowledgeBaseId,
+      query,
+      top_k: topK,
+      search_method: searchMethod,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "検索に失敗しました");
+  }
+
+  return response.json();
+}
