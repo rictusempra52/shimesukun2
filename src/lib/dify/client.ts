@@ -1,16 +1,14 @@
+// client.ts
+// このファイルは、Dify API へのリクエストを行うための基本的な関数を定義しています。
+
 "use server";
 
-/**
- * Dify API クライアント
- * API キーはサーバーサイドでのみ使用し、フロントエンドには公開しない
- */
-
+// Dify API キーを環境変数から取得
 const DIFY_API_KEY = process.env.DIFY_API_KEY;
 const DIFY_API_ENDPOINT =
   process.env.DIFY_API_ENDPOINT || "https://api.dify.ai/v1";
 
-/**
- * Dify API へのリクエストを行うための基本関数
+/**　Dify API へのリクエストを行うための基本関数
  * @param path - APIパス
  * @param method - HTTPメソッド
  * @param body - リクエストボディ（オプション）
@@ -18,20 +16,16 @@ const DIFY_API_ENDPOINT =
  */
 export async function difyRequest(path: string, method: string, body?: any) {
   // APIキーが設定されていない場合はエラーをスロー
-  if (!DIFY_API_KEY) {
-    throw new Error("Dify API キーが設定されていません");
-  }
+  if (!DIFY_API_KEY) throw new Error("Dify API キーが設定されていません");
 
-  /**
-   * Dify API へのリクエストを行うための基本関数
-   * @param path - APIパス
-   */
+  // APIエンドポイントのURL
   const url = `${DIFY_API_ENDPOINT}${path}`;
-  /**
-   * リクエストヘッダー
-   * @type {HeadersInit}
+
+  /** リクエストヘッダー
+   * @type {HeadersInit} - ヘッダーの初期値を設定するための型
    * @property {string} Authorization - Bearer トークン
    * @property {string} Content-Type - リクエストボディの形式
+   * application/jsonは、リクエストボディがJSON形式であることを示す
    */
   const headers: HeadersInit = {
     Authorization: `Bearer ${DIFY_API_KEY}`,
@@ -39,13 +33,14 @@ export async function difyRequest(path: string, method: string, body?: any) {
   };
 
   try {
-    // Fetch API を使用してリクエストを送信
+    // fetch: API を使用してリクエストを送信
+    // method: HTTPメソッド（GET, POST, PUT, DELETEなど）
+    // headers: リクエストヘッダー（AuthorizationとContent-Type）
+    // body: リクエストボディ（JSON形式）
+    // cache: キャッシュの設定（no-storeはキャッシュを使用しないことを示す）
     const response = await fetch(url, {
-      // method: HTTPメソッド（GET, POST, PUT, DELETEなど）
       method,
-      // headers: リクエストヘッダー（AuthorizationとContent-Type）
       headers,
-      // body: リクエストボディ（JSON形式）
       body: body ? JSON.stringify(body) : undefined,
       cache: "no-store",
     });
@@ -87,7 +82,10 @@ export async function difyRequest(path: string, method: string, body?: any) {
       }
       throw new Error(`Dify API エラー (${response.status}): ${errorMessage}`);
     }
-    // 返り値をJSON形式で取得
+    // 返り値をJSON形式で取得    src/lib/dify/
+      ├── client.ts    // 現在のファイル（サーバーサイド基本関数）
+      ├── api.ts       // 具体的なAPI呼び出し関数（現在のdify.tsの内容）
+      └── browser.ts   // クライアントサイド用関数（use clientディレクティブ）
     return await response.json();
   } catch (error: any) {
     // エラーハンドリング: エラーメッセージをコンソールに出力し、エラーをスロー

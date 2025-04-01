@@ -22,7 +22,8 @@ export async function askAI(query: string) {
 }
 
 /**
- * クライアントサイドでDify API（Next.js API Route経由）を呼び出すためのユーティリティ関数
+ * クライアントサイドでDify API（Next.js API Route経由）
+ * を呼び出すためのユーティリティ関数
  */
 
 /**
