@@ -30,7 +30,7 @@ export async function getKnowledgeBasesFromClient(page = 1, limit = 20) {
  */
 export async function searchKnowledgeBase(
   knowledgeBaseId: string,
-  query: string,
+  query: string | null = null, // クエリをオプションに変更
   topK: number = 3,
   searchMethod:
     | "hybrid_search"
@@ -38,16 +38,21 @@ export async function searchKnowledgeBase(
     | "keyword_search"
     | "full_text_search" = "hybrid_search"
 ) {
+  const body: any = {
+    top_k: topK,
+    search_method: searchMethod,
+  };
+
+  if (query) {
+    body.query = query; // クエリが存在する場合のみ追加
+  }
+
   const response = await fetch(`/api/knowledge/${knowledgeBaseId}/search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      query,
-      top_k: topK,
-      search_method: searchMethod,
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!response.ok) {

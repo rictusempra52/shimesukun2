@@ -1,29 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
 import { searchKnowledgeBase } from "@/lib/dify/knowledge";
 
+const DATASET_ID = process.env.DIFY_DATASET_ID; // 環境変数からデータセットIDを取得
+
 /**
  * ナレッジベース検索 API
  */
-export async function POST(
-  request: NextRequest,
-  { params }: { params: { datasetId: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    // paramsを適切に扱うために、非同期コンテキスト内で直接アクセス
-    const { datasetId } = params;
-
-    if (!datasetId) {
+    if (!DATASET_ID) {
       return NextResponse.json(
-        { error: "ナレッジベースIDは必須です" },
-        { status: 400 }
+        { error: "サーバー側でデータセットIDが設定されていません" },
+        { status: 500 }
       );
     }
 
     const body = await request.json();
     const { query, topK, searchMethod } = body;
 
-    // クエリがnullの場合も許容するように変更（空検索の対応）
-    if (query === undefined) {
+    if (!query) {
       return NextResponse.json(
         { error: "検索クエリは必須です" },
         { status: 400 }
@@ -31,8 +26,8 @@ export async function POST(
     }
 
     const result = await searchKnowledgeBase(
-      datasetId,
-      query || "", // nullの場合は空文字を使用
+      DATASET_ID,
+      query,
       topK || 3,
       searchMethod || "hybrid_search"
     );
