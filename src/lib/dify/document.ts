@@ -1,6 +1,6 @@
 "use server";
 
-import { difyRequest, difyFormDataRequest } from "./client";
+import { difyRequest, difyFormDataRequest } from ".api-service";
 
 /**
  * ナレッジベース内のドキュメント一覧を取得

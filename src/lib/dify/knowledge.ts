@@ -1,6 +1,6 @@
 "use server";
 
-import { difyRequest } from "./client";
+import { difyRequest } from ".api-service";
 
 /**
  * ナレッジベースのリストを取得

@@ -14,7 +14,7 @@ const DIFY_API_ENDPOINT =
  * @param body - リクエストボディ（オプション）
  * @returns APIレスポンス
  */
-export async function difyRequest(path: string, method: string, body?: any) {
+export async function difyRequest(endpoint: string, method: string, body?: any) {
   // APIキーが設定されていない場合はエラーをスロー
   if (!DIFY_API_KEY) throw new Error("Dify API キーが設定されていません");
 
@@ -102,7 +102,7 @@ export async function difyRequest(path: string, method: string, body?: any) {
  * @param formData - フォームデータ
  * @returns APIレスポンス
  */
-export async function difyFormDataRequest(path: string, formData: FormData) {
+export async function difyFormDataRequest(endpoint: string, formData: FormData) {
   //   APIキーが設定されていない場合はエラーをスロー
   if (!DIFY_API_KEY) throw new Error("Dify API キーが設定されていません");
 
