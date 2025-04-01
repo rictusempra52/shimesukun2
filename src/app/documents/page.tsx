@@ -1,32 +1,16 @@
-import { getAllDocuments } from '@/lib/data/documents';
-import { DocumentList } from '@/components/document-list';
-import { cookies } from "next/headers";
-import { documentsData } from '@/lib/document-data';
+import DifyDocumentSearch from '@/components/dify-document-search';
 
-// normalizeDocument関数をインポート
-import { normalizeDocument } from '@/lib/data/document-normalizer';
+/**
+ * 書類を探すページコンポーネント
+ * Dify ナレッジAPIを使用して書類を検索する機能を提供
+ */
+export default function DocumentsPage() {
+    return (
+        <div className="space-y-8">
+            <h1 className="text-3xl font-bold tracking-tight">書類を探す</h1>
 
-// サーバーコンポーネントでデータを取得
-export default async function DocumentsPage() {
-    // クッキーからデータソース設定を取得（デフォルトはfirebase）
-    const cookieStore = await cookies();
-    const dataSource = cookieStore.get('dataSource')?.value as 'firebase' | 'mock' || 'firebase';
-
-    try {
-        // 統一インターフェースでデータを取得
-        const documents = await getAllDocuments(dataSource);
-
-        // クライアントコンポーネントにデータを渡す
-        return <DocumentList initialDocuments={documents} />;
-    } catch (error) {
-        console.error("サーバーサイドでのデータ取得エラー:", error);
-
-        // Firebaseが空/接続失敗でモックデータを使用する旨をログに出力
-        if (dataSource === 'firebase') {
-            console.log("WARNING: Firebaseからのデータ取得に失敗しました。代わりにモックデータを使用します。");
-        }
-
-        // エラーが発生した場合はモックデータを使用（型を適切に変換）
-        return <DocumentList initialDocuments={dataSource === 'mock' ? [] : documentsData.map(doc => normalizeDocument(doc))} />;
-    }
+            {/* Dify ナレッジAPIによる書類検索 */}
+            <DifyDocumentSearch />
+        </div>
+    );
 }
