@@ -1,39 +1,93 @@
+// document-list.tsx
+// このファイルは、ドキュメント一覧を表示するためのコンポーネントを定義しています
+// 大まかな構成は、
+// - DocumentListコンポーネント: ドキュメント一覧表示の主要機能
+// - 検索・フィルター機能: キーワード、マンション名、ファイル形式でのフィルタリング
+// - 表示モード: テーブルビューとカードビューの切り替え（レスポンシブ対応）
+// - データ取得: SWRを使用したAPIからのドキュメントデータの取得
+// - エラー処理: データ取得失敗時の表示と再試行機能
+// - ドキュメント詳細表示: 各ドキュメントの詳細ページへのナビゲーション
+
 "use client"
 
+// - ReactのuseState, useEffect, useRef: 状態管理と副作用処理
 import { useState, useEffect, useRef } from "react"
+// - UIコンポーネント: ボタン、入力フィールド、セレクトボックス、テーブル、バッジ、カード
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+// - アイコン: ファイルのアイコン、ダウンロードの…、目、検索、矢印　
 import { FileText, Download, Eye, Search, ChevronRight } from "lucide-react"
+// - ルーター: Next.jsのルーティング機能
 import { useRouter } from "next/navigation"
+// - Document: ドキュメントの型定義
 import { Document } from "@/types/document"
+// - useSWR: データ取得ライブラリ
 import useSWR from 'swr'
+// - useApiFetcher: APIリクエストを行うためのカスタムフック
 import { useApiFetcher } from "@/lib/api-fetcher"
 
+/** DocumentListコンポーネントのプロップ定義
+ * @property searchQuery - 初期検索クエリ（URLクエリパラメータなど）
+ * @property initialDocuments - 初期表示用のドキュメントリスト
+ */
 interface DocumentListProps {
   searchQuery?: string
   initialDocuments?: Document[]
 }
 
-export function DocumentList({ searchQuery = "", initialDocuments = [] }: DocumentListProps) {
+/** ドキュメント一覧を表示するコンポーネント
+ * - 検索機能: タイトル、マンション名、タグでフィルタリング
+ * - フィルタリング: マンション名、ファイル形式でのフィルタリング
+ * - 表示モード: テーブルビューとカードビューの切り替え
+ * - レスポンシブデザイン: スマートフォンではカードビュー、PCではテーブルビュー
+ * - データ取得: SWRを使用してAPIからドキュメントデータを取得
+ * - エラー処理: データ取得失敗時の表示と再試行機能
+ * - ドキュメント詳細表示: 各ドキュメントの詳細ページへのナビゲーション
+ * @param searchQuery: 初期検索クエリ
+ * @param initialDocuments: 初期ドキュメントリスト
+ */
+export function DocumentList(
+  { searchQuery = "", initialDocuments = [] }: DocumentListProps) {
+  // Next.jsのルーターを使用してページ遷移を行う（書類詳細ページへの遷移に使用）
   const router = useRouter()
+
+  // マンション名でフィルタリングするための状態変数と更新関数
   const [buildingFilter, setBuildingFilter] = useState<string>("")
+
+  // ファイル形式（PDF/JPG/PNG）でフィルタリングするための状態変数と更新関数
   const [typeFilter, setTypeFilter] = useState<string>("")
+
+  // 検索クエリを保持するための状態変数（propsで渡されたsearchQueryを初期値として使用）
   const [localSearchQuery, setLocalSearchQuery] = useState<string>(searchQuery)
+
+  // 表示モード（テーブルビュー/カードビュー）を切り替えるための状態変数
+  // デフォルトはテーブルビュー、レスポンシブ対応のためにuseEffectで動的に変更される
   const [viewMode, setViewMode] = useState<"table" | "card">("table")
 
+  // APIリクエストを行うためのカスタムフック関数を取得
   const fetcher = useApiFetcher()
 
+  // useSWRを使用してドキュメントデータをフェッチ
+  // 戻り値: data（取得データ）、error（エラー情報）、isLoading（読み込み中かどうか）
   const { data, error, isLoading } = useSWR<{ documents: Document[] }>(
+    // APIエンドポイントURL
     '/api/documents',
+    // フェッチャー関数
     fetcher,
     {
-      fallbackData: initialDocuments.length ? { documents: initialDocuments } : undefined,
+      // 初期データがある場合は使用し、即座にUIをレンダリング
+      fallbackData: initialDocuments.length
+        ? { documents: initialDocuments }
+        : undefined,
+      // ページにフォーカスが当たった時に再検証する
       revalidateOnFocus: true,
+      // ネットワーク接続が回復した時に再検証する
       revalidateOnReconnect: true,
+      // エラーハンドリング（コンソールにエラー内容を出力）
       onError: (err) => {
         console.error('データ取得エラー:', err);
       }
