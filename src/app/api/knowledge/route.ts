@@ -1,24 +1,20 @@
+import { getKnowledgeBases } from "@/lib/dify/api";
+import { createKnowledgeBase } from "@/lib/dify/knowledge"; // 追加：知識ベース作成関数をインポート
 import { NextRequest, NextResponse } from "next/server";
-import {
-  getKnowledgeBases,
-  createKnowledgeBase,
-  deleteKnowledgeBase,
-} from "@/lib/dify/knowledge";
 
 /**
  * ナレッジベースリストの取得 API
  */
 export async function GET(request: NextRequest) {
   try {
-    const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const { searchParams } = new URL(request.url);
+    const page = Number(searchParams.get("page") || "1");
+    const limit = Number(searchParams.get("limit") || "20");
 
-    const result = await getKnowledgeBases(page, limit);
-
-    return NextResponse.json(result);
+    const data = await getKnowledgeBases(page, limit);
+    return NextResponse.json(data);
   } catch (error: any) {
-    console.error("ナレッジベースリスト取得エラー:", error);
+    console.error("ナレッジベース取得API内部エラー:", error);
     return NextResponse.json(
       { error: error.message || "ナレッジベースの取得に失敗しました" },
       { status: 500 }

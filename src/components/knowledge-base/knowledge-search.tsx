@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getKnowledgeBases, searchKnowledgeBase } from "@/lib/client/dify";
+import { getKnowledgeBasesFromClient, searchKnowledgeBase } from "@/lib/dify/browser";
 
 /**
  * ナレッジベース検索コンポーネント
@@ -29,38 +29,38 @@ export default function KnowledgeSearch() {
     const [topK, setTopK] = useState(3);
 
     // ナレッジベース一覧を取得
-    useEffect        (() => {
-            // 非同期関数を定義して、ナレッジベースの取得を行います。
-            // useEffect内でasync/awaitを使用することはできないため、関数を定義して呼び出します。
-            async function fetchKnowledgeBases() {
-                // 取得中であることを設定
-                setLoading(true);
-                // エラー状態をリセット
-                setError(null);
-                try {
-                    // Difyからナレッジベースのリストを取得
-                    const result = await getKnowledgeBases();
-                    // 取得したナレッジベースのリストを状態に設定
-                    setKnowledgeBases(result.data || []);
-                    // ifの条件:result.dataが存在し、かつ、lengthが0より大きい場合
-                    if (result.data && result.data.length > 0)
-                        // 最初のナレッジベースを選択
-                        setSelectedKnowledgeBase(result.data[0].id);
+    useEffect(() => {
+        // 非同期関数を定義して、ナレッジベースの取得を行います。
+        // useEffect内でasync/awaitを使用することはできないため、関数を定義して呼び出します。
+        async function fetchKnowledgeBases() {
+            // 取得中であることを設定
+            setLoading(true);
+            // エラー状態をリセット
+            setError(null);
+            try {
+                // Difyからナレッジベースのリストを取得
+                const result = await getKnowledgeBasesFromClient();
+                // 取得したナレッジベースのリストを状態に設定
+                setKnowledgeBases(result.data || []);
+                // ifの条件:result.dataが存在し、かつ、lengthが0より大きい場合
+                if (result.data && result.data.length > 0)
+                    // 最初のナレッジベースを選択
+                    setSelectedKnowledgeBase(result.data[0].id);
 
-                } catch (error: any) {
-                    setError(error.message || "ナレッジベースの取得に失敗しました");
-                    console.error("ナレッジベース取得エラー:", error);
-                } finally {
-                    // ローディング状態を解除
-                    setLoading(false);
-                }
+            } catch (error: any) {
+                setError(error.message || "ナレッジベースの取得に失敗しました");
+                console.error("ナレッジベース取得エラー:", error);
+            } finally {
+                // ローディング状態を解除
+                setLoading(false);
             }
-            // ナレッジベースの取得を実行
-            fetchKnowledgeBases();
-        },
-            // 依存配列:空の配列を指定することで、コンポーネントのマウント時にのみ実行されるようにします。
-            []
-        );
+        }
+        // ナレッジベースの取得を実行
+        fetchKnowledgeBases();
+    },
+        // 依存配列:空の配列を指定することで、コンポーネントのマウント時にのみ実行されるようにします。
+        []
+    );
 
     // 検索実行
     const handleSearch = async (e: React.FormEvent) => {

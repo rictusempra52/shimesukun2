@@ -1,3 +1,6 @@
+// api-service.ts
+// このファイルは、Dify APIへのリクエストを送信するための基本的な関数を定義しています
+
 "use server";
 
 const DIFY_API_ENDPOINT =

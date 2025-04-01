@@ -1,6 +1,10 @@
+// document.ts
+// このファイルは、ナレッジベース内のドキュメントに関連するAPI呼び出しを行うための関数を定義しています
+// 具体的には、ドキュメントの取得、作成、削除、インデックス作成状況の確認などを行います
+
 "use server";
 
-import { difyRequest, difyFormDataRequest } from ".api-service";
+import { difyRequest, difyFormDataRequest } from "./api-service";
 
 /**
  * ナレッジベース内のドキュメント一覧を取得
@@ -66,6 +70,7 @@ export async function createDocumentFromFile(
 
   return difyFormDataRequest(
     `/datasets/${datasetId}/document/create-by-file`,
+    "POST",
     formData
   );
 }

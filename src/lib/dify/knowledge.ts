@@ -1,3 +1,6 @@
+// knowledge.ts
+// Difyのナレッジベース関連のAPIをラップする関数群
+
 "use server";
 
 import { difyRequest } from "./api-service";
