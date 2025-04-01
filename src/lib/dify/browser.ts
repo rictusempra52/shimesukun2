@@ -38,13 +38,12 @@ export async function searchKnowledgeBase(
     | "keyword_search"
     | "full_text_search" = "hybrid_search"
 ) {
-  const response = await fetch(`/api/knowledge/search`, {
+  const response = await fetch(`/api/knowledge/${knowledgeBaseId}/search`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      knowledge_base_id: knowledgeBaseId,
       query,
       top_k: topK,
       search_method: searchMethod,
