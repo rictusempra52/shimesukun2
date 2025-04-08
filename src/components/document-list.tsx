@@ -50,8 +50,8 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   const [documents, setDocuments] = useState<Document[]>(initialDocuments);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [knowledgeBases, setKnowledgeBases] = useState<{ id: string; name: string }[]>([]); // ナレッジベース一覧
-  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string | null>(null); // 初期値をnullに設定
+  const [knowledgeBases, setKnowledgeBases] = useState<{ id: string; name: string }[]>([]);
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState<string | null>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -77,7 +77,6 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   }, []);
 
   useEffect(() => {
-    // データセットが選択されたら自動的にドキュメント全件取得
     if (selectedKnowledgeBase) {
       fetchAllDocuments();
     }
@@ -98,9 +97,8 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: "*",
-          // ワイルドカードクエリまたは空文字で全ドキュメント取得を試みる
-          top_k: 5,
+          query: "*", // ワイルドカードクエリで全ドキュメント取得を試みる
+          top_k: 50, // より多くのドキュメントを取得
           search_method: "keyword_search", // キーワード検索を使用
         }),
       });
@@ -113,7 +111,28 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
 
       const result = await response.json();
       console.log("All documents fetched successfully:", result);
-      setDocuments(result.data || []);
+
+      // APIレスポンス構造に合わせてデータを取得
+      // Dify APIはrecords配列でデータを返す
+      if (result.records && Array.isArray(result.records)) {
+        console.log("Documents found in records array:", result.records.length);
+
+        // ドキュメント型に変換
+        const formattedDocs = result.records.map((item: any) => ({
+          id: item.document_id || item.id || `doc-${Math.random()}`,
+          title: item.title || item.document_name || "無題ドキュメント",
+          building: item.metadata?.building || item.building || "未分類",
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          uploadedAt: item.uploaded_at || item.created_at || new Date().toISOString(),
+        }));
+
+        setDocuments(formattedDocs);
+      } else if (result.data && Array.isArray(result.data)) {
+        setDocuments(result.data);
+      } else {
+        console.warn("Unexpected response format:", result);
+        setDocuments([]);
+      }
     } catch (err: any) {
       console.error("Error fetching all documents:", err);
       setError(err.message || "ドキュメント一覧の取得に失敗しました");
@@ -130,7 +149,6 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
     setIsLoading(true);
     setError(null);
     try {
-      // 空の検索クエリの場合はデフォルト値を設定
       const searchQuery = localSearchQuery.trim() || "*";
 
       console.log("Fetching documents with query:", searchQuery);
@@ -140,7 +158,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          query: searchQuery, // 空の場合でも文字列を送信
+          query: searchQuery,
           top_k: 10,
           search_method: "hybrid_search",
         }),
@@ -152,7 +170,27 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
       }
       const result = await response.json();
       console.log("Documents fetched successfully:", result);
-      setDocuments(result.data || []);
+
+      // 全件取得と同じ形式でレスポンスを処理
+      if (result.records && Array.isArray(result.records)) {
+        console.log("Search found documents in records array:", result.records.length);
+
+        // ドキュメント型に変換
+        const formattedDocs = result.records.map((item: any) => ({
+          id: item.document_id || item.id || `doc-${Math.random()}`,
+          title: item.title || item.document_name || "無題ドキュメント",
+          building: item.metadata?.building || item.building || "未分類",
+          tags: Array.isArray(item.tags) ? item.tags : [],
+          uploadedAt: item.uploaded_at || item.created_at || new Date().toISOString(),
+        }));
+
+        setDocuments(formattedDocs);
+      } else if (result.data && Array.isArray(result.data)) {
+        setDocuments(result.data);
+      } else {
+        console.warn("Unexpected search response format:", result);
+        setDocuments([]);
+      }
     } catch (err: any) {
       console.error("Error fetching documents:", err);
       setError(err.message || "ドキュメントの取得に失敗しました");
@@ -161,7 +199,6 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
     };
   };
 
-  // 検索ボタン追加
   const handleSearch = () => {
     if (selectedKnowledgeBase) {
       fetchDocuments();

@@ -3,14 +3,17 @@ import { searchKnowledgeBase } from "@/lib/dify/knowledge";
 
 /**
  * ナレッジベース検索 API
+ * Next.js 14+では、動的パラメータを扱う際に非同期で処理する必要がある
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  context: { params: { datasetId: string } }
 ) {
   try {
-    // paramsを適切に扱うために、非同期コンテキスト内で直接アクセス
-    const { datasetId } = params;
+    // 動的パラメータを非同期コンテキストで安全に取得
+    const datasetId = context.params.datasetId;
+
+    console.log("Received search request for dataset:", datasetId);
 
     if (!datasetId) {
       return NextResponse.json(
@@ -21,6 +24,10 @@ export async function POST(
 
     const body = await request.json();
     const { query, topK, searchMethod } = body;
+
+    console.log(
+      `Search query: "${query}", method: ${searchMethod}, top_k: ${topK}`
+    );
 
     // クエリがnullの場合も許容するように変更（空検索の対応）
     if (query === undefined) {

@@ -16,7 +16,7 @@ export async function getKnowledgeBasesFromClient(page = 1, limit = 20) {
     const error = await response.json();
     throw new Error(error.error || "ナレッジベース取得に失敗しました");
   }
-
+  console.log("ナレッジベース:", response);
   return response.json();
 }
 
