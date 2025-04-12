@@ -17,8 +17,31 @@ export async function POST(
       );
     }
 
+    console.log(
+      `ナレッジベース ${datasetId} へのファイルアップロードリクエスト受信`
+    );
+
     // multipart/form-dataをそのまま転送
     const formData = await request.formData();
+
+    // 送信されたファイル情報をログ出力
+    const file = formData.get("file");
+    if (file instanceof File) {
+      console.log(
+        `ファイル名: ${file.name}, タイプ: ${file.type}, サイズ: ${file.size} bytes`
+      );
+    }
+
+    // メタデータ情報があれば取得してログ出力
+    const metadataStr = formData.get("metadata");
+    if (metadataStr && typeof metadataStr === "string") {
+      try {
+        const metadata = JSON.parse(metadataStr);
+        console.log("メタデータ:", metadata);
+      } catch (e) {
+        console.warn("メタデータのパースエラー:", e);
+      }
+    }
 
     // DifyのナレッジベースAPIにリクエストを送信
     const result = await difyKnowledgeFormDataRequest(

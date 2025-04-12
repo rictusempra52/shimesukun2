@@ -99,3 +99,35 @@ export async function uploadDocumentToKnowledgeBase(
 
   return response.json();
 }
+
+/**
+ * アップロードしたドキュメントをAIで分析し、メタデータを自動提案する関数
+ * @param file 分析するファイル (PDFまたは画像)
+ * @returns 分析結果（タイトル、マンション、説明の提案）
+ */
+export async function analyzeDocumentWithAI(file: File) {
+  console.log(`ファイル "${file.name}" をAI分析のために送信中...`);
+  
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const response = await fetch("/api/knowledge/analyze", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "ドキュメント分析に失敗しました");
+  }
+
+  const result = await response.json();
+  console.log("AI分析結果:", result);
+  
+  return {
+    title: result.metadata?.title || null,
+    building: result.metadata?.building || null,
+    description: result.metadata?.description || null,
+    rawResponse: result.rawResponse || null
+  };
+}

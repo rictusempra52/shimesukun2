@@ -2,15 +2,16 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { FileUp, Upload, Check, AlertCircle, Sparkles } from "lucide-react"
+import { FileUp, Upload, Check, AlertCircle, Sparkles, Database } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { getKnowledgeBasesFromClient, uploadDocumentToKnowledgeBase, analyzeDocumentWithAI } from "@/lib/dify/browser"
 
 export function DocumentUploader() {
   const [file, setFile] = useState<File | null>(null)
@@ -23,10 +24,44 @@ export function DocumentUploader() {
   const [error, setError] = useState<string | null>(null)
   const [isProcessingOcr, setIsProcessingOcr] = useState(false)
 
+  // Difyナレッジベース関連の状態
+  const [knowledgeBases, setKnowledgeBases] = useState<Array<{ id: string; name: string }>>([])
+  const [selectedKnowledgeBase, setSelectedKnowledgeBase] = useState("")
+  const [isLoadingKnowledgeBases, setIsLoadingKnowledgeBases] = useState(false)
+
   // AI提案用の状態
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null)
   const [suggestedBuilding, setSuggestedBuilding] = useState<string | null>(null)
   const [suggestedDescription, setSuggestedDescription] = useState<string | null>(null)
+
+  // コンポーネント初期化時にナレッジベース一覧を取得
+  useEffect(() => {
+    async function fetchKnowledgeBases() {
+      try {
+        setIsLoadingKnowledgeBases(true)
+        const result = await getKnowledgeBasesFromClient()
+        if (result.data) {
+          setKnowledgeBases(
+            result.data.map((kb: any) => ({
+              id: kb.id,
+              name: kb.name,
+            }))
+          )
+          // デフォルト値を設定（最初のナレッジベース）
+          if (result.data.length > 0) {
+            setSelectedKnowledgeBase(result.data[0].id)
+          }
+        }
+      } catch (err: any) {
+        console.error("ナレッジベース取得エラー:", err)
+        setError("ナレッジベース一覧の取得に失敗しました: " + (err.message || "不明なエラー"))
+      } finally {
+        setIsLoadingKnowledgeBases(false)
+      }
+    }
+
+    fetchKnowledgeBases()
+  }, [])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -51,43 +86,49 @@ export function DocumentUploader() {
   }
 
   const processOcrAndSuggestMetadata = async (file: File) => {
-    // 実際の実装ではここでOCR処理とAI処理を行う
     setIsProcessingOcr(true)
+    setError(null)
 
-    // OCRとAI処理をシミュレート
-    setTimeout(() => {
-      // ファイル名から拡張子を除いたものをベースにタイトルを生成
+    try {
+      // Dify AIを使用してドキュメントを分析
+      const aiAnalysisResult = await analyzeDocumentWithAI(file)
+
+      console.log("AI分析が完了しました:", aiAnalysisResult)
+
+      // 分析結果からメタデータ提案を設定
+      if (aiAnalysisResult.title) {
+        setSuggestedTitle(aiAnalysisResult.title)
+      }
+
+      if (aiAnalysisResult.building) {
+        setSuggestedBuilding(aiAnalysisResult.building)
+      }
+
+      if (aiAnalysisResult.description) {
+        setSuggestedDescription(aiAnalysisResult.description)
+      }
+
+      // 提案がない場合のフォールバック処理
+      if (!aiAnalysisResult.title && !aiAnalysisResult.building && !aiAnalysisResult.description) {
+        console.warn("AIからの提案が得られませんでした。フォールバックを使用します。")
+
+        // ファイル名から拡張子を除いたものをベースにタイトルを提案
+        const baseName = file.name.replace(/\.[^/.]+$/, "")
+        setSuggestedTitle(`${baseName} （文書）`)
+
+        // 説明のフォールバック
+        setSuggestedDescription(`${baseName}に関する文書です。内容の詳細は本文をご確認ください。`)
+      }
+    } catch (err: any) {
+      console.error("AI分析エラー:", err)
+      setError(`AI分析中にエラーが発生しました: ${err.message || "不明なエラー"}`)
+
+      // エラー時はフォールバック提案を設定
       const baseName = file.name.replace(/\.[^/.]+$/, "")
-
-      // タイトル提案
-      const documentTypes = ["議事録", "報告書", "見積書", "契約書", "点検記録"]
-      const randomType = documentTypes[Math.floor(Math.random() * documentTypes.length)]
-      const suggestedTitle = `${baseName} ${randomType}`
-
-      // マンション提案
-      const buildingOptions = [
-        "building1", // グランドパレス東京
-        "building2", // サンシャインマンション
-        "building3", // パークハイツ横浜
-        "building4", // リバーサイドタワー大阪
-        "building5", // グリーンヒルズ札幌
-      ]
-      const suggestedBuilding = buildingOptions[Math.floor(Math.random() * buildingOptions.length)]
-
-      // 説明提案
-      const descriptionTemplates = [
-        `${randomType}の内容に関する書類です。${baseName}に関連する重要な情報が含まれています。`,
-        `${baseName}についての${randomType}です。今後の管理に必要な内容が記載されています。`,
-        `マンション管理に関する${randomType}です。${baseName}の詳細が記録されています。`,
-      ]
-      const suggestedDescription = descriptionTemplates[Math.floor(Math.random() * descriptionTemplates.length)]
-
-      // 提案をセット
-      setSuggestedTitle(suggestedTitle)
-      setSuggestedBuilding(suggestedBuilding)
-      setSuggestedDescription(suggestedDescription)
+      setSuggestedTitle(`${baseName}`)
+    } finally {
       setIsProcessingOcr(false)
-    }, 2000) // 2秒後に結果を返す
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -108,22 +149,60 @@ export function DocumentUploader() {
       return
     }
 
+    if (!selectedKnowledgeBase) {
+      setError("ナレッジベースを選択してください")
+      return
+    }
+
     setUploading(true)
     setProgress(0)
     setError(null)
 
-    // 実際のアップロード処理をシミュレート
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval)
-          setUploading(false)
-          setSuccess(true)
-          return 100
-        }
-        return prev + 10
-      })
-    }, 300)
+    try {
+      // メタデータの準備
+      const metadata = {
+        title,
+        building,
+        description,
+        uploadedAt: new Date().toISOString(),
+        buildingName: {
+          building1: "グランドパレス東京",
+          building2: "サンシャインマンション",
+          building3: "パークハイツ横浜",
+          building4: "リバーサイドタワー大阪",
+          building5: "グリーンヒルズ札幌",
+        }[building] || "",
+      }
+
+      // 進捗表示開始
+      let progressInterval = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 90) {
+            return 90 // 90%で停止（API完了を待つ）
+          }
+          return prev + 5
+        })
+      }, 300)
+
+      // Difyのナレッジベースにファイルをアップロード
+      const uploadResult = await uploadDocumentToKnowledgeBase(selectedKnowledgeBase, file, metadata)
+
+      console.log("Difyアップロード結果:", uploadResult)
+
+      // 進捗を100%に設定
+      clearInterval(progressInterval)
+      setProgress(100)
+
+      // 成功状態に設定
+      setTimeout(() => {
+        setUploading(false)
+        setSuccess(true)
+      }, 500)
+    } catch (err: any) {
+      setError(err.message || "アップロード中にエラーが発生しました")
+      setUploading(false)
+      console.error("Difyアップロードエラー:", err)
+    }
   }
 
   const resetForm = () => {
@@ -191,6 +270,43 @@ export function DocumentUploader() {
           <Input id="file" type="file" onChange={handleFileChange} className="hidden" accept=".pdf,.jpg,.jpeg,.png" />
         </div>
         <p className="text-xs text-muted-foreground">PDF、JPG、PNG形式のファイル（最大10MB）</p>
+      </div>
+
+      {/* ナレッジベース選択UI */}
+      <div className="space-y-2">
+        <Label htmlFor="knowledgeBase">ナレッジベース</Label>
+        <div className="space-y-2">
+          <Select
+            value={selectedKnowledgeBase}
+            onValueChange={setSelectedKnowledgeBase}
+            required
+            disabled={isProcessingOcr || isLoadingKnowledgeBases}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="ナレッジベースを選択" />
+            </SelectTrigger>
+            <SelectContent>
+              {isLoadingKnowledgeBases ? (
+                <SelectItem value="loading" disabled>
+                  読み込み中...
+                </SelectItem>
+              ) : knowledgeBases.length === 0 ? (
+                <SelectItem value="none" disabled>
+                  ナレッジベースがありません
+                </SelectItem>
+              ) : (
+                knowledgeBases.map((kb) => (
+                  <SelectItem key={kb.id} value={kb.id}>
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-muted-foreground" />
+                      {kb.name}
+                    </div>
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {isProcessingOcr && (
@@ -341,7 +457,11 @@ export function DocumentUploader() {
         </div>
       )}
 
-      <Button type="submit" disabled={uploading || isProcessingOcr} className="w-full">
+      <Button
+        type="submit"
+        disabled={uploading || isProcessingOcr || !selectedKnowledgeBase || isLoadingKnowledgeBases}
+        className="w-full"
+      >
         {uploading ? (
           <span className="flex items-center gap-2">
             <Upload className="h-4 w-4 animate-pulse" />
