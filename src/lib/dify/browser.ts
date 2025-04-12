@@ -62,3 +62,40 @@ export async function searchKnowledgeBase(
 
   return response.json();
 }
+
+/**
+ * ナレッジベースにドキュメントをアップロードする関数
+ * @param knowledgeBaseId ナレッジベースID
+ * @param file アップロードするファイル
+ * @param metadata ファイルに関連するメタデータ（任意）
+ * @returns アップロード結果
+ */
+export async function uploadDocumentToKnowledgeBase(
+  knowledgeBaseId: string,
+  file: File,
+  metadata?: Record<string, any>
+) {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  // メタデータがある場合は追加
+  if (metadata) {
+    formData.append("metadata", JSON.stringify(metadata));
+  }
+
+  console.log(
+    `ナレッジベースID ${knowledgeBaseId} にファイル ${file.name} をアップロード中...`
+  );
+
+  const response = await fetch(`/api/knowledge/${knowledgeBaseId}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "ドキュメントのアップロードに失敗しました");
+  }
+
+  return response.json();
+}
