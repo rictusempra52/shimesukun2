@@ -106,6 +106,12 @@ export function DocumentUploader() {
 
       if (aiAnalysisResult.description) {
         setSuggestedDescription(aiAnalysisResult.description)
+
+        // 既存の説明があれば、AIによる提案で自動置換
+        if (description) {
+          setDescription(aiAnalysisResult.description)
+          setSuggestedDescription(null) // 提案を適用したのでクリア
+        }
       }
 
       // 提案がない場合のフォールバック処理
@@ -117,7 +123,14 @@ export function DocumentUploader() {
         setSuggestedTitle(`${baseName} （文書）`)
 
         // 説明のフォールバック
-        setSuggestedDescription(`${baseName}に関する文書です。内容の詳細は本文をご確認ください。`)
+        const fallbackDescription = `${baseName}に関する文書です。内容の詳細は本文をご確認ください。`
+        setSuggestedDescription(fallbackDescription)
+
+        // 既存の説明があれば、フォールバックの説明で自動置換
+        if (description) {
+          setDescription(fallbackDescription)
+          setSuggestedDescription(null) // 提案を適用したのでクリア
+        }
       }
     } catch (err: any) {
       console.error("AI分析エラー:", err)
@@ -422,9 +435,10 @@ export function DocumentUploader() {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="書類の説明を入力"
+            placeholder="ファイルをアップロードすると、AIが自動で内容の説明を生成します（100字以内）"
             rows={3}
             disabled={isProcessingOcr}
+            className="border-input placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive flex field-sizing-content min-h-16 w-full rounded-md border bg-transparent px-3 py-2 text-base shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
           />
           {suggestedDescription && !isProcessingOcr && (
             <div className="text-sm p-2 border rounded bg-muted/50">

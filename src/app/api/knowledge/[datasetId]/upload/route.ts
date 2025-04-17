@@ -43,11 +43,61 @@ export async function POST(
       }
     }
 
-    // DifyのナレッジベースAPIにリクエストを送信
+    // 新しいFormDataオブジェクトを作成（Difyが期待するフォーマットに合わせる）
+    const difyFormData = new FormData();
+
+    // fileフィールドをそのまま追加
+    if (file) {
+      difyFormData.append("file", file);
+    }
+
+    // Difyが期待するdataフィールドを追加（インデックス設定など）
+    const dataConfig: {
+      indexing_technique: string;
+      process_rule: {
+        rules: {
+          pre_processing_rules: { id: string; enabled: boolean }[];
+          segmentation: { separator: string; max_tokens: number };
+        };
+        mode: string;
+      };
+      metadata?: Record<string, any>;
+    } = {
+      indexing_technique: "high_quality",
+      process_rule: {
+        rules: {
+          pre_processing_rules: [
+            { id: "remove_extra_spaces", enabled: true },
+            { id: "remove_urls_emails", enabled: true },
+          ],
+          segmentation: {
+            separator: "###",
+            max_tokens: 500,
+          },
+        },
+        mode: "custom",
+      },
+    };
+
+    // メタデータがあれば、それもdataConfigに含める
+    if (metadataStr && typeof metadataStr === "string") {
+      try {
+        const metadata = JSON.parse(metadataStr);
+        dataConfig["metadata"] = metadata;
+      } catch (e) {
+        console.warn("メタデータの追加エラー:", e);
+      }
+    }
+
+    // dataフィールドをJSON文字列として追加
+    difyFormData.append("data", JSON.stringify(dataConfig));
+
+    // DifyのナレッジベースAPIにリクエストを送信 - 正しいパスと形式を使用
+    // 正しいエンドポイント: `/datasets/${datasetId}/document/create_by_file`
     const result = await difyKnowledgeFormDataRequest(
-      `/datasets/${datasetId}/documents/upload`,
+      `/datasets/${datasetId}/document/create_by_file`,
       "POST",
-      formData
+      difyFormData
     );
 
     console.log("Dify document upload result:", result);
