@@ -116,7 +116,13 @@ export async function POST(request: NextRequest) {
       console.log("Dify分析結果:", result);
 
       // DifyのレスポンスからJSONを抽出
-      let metadata = {};
+      let metadata: {
+        title?: string;
+        building?: string;
+        buildingName?: string;
+        description?: string;
+        [key: string]: any;
+      } = {};
       try {
         if (result.answer) {
           // JSONパターンを検出して抽出
