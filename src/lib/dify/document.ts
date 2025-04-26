@@ -79,3 +79,50 @@ export async function createDocumentFromFile(
     formData
   );
 }
+
+/**
+ * テキストからドキュメントを作成
+ * @param datasetId - ナレッジベースID
+ * @param text - 登録するテキスト
+ * @param metadata - メタデータ（タイトル、ドキュメントID等）
+ * @param indexingTechnique - インデックス方法
+ */
+export async function createDocumentFromText(
+  datasetId: string,
+  text: string,
+  metadata: { title?: string; document_id?: string } = {},
+  indexingTechnique: "high_quality" | "economy" = "high_quality"
+) {
+  const data = {
+    document: {
+      text: text,
+      metadata: metadata,
+    },
+    indexing_technique: indexingTechnique,
+    process_rule: { mode: "automatic" },
+  };
+
+  return difyKnowledgeRequest(
+    `/datasets/${datasetId}/document/create-by-text`,
+    "POST",
+    data
+  );
+}
+
+/**
+ * ドキュメントのインデックス作成状況を確認
+ * @param datasetId - ナレッジベースID
+ * @param documentId - ドキュメントID
+ * @param batch - バッチID
+ * @returns インデックス作成の状況
+ */
+export async function checkDocumentIndexingStatus(
+  datasetId: string,
+  documentId: string,
+  batch: string
+) {
+  return difyKnowledgeRequest(
+    `/datasets/${datasetId}/documents/${documentId}/indexing-status/${batch}`,
+    "GET"
+  );
+}

@@ -6,19 +6,23 @@ import { checkDocumentIndexingStatus } from "@/lib/dify/document";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { datasetId: string; batch: string } }
+  context: { params: { datasetId: string; documentId: string; batch: string } }
 ) {
   try {
-    const { datasetId, batch } = params;
+    const { datasetId, documentId, batch } = context.params;
 
-    if (!datasetId || !batch) {
+    if (!datasetId || !documentId || !batch) {
       return NextResponse.json(
-        { error: "ナレッジベースIDとバッチIDは必須です" },
+        { error: "ナレッジベースID、ドキュメントID、バッチIDは必須です" },
         { status: 400 }
       );
     }
 
-    const result = await checkDocumentIndexingStatus(datasetId, batch);
+    const result = await checkDocumentIndexingStatus(
+      datasetId,
+      documentId,
+      batch
+    );
 
     return NextResponse.json(result);
   } catch (error: any) {

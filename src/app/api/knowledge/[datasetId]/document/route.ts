@@ -6,10 +6,10 @@ import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  context: { params: { datasetId: string } }
 ) {
   try {
-    const datasetId = params.datasetId;
+    const datasetId = context.params.datasetId;
     if (!datasetId) {
       return NextResponse.json(
         { error: "ナレッジベースIDは必須です" },
@@ -39,45 +39,38 @@ export async function GET(
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  context: { params: { datasetId: string } }
 ) {
   try {
-    const datasetId = params.datasetId;
+    const datasetId = context.params.datasetId;
     // datasetIdが存在しない場合はエラーを返す
-    // datasetIdとは、ナレッジベースのIDを指します
-    // これは、ナレッジベースを識別するための一意のIDです
     if (!datasetId) {
       return NextResponse.json(
         { error: "ナレッジベースIDは必須です" },
-        // status: 400とは、リクエストが不正であることを示すHTTPステータスコードです
-        // 例えば、必要なパラメータが不足している場合などに使用されます
         { status: 400 }
       );
     }
 
-    // リクエストボディをJSON形式で取得します
+    // リクエストボディをJSON形式で取得
     const body = await request.json();
-    // bodyからname, text, indexingTechniqueを取得します
-    // nameはドキュメントの名前、textはドキュメントの内容、indexingTechniqueはインデックス作成の技術を指します
-    // const{}という構文は、オブジェクトから特定のプロパティを抽出するための構文です
-    // 例えば、const { name, text } = body;は、bodyオブジェクトからnameとtextを抽出しています
-    const { name, text, indexingTechnique } = body;
+    const { text, metadata = {}, indexingTechnique = "high_quality" } = body;
 
-    // nameとtextが存在しない場合はエラーを返す
-    // これは、ドキュメントを作成するために必要な情報です
-    if (!name || !text) {
-        // nextres
+    // テキストが存在しない場合はエラーを返す
+    if (!text) {
       return NextResponse.json(
-        { error: "ドキュメント名とテキスト内容は必須です" },
+        { error: "テキスト内容は必須です" },
         { status: 400 }
       );
     }
+
+    // titleがメタデータにあればそれを使用、なければ空のオブジェクト
+    const documentMetadata = typeof metadata === "object" ? metadata : {};
 
     const result = await createDocumentFromText(
       datasetId,
-      name,
       text,
-      indexingTechnique || "high_quality"
+      documentMetadata,
+      indexingTechnique
     );
 
     return NextResponse.json(result);
