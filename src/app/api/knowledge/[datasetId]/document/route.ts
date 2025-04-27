@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
 
+interface RouteContext {
+  params: {
+    datasetId: string;
+  };
+}
+
 /**
  * ドキュメント一覧取得 API
  */
-export async function GET(
-  request: NextRequest,
-  context: { params: { datasetId: string } }
-) {
+export async function GET(request: NextRequest, context: RouteContext) {
   try {
     const datasetId = context.params.datasetId;
     if (!datasetId) {
@@ -37,10 +40,7 @@ export async function GET(
 /**
  * テキストからドキュメント作成 API
  */
-export async function POST(
-  request: NextRequest,
-  context: { params: { datasetId: string } }
-) {
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const datasetId = context.params.datasetId;
     // datasetIdが存在しない場合はエラーを返す

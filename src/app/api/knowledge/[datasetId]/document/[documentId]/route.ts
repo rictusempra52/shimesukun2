@@ -1,19 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteDocument } from "@/lib/dify/document";
 
-type Params = {
+interface RouteContext {
   params: {
     datasetId: string;
     documentId: string;
   };
-};
+}
 
 /**
  * 特定ドキュメントの削除 API
  */
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { datasetId, documentId } = params;
+    const { datasetId, documentId } = context.params;
 
     console.log(
       `ドキュメント削除: datasetId=${datasetId}, documentId=${documentId}`
