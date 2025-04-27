@@ -1,18 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
 
-interface RouteContext {
-  params: {
-    datasetId: string;
-  };
-}
-
 /**
  * ドキュメント一覧取得 API
  */
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: { datasetId: string } }
+) {
   try {
-    const datasetId = context.params.datasetId;
+    const datasetId = params.datasetId;
     if (!datasetId) {
       return NextResponse.json(
         { error: "ナレッジベースIDは必須です" },
@@ -40,9 +37,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
 /**
  * テキストからドキュメント作成 API
  */
-export async function POST(request: NextRequest, context: RouteContext) {
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { datasetId: string } }
+) {
   try {
-    const datasetId = context.params.datasetId;
+    const datasetId = params.datasetId;
     // datasetIdが存在しない場合はエラーを返す
     if (!datasetId) {
       return NextResponse.json(

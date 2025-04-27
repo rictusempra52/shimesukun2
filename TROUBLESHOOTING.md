@@ -27,6 +27,7 @@
 5. [ナビゲーションと UI 関連のトラブル](#ナビゲーションとui関連のトラブル)
    - [モバイルメニューが開かない](#モバイルメニューが開かない)
    - [検索結果が表示されない](#検索結果が表示されない)
+6. [Next.js 開発関連のトラブル](#nextjs開発関連のトラブル)
 
 ## 認証関連のエラー
 
@@ -451,3 +452,61 @@ Dify API のエンドポイントが正しく設定されていない、また�
 3. ナレッジベースにドキュメントが追加されているか確認する
 4. ネットワークタブで API リクエスト/レスポンスを確認する
 5. 別の検索キーワードや検索方法を試す
+
+## Next.js 開発関連のトラブル
+
+### Next.js 15 での Route Handler 型エラー
+
+**エラーメッセージ:**
+
+```
+Type error: Route "src/app/api/knowledge/[datasetId]/document/[documentId]/route.ts" has an invalid "DELETE" export:
+Type "RouteContext" is not a valid type for the function's second argument.
+```
+
+**原因:**
+Next.js 15 では、App Router の Route Handler（API ルート）の型定義が厳格化されています。カスタムインターフェース（`RouteContext`など）を使用した型定義がエラーの原因となります。
+
+**解決策:**
+
+1. **公式の型定義パターンを使用する:**
+
+   カスタムインターフェースを使わず、以下のような直接的な型定義を使用します:
+
+   ```typescript
+   export async function DELETE(
+     request: NextRequest,
+     { params }: { params: { datasetId: string; documentId: string } }
+   ) {
+     // 実装
+   }
+   ```
+
+2. **すべての Route Handler で一貫した型定義を使用する:**
+
+   GET、POST、DELETE、PUT などすべての HTTP メソッドに同じ型定義パターンを適用します:
+
+   ```typescript
+   export async function GET(
+     request: NextRequest,
+     { params }: { params: { datasetId: string } }
+   ) {
+     // 実装
+   }
+
+   export async function POST(
+     request: NextRequest,
+     { params }: { params: { datasetId: string } }
+   ) {
+     // 実装
+   }
+   ```
+
+3. **注意点:**
+   - 型定義にはインタフェースではなく直接型を使用する
+   - パラメータには分割代入パターン `{ params }: { params: { ... } }` を使用する
+   - 動的ルートセグメントに対応するパラメータ名を正確に使用する
+
+これにより、Vercel でのデプロイ時に Route Handler 型エラーが解消されます。
+
+特に注意が必要なのは、GET/POST ハンドラーでは問題が発生しなくても、DELETE ハンドラーなど他のメソッドで型エラーが発生することがあるため、すべてのルートハンドラーで同じ型定義パターンを採用することが重要です。

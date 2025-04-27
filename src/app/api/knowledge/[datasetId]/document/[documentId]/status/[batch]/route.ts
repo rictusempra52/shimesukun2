@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkDocumentIndexingStatus } from "@/lib/dify/document";
 
-interface RouteContext {
-  params: {
-    datasetId: string;
-    documentId: string;
-    batch: string;
-  };
-}
-
 /**
  * ドキュメントインデックス作成状況チェック API
  */
-export async function GET(request: NextRequest, context: RouteContext) {
+export async function GET(
+  request: NextRequest,
+  {
+    params,
+  }: { params: { datasetId: string; documentId: string; batch: string } }
+) {
   try {
-    const { datasetId, documentId, batch } = context.params;
+    const { datasetId, documentId, batch } = params;
 
     if (!datasetId || !documentId || !batch) {
       return NextResponse.json(
