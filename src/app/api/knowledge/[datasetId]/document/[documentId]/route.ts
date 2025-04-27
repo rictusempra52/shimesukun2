@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { deleteDocument } from "@/lib/dify/document";
 
 /**
  * 特定ドキュメントの削除 API
  */
 export async function DELETE(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { datasetId: string; documentId: string } }
 ) {
   try {

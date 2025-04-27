@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { checkDocumentIndexingStatus } from "@/lib/dify/document";
 
 /**
  * ドキュメントインデックス作成状況チェック API
  */
 export async function GET(
-  request: NextRequest,
+  request: Request,
   {
     params,
   }: { params: { datasetId: string; documentId: string; batch: string } }

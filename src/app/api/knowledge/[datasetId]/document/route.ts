@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
 
 /**
  * ドキュメント一覧取得 API
  */
 export async function GET(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { datasetId: string } }
 ) {
   try {
@@ -17,10 +17,11 @@ export async function GET(
       );
     }
 
-    const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
-    const keyword = searchParams.get("keyword") || undefined;
+    // 標準のURLオブジェクトを使用してクエリパラメータを取得
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get("page") || "1");
+    const limit = parseInt(url.searchParams.get("limit") || "20");
+    const keyword = url.searchParams.get("keyword") || undefined;
 
     const result = await getDocuments(datasetId, page, limit, keyword);
 
@@ -38,7 +39,7 @@ export async function GET(
  * テキストからドキュメント作成 API
  */
 export async function POST(
-  request: NextRequest,
+  request: Request,
   { params }: { params: { datasetId: string } }
 ) {
   try {
