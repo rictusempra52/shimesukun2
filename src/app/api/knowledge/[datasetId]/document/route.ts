@@ -4,10 +4,7 @@ import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
 /**
  * ドキュメント一覧取得 API
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { datasetId: string } }
-) {
+export async function GET(request, { params }) {
   try {
     const datasetId = params.datasetId;
     if (!datasetId) {
@@ -17,7 +14,7 @@ export async function GET(
       );
     }
 
-    // 標準のURLオブジェクトを使用してクエリパラメータを取得
+    // URLオブジェクトを使用してクエリパラメータを取得
     const url = new URL(request.url);
     const page = parseInt(url.searchParams.get("page") || "1");
     const limit = parseInt(url.searchParams.get("limit") || "20");
@@ -26,7 +23,7 @@ export async function GET(
     const result = await getDocuments(datasetId, page, limit, keyword);
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error("ドキュメント一覧取得エラー:", error);
     return NextResponse.json(
       { error: error.message || "ドキュメント一覧の取得に失敗しました" },
@@ -38,10 +35,7 @@ export async function GET(
 /**
  * テキストからドキュメント作成 API
  */
-export async function POST(
-  request: Request,
-  { params }: { params: { datasetId: string } }
-) {
+export async function POST(request, { params }) {
   try {
     const datasetId = params.datasetId;
     // datasetIdが存在しない場合はエラーを返す
@@ -75,7 +69,7 @@ export async function POST(
     );
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error("テキストからドキュメント作成エラー:", error);
     return NextResponse.json(
       { error: error.message || "ドキュメントの作成に失敗しました" },

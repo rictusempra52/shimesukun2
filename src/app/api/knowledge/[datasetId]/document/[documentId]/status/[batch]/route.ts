@@ -4,12 +4,7 @@ import { checkDocumentIndexingStatus } from "@/lib/dify/document";
 /**
  * ドキュメントインデックス作成状況チェック API
  */
-export async function GET(
-  request: Request,
-  {
-    params,
-  }: { params: { datasetId: string; documentId: string; batch: string } }
-) {
+export async function GET(request, { params }) {
   try {
     const { datasetId, documentId, batch } = params;
 
@@ -27,7 +22,7 @@ export async function GET(
     );
 
     return NextResponse.json(result);
-  } catch (error: any) {
+  } catch (error) {
     console.error("インデックス状態チェックエラー:", error);
     return NextResponse.json(
       { error: error.message || "インデックス状態の確認に失敗しました" },

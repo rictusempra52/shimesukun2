@@ -4,10 +4,7 @@ import { deleteDocument } from "@/lib/dify/document";
 /**
  * 特定ドキュメントの削除 API
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { datasetId: string; documentId: string } }
-) {
+export async function DELETE(request, { params }) {
   try {
     const { datasetId, documentId } = params;
 
@@ -22,7 +19,7 @@ export async function DELETE(
       success: true,
       message: "ドキュメントが削除されました",
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("ドキュメント削除エラー:", error);
     return NextResponse.json(
       { error: error.message || "ドキュメントの削除に失敗しました" },
