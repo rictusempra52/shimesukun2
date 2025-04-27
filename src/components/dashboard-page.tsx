@@ -259,15 +259,15 @@ export default function DashboardPage() {
                   <CardTitle>書類検索</CardTitle>
                   <CardDescription>タイトルやOCRで抽出されたテキストから書類を検索できます</CardDescription>
                 </CardHeader>
-                <CardContent className="p-0 sm:p-6">
-                  <div className="overflow-x-auto">
-                    {/* 書類一覧コンポーネント表示 */}
-                    <DocumentList searchQuery={searchQuery} />
-                  </div>
-                  <div className="p-4 sm:hidden">
-                    <Button variant="outline" className="w-full text-center" onClick={() => { }}>
-                      もっと見る
-                    </Button>
+                <CardContent>
+                  {/* 検索フォームと結果表示 */}
+                  <div className="space-y-6">
+                    {/* 検索フォーム */}
+                    <div className="space-y-4">
+                      <DocumentList searchQuery={searchQuery} />
+                    </div>
+
+                    {/* エクスポートボタン - DocumentListコンポーネントで実装 */}
                   </div>
                 </CardContent>
               </Card>

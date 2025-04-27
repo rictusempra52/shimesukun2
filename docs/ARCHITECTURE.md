@@ -10,24 +10,58 @@
 shimesukun/
 ├── src/
 │   ├── app/ - Next.jsのApp Router関連ファイル
-│   │   ├── (auth)/ - 認証関連のルート
 │   │   ├── admin/ - 管理者用ルート
+│   │   │   └── settings/ - 管理設定ページ
+│   │   ├── ai/ - AI機能関連のルート
+│   │   │   └── page.tsx - AI質問応答ページ
+│   │   ├── api/ - APIエンドポイント
+│   │   │   ├── ai/ - AI関連API
+│   │   │   ├── documents/ - 書類関連API
+│   │   │   │   └── [id]/ - 特定書類に対するAPI
+│   │   │   └── knowledge/ - ナレッジベース関連API
+│   │   │       └── [datasetId]/ - 特定データセットに対するAPI
+│   │   │           ├── document/ - ドキュメント管理API
+│   │   │           │   └── [documentId]/ - 特定ドキュメントに対するAPI
+│   │   │           └── search/ - 検索API
 │   │   ├── documents/ - 書類表示・管理関連のルート
+│   │   │   └── [id]/ - 書類詳細ページ
+│   │   ├── knowledge/ - 知識ベース関連のルート
+│   │   │   └── search/ - 検索機能関連
+│   │   ├── login/ - ログインページ
+│   │   ├── signup/ - 新規登録ページ
+│   │   ├── client-layout.tsx - クライアントサイドのレイアウトラッパー
+│   │   ├── globals.css - グローバルスタイル
 │   │   ├── page.tsx - ホームページ
 │   │   └── layout.tsx - ルートレイアウト（サーバーコンポーネント）
-│   ├── components/ - 再利用可能なコンポーネント
 │   │   ├── ui/ - 基本的なUIコンポーネント
+│   │   ├── knowledge-base/ - 知識ベース関連コンポーネント
 │   │   ├── client-layout.tsx - クライアントサイドのレイアウトラッパー
-│   │   └── ... - その他のコンポーネント
+│   │   ├── dashboard-page.tsx - ダッシュボード
+│   │   ├── document-list.tsx - 書類一覧
+│   │   ├── document-uploader.tsx - 書類アップロード
+│   │   └── ai-assistant.tsx - AI質問応答
 │   ├── contexts/ - Reactコンテキスト
 │   │   ├── AuthContext.tsx - 認証コンテキスト
 │   │   └── data-source-context.tsx - データソース管理コンテキスト
 │   ├── lib/ - ユーティリティ関数
+│   │   ├── client/ - クライアント専用関数
+│   │   │   └── dify.ts - Dify API クライアント
+│   │   ├── data/ - データアクセス
+│   │   │   └── documents.ts - 書類データ操作
+│   │   ├── dify/ - Dify API サーバーサイド関数
+│   │   │   ├── api.ts - API エンドポイント
+│   │   │   └── api-service.ts - 実装
+│   │   ├── api-fetcher.ts - API通信ユーティリティ
 │   │   ├── firebase.ts - Firebase初期化と設定
+│   │   ├── documents.ts - 書類関連ユーティリティ
 │   │   └── utils.ts - 汎用ユーティリティ関数
 │   └── types/ - TypeScript型定義
+│       └── document.ts - 書類型定義
 ├── public/ - 静的ファイル
 └── docs/ - ドキュメント
+  ├── ARCHITECTURE.md - アーキテクチャ説明
+  ├── DEPLOYMENT.md - デプロイ方法
+  └── TROUBLESHOOTING.md - トラブルシューティング
 ```
 
 ## レイヤー構造

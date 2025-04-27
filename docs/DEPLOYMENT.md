@@ -1,58 +1,28 @@
 # シメスくんのデプロイ手順
 
-このドキュメントでは、シメスくんアプリケーションを Vercel にデプロイする方法について説明します。
+## 目次
 
-## 前提条件
+1. [環境要件](#環境要件)
+2. [環境変数の準備](#環境変数の準備)
+3. [セットアップ手順](#セットアップ手順)
+4. [Firebase の設定](#firebase-の設定)
+5. [Dify API の設定](#dify-api-の設定)
+6. [本番環境へのデプロイ](#本番環境へのデプロイ)
+7. [一般的な問題と解決策](#一般的な問題と解決策)
 
-- [Vercel アカウント](https://vercel.com/signup)
-- [GitHub アカウント](https://github.com/join)
-- [Firebase プロジェクト](https://console.firebase.google.com/)
-- [Dify アカウント](https://dify.ai/) - AI 質問応答機能に使用
+## 環境要件
 
-## Firebase 設定
+- Node.js 18.x 以上
+- npm または yarn
+- Firebase プロジェクト
+- Dify アカウントと API 設定
 
-### 必要な環境変数
+## 環境変数の準備
 
-以下の環境変数を`.env.local`ファイルに設定する必要があります：
-
-```
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
-```
-
-### Firebase Local Emulator のセットアップ
-
-開発環境では、Firebase Local Emulator を使用することをお勧めします：
-
-1. Firebase CLI をインストール
-
-   ```bash
-   npm install -g firebase-tools
-   ```
-
-2. エミュレーターを起動
-
-   ```bash
-   firebase emulators:start
-   ```
-
-3. エミュレーターのデフォルトポート
-   - Authentication: 9099
-   - Firestore: 8080
-   - Storage: 9199
-
-## デプロイ手順
-
-### 1. 環境変数の準備
-
-Firebase プロジェクトの設定から必要な情報を取得し、以下の環境変数を準備します。
+Firebase プロジェクトと Dify の設定から必要な情報を取得し、以下の環境変数を準備します。
 
 ```
+# Firebase関連
 NEXT_PUBLIC_FIREBASE_API_KEY=xxxxxxxxxxxxxxxxxxxx
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project-id.firebaseapp.com
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
@@ -60,85 +30,155 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project-id.appspot.com
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=xxxxxxxxxxxx
 NEXT_PUBLIC_FIREBASE_APP_ID=1:xxxxxxxxxxxx:web:xxxxxxxxxxxx
 
-# Dify API関連の環境変数
+# Dify API関連
 DIFY_API_KEY=your-dify-api-key
 DIFY_API_ENDPOINT=https://api.dify.ai/v1 # または自己ホスティングのエンドポイント
 ```
 
-### 2. Vercel でのデプロイ
+## セットアップ手順
 
-1. [Vercel Dashboard](https://vercel.com/dashboard)にログインします
+1. **リポジトリをクローン:**
+
+```bash
+git clone https://github.com/yourusername/shimesukun.git
+cd shimesukun
+```
+
+2. **依存関係のインストール:**
+
+```bash
+npm install
+# または
+yarn install
+```
+
+3. **環境変数の設定:**
+
+`.env.local` ファイルをプロジェクトのルートディレクトリに作成し、上記の環境変数を設定します。
+
+4. **開発サーバーの起動:**
+
+```bash
+npm run dev
+# または
+yarn dev
+```
+
+## Firebase の設定
+
+### 1. Firebase プロジェクトの作成
+
+1. [Firebase Console](https://console.firebase.google.com/) にアクセスし、新しいプロジェクトを作成します
+2. プロジェクト名を入力し、利用規約に同意して「プロジェクトを作成」をクリックします
+
+### 2. Firebase Authentication の有効化
+
+1. 左側のメニューから「Authentication」を選択します
+2. 「Sign-in method」タブをクリックします
+3. 「メール/パスワード」と「Google」を有効にします
+
+### 3. Firestore Database の設定
+
+1. 左側のメニューから「Firestore Database」を選択します
+2. 「データベースの作成」をクリックします
+3. 「本番環境モード」または「テストモード」を選択します
+4. データベースのロケーションを選択し、「作成」をクリックします
+
+### 4. Storage の設定
+
+1. 左側のメニューから「Storage」を選択します
+2. 「開始する」をクリックします
+3. セキュリティルールを設定し、「次へ」をクリックします
+4. ストレージのロケーションを選択し、「完了」をクリックします
+
+### 5. ウェブアプリの追加
+
+1. プロジェクトの概要ページで「</>」（ウェブアプリ）アイコンをクリックします
+2. アプリのニックネームを入力し、「アプリを登録」をクリックします
+3. Firebase の設定情報が表示されるので、メモしておきます（環境変数に使用します）
+
+## Dify API の設定
+
+### 1. Dify アカウントの作成と設定
+
+1. [Dify.ai](https://dify.ai/) にアクセスして、アカウントを作成します
+
+   - または Dify を自己ホスティングする場合は、[GitHub リポジトリ](https://github.com/langgenius/dify)の手順に従ってインストールします
+
+2. アカウント作成後、ダッシュボードにログインします
+
+### 2. API キーの取得
+
+1. Dify ダッシュボードにログインします
+2. 右上のプロフィールアイコンをクリックし、「Settings」を選択します
+3. API Keys の項目から「Create new API key」をクリックします
+4. API キーの名前を入力し、「Create」をクリックします
+5. 生成された API キーをコピーし、`.env.local` ファイルの `DIFY_API_KEY` 変数に設定します
+
+### 3. ナレッジベースの設定
+
+1. Dify ダッシュボードの左側メニューから「Knowledge」をクリックします
+2. 「Create a Knowledge」ボタンをクリックします
+3. ナレッジベースの名前と説明を入力し、「Create」をクリックします
+4. 作成したナレッジベースを選択し、「Settings」タブを開きます
+5. 「API Reference」セクションからナレッジベース ID をメモします（アプリケーション内で使用）
+
+### 4. 埋め込みモデルの選択
+
+1. ナレッジベースの「Settings」タブで「Embedding & Retrieval Model」セクションを開きます
+2. 使用する埋め込みモデルを選択します（例: OpenAI embeddings）
+3. 検索方法（Search Method）を設定します（推奨: hybrid_search）
+4. 必要に応じて再ランキング（Reranking）を有効にします
+
+### 5. ドキュメントのアップロード（オプション）
+
+1. ナレッジベースの「Documents」タブを開きます
+2. 「Upload Documents」ボタンをクリックします
+3. ファイルをアップロードするか、テキストを入力します
+4. インデックス作成方法を選択し（推奨: high_quality）、「Upload」をクリックします
+
+## 本番環境へのデプロイ
+
+### Vercel へのデプロイ
+
+1. [Vercel](https://vercel.com/) にアカウント登録/ログインします
 2. 「New Project」をクリックします
-3. GitHub からリポジトリをインポートします
-4. 「Environment Variables」セクションで、上記の環境変数を追加します
+3. GitHub リポジトリを接続し、shimesukun リポジトリを選択します
+4. 「Environment Variables」セクションで、上記の環境変数をすべて設定します
 5. 「Deploy」ボタンをクリックしてデプロイを開始します
 
-### 3. デプロイ後の設定
+### Netlify へのデプロイ
 
-1. **Firebase 認証の設定**:
-
-   - Firebase Console で「Authentication」→「Sign-in method」を開きます
-   - 「承認済みドメイン」に Vercel のドメイン（例: `your-app.vercel.app`）を追加します
-
-2. **Firebase セキュリティルールの確認**:
-   - Firestore、Storage のセキュリティルールが適切に設定されていることを確認します
-
-### 4. Dify の設定
-
-1. **Dify アカウントの作成**:
-
-   - [Dify.ai](https://dify.ai/) にアクセスしてアカウントを作成します
-   - または Dify を自己ホスティングする場合は、[GitHub リポジトリ](https://github.com/langgenius/dify) の手順に従ってインストールします
-
-2. **アプリケーションの作成**:
-
-   - Dify ダッシュボードで「Create Application」をクリックします
-   - アプリケーションタイプとして「Completion App」または「Chat App」を選択します
-   - マンション管理に関連するプロンプトテンプレートを設定します
-
-3. **API キーの取得**:
-
-   - 作成したアプリケーションの Settings ページから「API Reference」を開きます
-   - 「API Key」タブで API キーをコピーし、環境変数 `DIFY_API_KEY` に設定します
-
-4. **ナレッジベースの作成 (オプション)**:
-   - 「Knowledge Base」タブで新しいナレッジベースを作成します
-   - マンション管理に関連する文書をアップロードして、AI が参照できるようにします
+1. [Netlify](https://www.netlify.com/) にアカウント登録/ログインします
+2. 「New site from Git」をクリックします
+3. GitHub を選択し、shimesukun リポジトリを選択します
+4. ビルド設定を入力します:
+   - Build command: `npm run build` または `yarn build`
+   - Publish directory: `.next`
+5. 「Advanced」セクションで環境変数を設定します
+6. 「Deploy site」をクリックします
 
 ## 一般的な問題と解決策
 
-### 環境変数関連のエラー
+### Firebase 認証関連のエラー
 
-**症状**: 「Firebase is not initialized」などのエラーが表示される
-
-**解決策**:
-
-- Vercel のプロジェクト設定で環境変数が正しく設定されているか確認します
-- 特に`NEXT_PUBLIC_`プレフィックスが付いているか確認します
-
-### 認証エラー
-
-**症状**: ログインは成功するが、すぐにログイン画面にリダイレクトされる
+**症状**: ログインまたは登録時にエラーが表示される
 
 **解決策**:
 
-- Firebase Console で Vercel ドメインが承認済みドメインに追加されているか確認します
-- ブラウザの Cookie とローカルストレージをクリアしてみます
+- Firebase コンソールで認証方法が有効になっているか確認します
+- 環境変数が正しく設定されているか確認します
+- Firebase のセキュリティルールを適切に設定します
 
-### React/Next.js に関するエラー
+### Firestore 接続エラー
 
-**症状**: ビルドエラーが発生する
+**症状**: データの読み取りまたは書き込み時にエラーが表示される
 
 **解決策**:
 
-1. クライアントコンポーネントとサーバーコンポーネントの混在を確認します
-
-   - サーバーコンポーネント(`layout.tsx`)からメタデータのみをエクスポート
-   - クライアント機能は別ファイル(`client-layout.tsx`)に分離
-
-2. React Hooks のルール違反を確認します
-   - Hooks は常にコンポーネントのトップレベルで呼び出す
-   - 条件付きでフックを呼び出さない
+- Firestore セキュリティルールを確認します
+- 環境変数が正しく設定されているか確認します
+- コンソールでネットワークエラーを確認します
 
 ### Dify API 関連のエラー
 
@@ -151,6 +191,13 @@ DIFY_API_ENDPOINT=https://api.dify.ai/v1 # または自己ホスティングの�
 - Dify のダッシュボードでアプリケーションのステータスを確認します
 - ネットワークタブでリクエスト/レスポンスを調査します
 
-## 継続的デプロイ
+### ナレッジベース接続エラー
 
-GitHub リポジトリと Vercel を連携することで、main ブランチへのプッシュごとに自動的にデプロイが実行されます。
+**症状**: ナレッジベースのコンテンツが表示されない、または検索結果が返らない
+
+**解決策**:
+
+- ナレッジベース ID が正しいか確認します
+- API キーに十分な権限があるか確認します
+- ナレッジベースにドキュメントがアップロードされているか確認します
+- インデックス作成が完了しているか確認します
