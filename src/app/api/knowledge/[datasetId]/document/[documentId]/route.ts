@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { deleteDocument } from "@/lib/dify/document";
 
-interface RouteContext {
-  params: {
+// Next.js 15.2.4の型定義に合わせて修正
+type RouteContext = {
+  params: Promise<{
     datasetId: string;
     documentId: string;
-  };
-}
+  }>;
+};
 
 /**
  * 特定ドキュメントの削除 API
  */
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
-    const { datasetId, documentId } = context.params;
+    const { datasetId, documentId } = await context.params;
 
     console.log(
       `ドキュメント削除: datasetId=${datasetId}, documentId=${documentId}`

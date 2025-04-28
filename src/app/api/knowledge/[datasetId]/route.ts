@@ -6,10 +6,10 @@ import { deleteKnowledgeBase } from "@/lib/dify/knowledge";
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  { params }: { params: Promise<{ datasetId: string }> }
 ) {
   try {
-    const datasetId = params.datasetId;
+    const { datasetId } = await params;
 
     if (!datasetId) {
       return NextResponse.json(

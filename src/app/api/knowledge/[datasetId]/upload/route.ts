@@ -5,11 +5,11 @@ import { difyKnowledgeFormDataRequest } from "@/lib/dify/api-service";
 // ナレッジベースへのファイルアップロードAPIエンドポイント
 export async function POST(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  { params }: { params: Promise<{ datasetId: string }> }
 ) {
   try {
-    // URLからデータセットIDを取得
-    const datasetId = params.datasetId;
+    // URLからデータセットIDを取得（Promise型に対応）
+    const { datasetId } = await params;
     if (!datasetId) {
       return NextResponse.json(
         { error: "データセットIDが必要です" },

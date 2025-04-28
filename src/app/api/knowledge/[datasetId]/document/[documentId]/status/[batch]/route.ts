@@ -1,20 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkDocumentIndexingStatus } from "@/lib/dify/document";
 
-interface RouteContext {
-  params: {
+// Next.js 15.2.4の型定義に合わせて修正
+type RouteContext = {
+  params: Promise<{
     datasetId: string;
     documentId: string;
     batch: string;
-  };
-}
+  }>;
+};
 
 /**
  * ドキュメントインデックス作成状況チェック API
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const { datasetId, documentId, batch } = context.params;
+    const { datasetId, documentId, batch } = await context.params;
 
     if (!datasetId || !documentId || !batch) {
       return NextResponse.json(

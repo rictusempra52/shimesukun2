@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDocuments, createDocumentFromText } from "@/lib/dify/document";
 
-interface RouteContext {
-  params: {
+// Next.js 15.2.4の型定義に合わせて修正
+type RouteContext = {
+  params: Promise<{
     datasetId: string;
-  };
-}
+  }>;
+};
 
 /**
  * ドキュメント一覧取得 API
  */
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    const datasetId = context.params.datasetId;
+    const { datasetId } = await context.params;
     if (!datasetId) {
       return NextResponse.json(
         { error: "ナレッジベースIDは必須です" },
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
  */
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const datasetId = context.params.datasetId;
+    const { datasetId } = await context.params;
     // datasetIdが存在しない場合はエラーを返す
     if (!datasetId) {
       return NextResponse.json(

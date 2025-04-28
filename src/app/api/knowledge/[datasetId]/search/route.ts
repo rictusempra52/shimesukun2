@@ -3,16 +3,16 @@ import { searchKnowledgeBase } from "@/lib/dify/knowledge";
 
 /**
  * ナレッジベース検索 API
- * Next.js 14+では、動的パラメータを扱う際に非同期で処理する必要がある
+ * Next.js 15.2.4では、動的パラメータのparams自体がPromiseになる
  */
 export async function POST(
   request: NextRequest,
-  context: { params: { datasetId: string } }
+  context: { params: Promise<{ datasetId: string }> }
 ) {
   try {
     // 動的パラメータを非同期コンテキストで安全に取得
-    const params = await context.params; // paramsを非同期で取得
-    const datasetId = params.datasetId;
+    const params = await context.params;
+    const { datasetId } = params;
 
     console.log("Received search request for dataset:", datasetId);
 

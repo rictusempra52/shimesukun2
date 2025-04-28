@@ -6,10 +6,10 @@ import { createDocumentFromFile } from "@/lib/dify/document";
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { datasetId: string } }
+  { params }: { params: Promise<{ datasetId: string }> }
 ) {
   try {
-    const datasetId = params.datasetId;
+    const { datasetId } = await params;
     if (!datasetId) {
       return NextResponse.json(
         { error: "ナレッジベースIDは必須です" },
