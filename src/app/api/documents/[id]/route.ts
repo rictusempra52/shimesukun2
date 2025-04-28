@@ -3,6 +3,11 @@ import { getDocumentById } from "@/lib/data/documents";
 import { cookies } from "next/headers";
 
 // Next.js 15.0.0-RCからparamsはPromiseになりました
+/** ドキュメント取得 API
+ * @param request
+ * @param param1
+ * @returns
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

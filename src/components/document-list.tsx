@@ -32,6 +32,19 @@ interface DocumentListProps {
   initialDocuments?: Document[]
 }
 
+interface DocumentGroup {
+  id: string;
+  title: string;
+  building: string;
+  tags: string[];
+  chunks?: {
+    id: string;
+    content: string;
+    score: number | null;
+    completed_at: string;
+  }[];
+}
+
 /** 
  * ドキュメント一覧を表示するコンポーネント
  * - 検索機能: タイトル、マンション名、タグでフィルタリング
@@ -52,7 +65,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
 
   // 検索結果をドキュメント単位でグループ化したもの
-  const [groupedResults, setGroupedResults] = useState<{ [key: string]: any[] }>({});
+  const [groupedResults, setGroupedResults] = useState<Record<string, DocumentGroup>>({});
   // 展開されているドキュメントID
   const [expandedDocuments, setExpandedDocuments] = useState<{ [key: string]: boolean }>({});
 
@@ -83,7 +96,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
     }
 
     // ドキュメントIDをキーにしてグループ化
-    const grouped: { [key: string]: any[] } = {};
+    const grouped: Record<string, DocumentGroup> = {};
 
     searchResults.forEach(result => {
       // ドキュメントIDを取得（いろいろなプロパティパターンに対応）
@@ -104,14 +117,15 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
           id: documentId,
           title: documentName,
           building: result.building || result.metadata?.building || "未分類",
-          // 関連部分（チャンク）の配列
-          segments: []
+          tags: [],
+          // その他のプロパティ
         };
       }
 
       // 関連部分（チャンク）の情報を追加
       if (result.segment || result.content) {
-        grouped[documentId].segments.push({
+        grouped[documentId].chunks = grouped[documentId].chunks || [];
+        grouped[documentId].chunks.push({
           id: result.segment?.id || `segment-${Math.random()}`,
           content: result.segment?.content || result.content || "",
           score: result.score || null,
@@ -120,7 +134,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
       }
 
       // タグがあれば追加
-      if (result.tags && result.tags.length && !grouped[documentId].tags) {
+      if (result.tags && result.tags.length) {
         grouped[documentId].tags = result.tags;
       }
     });
@@ -182,13 +196,13 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
 
       text += "\n関連部分:\n";
 
-      if (doc.segments && doc.segments.length > 0) {
-        doc.segments.forEach((segment: any, segIndex: number) => {
+      if (doc.chunks && doc.chunks.length > 0) {
+        doc.chunks.forEach((chunk: any, segIndex: number) => {
           text += `\n------- 関連部分 ${segIndex + 1} -------\n`;
-          if (segment.score) {
-            text += `関連度: ${formatScore(segment.score)}\n`;
+          if (chunk.score) {
+            text += `関連度: ${formatScore(chunk.score)}\n`;
           }
-          text += `${segment.content}\n`;
+          text += `${chunk.content}\n`;
         });
       } else {
         text += "関連部分が見つかりません\n";
@@ -209,18 +223,18 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   };
 
   // ドキュメントの詳細を表示する
-  const handleDocumentView = (documentId: string, segmentId?: string) => {
+  const handleDocumentView = (documentId: string, chunkId?: string) => {
     const doc = groupedResults[documentId];
 
-    // 選択された特定のセグメントがある場合はそれを先頭に
-    if (segmentId && doc.segments) {
-      const targetSegment = doc.segments.find((s: any) => s.id === segmentId);
+    // 選択された特定のチャンクがある場合はそれを先頭に
+    if (chunkId && doc.chunks) {
+      const targetChunk = doc.chunks.find((s: any) => s.id === chunkId);
 
-      if (targetSegment) {
+      if (targetChunk) {
         setSelectedDocument({
           ...doc,
-          // 選択されたセグメントを先頭に持ってくる
-          viewingSegment: targetSegment
+          // 選択されたチャンクを先頭に持ってくる
+          viewingChunk: targetChunk
         });
       } else {
         setSelectedDocument(doc);
@@ -540,7 +554,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="bg-muted/30">
-                        {doc.segments?.length || 0} 関連部分
+                        {doc.chunks?.length || 0} 関連部分
                       </Badge>
                       <Button variant="ghost" size="sm" className="h-8 w-8 p-0" aria-label="展開切替">
                         {expandedDocuments[doc.id] ?
@@ -569,7 +583,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                 </CardHeader>
 
                 {/* 関連部分（チャンク）一覧 - 折りたたみ可能 */}
-                {expandedDocuments[doc.id] && doc.segments && doc.segments.length > 0 && (
+                {expandedDocuments[doc.id] && doc.chunks && doc.chunks.length > 0 && (
                   <CardContent className="pt-4">
                     <Table>
                       <TableHeader>
@@ -581,16 +595,16 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                       </TableHeader>
                       <TableBody>
                         {/* 関連度スコアでソート */}
-                        {doc.segments
+                        {doc.chunks
                           .sort((a: any, b: any) => (b.score || 0) - (a.score || 0))
-                          .map((segment: any, index: number) => (
-                            <TableRow key={segment.id || index} className="hover:bg-muted/50">
+                          .map((chunk: any, index: number) => (
+                            <TableRow key={chunk.id || index} className="hover:bg-muted/50">
                               <TableCell>
-                                {highlightImportantSections(segment.content)}
+                                {highlightImportantSections(chunk.content)}
                               </TableCell>
                               <TableCell>
-                                {segment.score ? (
-                                  <Badge variant="secondary">{formatScore(segment.score)}</Badge>
+                                {chunk.score ? (
+                                  <Badge variant="secondary">{formatScore(chunk.score)}</Badge>
                                 ) : (
                                   "N/A"
                                 )}
@@ -600,7 +614,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 w-8 p-0"
-                                  onClick={() => handleDocumentView(doc.id, segment.id)}
+                                  onClick={() => handleDocumentView(doc.id, chunk.id)}
                                 >
                                   <Eye className="h-4 w-4" />
                                   <span className="sr-only">詳細表示</span>
@@ -614,7 +628,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                 )}
 
                 {/* 関連部分がない場合のメッセージ */}
-                {expandedDocuments[doc.id] && (!doc.segments || doc.segments.length === 0) && (
+                {expandedDocuments[doc.id] && (!doc.chunks || doc.chunks.length === 0) && (
                   <CardContent>
                     <p className="text-center text-muted-foreground py-4">
                       この書類には検索条件に一致する関連部分が見つかりませんでした
@@ -637,47 +651,47 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
                 <Button variant="ghost" size="sm" onClick={closeDocumentView}>×</Button>
               </div>
               <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(80vh - 64px)' }}>
-                {/* 特定のセグメントを表示 */}
-                {selectedDocument.viewingSegment && (
+                {/* 特定のチャンクを表示 */}
+                {selectedDocument.viewingChunk && (
                   <div className="mb-6 space-y-2">
                     <div className="flex justify-between items-center">
                       <h4 className="text-sm font-semibold">関連部分</h4>
-                      {selectedDocument.viewingSegment.score && (
+                      {selectedDocument.viewingChunk.score && (
                         <Badge variant="secondary">
-                          関連度: {formatScore(selectedDocument.viewingSegment.score)}
+                          関連度: {formatScore(selectedDocument.viewingChunk.score)}
                         </Badge>
                       )}
                     </div>
                     <div className="bg-yellow-50 dark:bg-yellow-950/20 p-4 rounded border border-yellow-200 dark:border-yellow-900/30 mb-4">
-                      <pre className="whitespace-pre-wrap font-sans">{selectedDocument.viewingSegment.content}</pre>
+                      <pre className="whitespace-pre-wrap font-sans">{selectedDocument.viewingChunk.content}</pre>
                     </div>
                   </div>
                 )}
 
-                {/* 全てのセグメント一覧 */}
-                {selectedDocument.segments && selectedDocument.segments.length > 0 && (
+                {/* 全てのチャンク一覧 */}
+                {selectedDocument.chunks && selectedDocument.chunks.length > 0 && (
                   <div>
                     <h4 className="text-sm font-semibold mb-2">
-                      文書内の全ての関連部分 ({selectedDocument.segments.length}件)
+                      文書内の全ての関連部分 ({selectedDocument.chunks.length}件)
                     </h4>
                     <div className="bg-muted/50 p-4 rounded border max-h-64 overflow-y-auto space-y-4">
-                      {selectedDocument.segments
+                      {selectedDocument.chunks
                         .sort((a: any, b: any) => (b.score || 0) - (a.score || 0))
-                        .map((segment: any, index: number) => (
-                          <div key={segment.id || index}
-                            className={`p-3 rounded border ${selectedDocument.viewingSegment?.id === segment.id ?
-                                'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900/30' :
-                                'bg-white dark:bg-background'
+                        .map((chunk: any, index: number) => (
+                          <div key={chunk.id || index}
+                            className={`p-3 rounded border ${selectedDocument.viewingChunk?.id === chunk.id ?
+                              'bg-yellow-50 dark:bg-yellow-950/20 border-yellow-200 dark:border-yellow-900/30' :
+                              'bg-white dark:bg-background'
                               }`}>
                             <div className="flex justify-between items-center mb-1">
                               <span className="text-xs font-medium">関連部分 {index + 1}</span>
-                              {segment.score && (
+                              {chunk.score && (
                                 <Badge variant="secondary" className="text-xs">
-                                  関連度: {formatScore(segment.score)}
+                                  関連度: {formatScore(chunk.score)}
                                 </Badge>
                               )}
                             </div>
-                            <pre className="whitespace-pre-wrap font-sans text-sm">{segment.content}</pre>
+                            <pre className="whitespace-pre-wrap font-sans text-sm">{chunk.content}</pre>
                           </div>
                         ))}
                     </div>
