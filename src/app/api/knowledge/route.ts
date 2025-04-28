@@ -11,6 +11,19 @@ export async function GET(request: NextRequest) {
     const page = Number(searchParams.get("page") || "1");
     const limit = Number(searchParams.get("limit") || "20");
 
+    // 環境変数の診断情報をログ出力
+    console.log("API環境変数診断:", {
+      DIFY_API_ENDPOINT: process.env.DIFY_API_ENDPOINT ? "設定済み" : "未設定",
+      DIFY_API_KEY: process.env.DIFY_API_KEY ? "設定済み" : "未設定",
+      DIFY_KNOWLEDGE_API_KEY: process.env.DIFY_KNOWLEDGE_API_KEY
+        ? "設定済み"
+        : "未設定",
+      // APIキーが設定されている場合、トークンの最初の5文字だけをデバッグ表示（セキュリティのため）
+      KEY_PREFIX: process.env.DIFY_KNOWLEDGE_API_KEY
+        ? `${process.env.DIFY_KNOWLEDGE_API_KEY.substring(0, 5)}...`
+        : "なし",
+    });
+
     const data = await getKnowledgeBases(page, limit);
     return NextResponse.json(data);
   } catch (error: any) {

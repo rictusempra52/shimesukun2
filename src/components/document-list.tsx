@@ -109,10 +109,17 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   useEffect(() => {
     const fetchKnowledgeBases = async () => {
       try {
+        setIsLoading(true);
+        console.log("ナレッジベース一覧を取得中...");
         const result = await getKnowledgeBasesFromClient();
+        console.log("ナレッジベース取得結果:", result);
         setKnowledgeBases(result.data || []);
-      } catch (err) {
+        setError(null);
+      } catch (err: any) {
         console.error("Error fetching knowledge bases:", err);
+        setError(`ナレッジベース一覧の取得に失敗しました: ${err.message}`);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchKnowledgeBases();

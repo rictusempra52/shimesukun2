@@ -8,7 +8,7 @@ export async function POST(
   { params }: { params: Promise<{ datasetId: string }> }
 ) {
   try {
-    // URLからデータセットIDを取得（Promise型に対応）
+    // URLからデータセットIDを取得
     const { datasetId } = await params;
     if (!datasetId) {
       return NextResponse.json(
