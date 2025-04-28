@@ -6,6 +6,33 @@
 // - 表示モード: テーブルビューとカードビューの切り替え（レスポンシブ対応）
 // - データ取得: サーバーサイドAPIを使用したドキュメントデータの取得
 // - エラー処理: データ取得失敗時の表示と再試行機能
+//
+// ■ コンポーネントの役割
+// このコンポーネントはマンション管理書類のデータベース検索と表示を担当します。
+// 検索キーワードを入力し、様々な方法（ハイブリッド、セマンティック、キーワードなど）で
+// ドキュメントを検索できます。検索結果は書類ごとにグループ化され、関連部分を強調表示します。
+// 
+// ■ データフロー
+// 1. ナレッジベース一覧の取得
+// 2. ナレッジベース選択
+// 3. 検索クエリ入力
+// 4. API経由でドキュメント検索
+// 5. 検索結果の整形とグループ化
+// 6. UI表示（カード形式、テーブル形式）
+//
+// ■ 主な機能
+// - 複数の検索方法対応（ハイブリッド、セマンティック、キーワード、全文）
+// - 検索結果の階層表示（ドキュメント→チャンク）
+// - 関連度スコアによる並び替え
+// - 検索結果のテキストエクスポート
+// - 詳細モーダル表示
+// - 条項の自動ハイライト表示
+//
+// ■ 状態管理
+// このコンポーネントは多数のReactステート（useState）を使用して様々な状態を管理しています。
+// - 検索関連の状態（クエリ、メソッド、結果件数など）
+// - UI状態（ローディング、エラー、展開/折りたたみなど）
+// - 検索結果の状態（グループ化前・後のデータ）
 
 "use client"
 
@@ -32,6 +59,14 @@ interface DocumentListProps {
   initialDocuments?: Document[]
 }
 
+/** ドキュメントグループの型定義 
+ * - ドキュメントID、タイトル、マンション名、タグ、関連部分（チャンク）を含む
+ * @param id ドキュメントID
+ * @param title ドキュメントタイトル
+ * @param building マンション名
+ * @param tags タグの配列
+ * @param chunks 関連部分（チャンク）の配列（オプション）
+ */
 interface DocumentGroup {
   id: string;
   title: string;
@@ -65,9 +100,11 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
 
   // 検索結果をドキュメント単位でグループ化したもの
-  const [groupedResults, setGroupedResults] = useState<Record<string, DocumentGroup>>({});
+  const [groupedResults, setGroupedResults] =
+    useState<Record<string, DocumentGroup>>({});
   // 展開されているドキュメントID
-  const [expandedDocuments, setExpandedDocuments] = useState<{ [key: string]: boolean }>({});
+  const [expandedDocuments, setExpandedDocuments] =
+    useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     const fetchKnowledgeBases = async () => {
