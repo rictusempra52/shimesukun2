@@ -8,6 +8,15 @@ const DIFY_API_ENDPOINT =
 const DIFY_API_KEY = process.env.DIFY_API_KEY || "";
 const DIFY_KNOWLEDGE_API_KEY = process.env.DIFY_KNOWLEDGE_API_KEY || "";
 
+// デプロイ環境でのデバッグ用に環境変数の状態を確認するログを追加
+console.log("Dify API設定情報(api-service.ts):", {
+  ENDPOINT_SET: !!process.env.DIFY_API_ENDPOINT,
+  API_KEY_SET: !!process.env.DIFY_API_KEY,
+  KNOWLEDGE_API_KEY_SET: !!process.env.DIFY_KNOWLEDGE_API_KEY,
+  ENDPOINT_USED: DIFY_API_ENDPOINT,
+  // セキュリティのためAPIキー自体はログ出力しない
+});
+
 /**
  * Dify APIへの基本的なリクエストを送信する内部関数
  * @param endpoint APIエンドポイント
@@ -29,6 +38,11 @@ async function sendDifyRequest(
 
   // リクエスト前にデバッグ情報を出力
   console.log(`Dify APIリクエスト: ${DIFY_API_ENDPOINT}${endpoint}`);
+  
+  // 認証情報の状態を確認（apiKeyが空かどうか）
+  if (!apiKey) {
+    console.error("警告: APIキーが設定されていません。認証エラーが発生する可能性があります。");
+  }
 
   try {
     const response = await fetch(`${DIFY_API_ENDPOINT}${endpoint}`, {
@@ -42,6 +56,7 @@ async function sendDifyRequest(
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const error = await response.json();
+        console.error("Dify APIエラーレスポンス:", error);
         throw new Error(
           error.error ||
             error.message ||
@@ -49,6 +64,7 @@ async function sendDifyRequest(
         );
       } else {
         const text = await response.text();
+        console.error("Dify API非JSONエラーレスポンス:", text);
         throw new Error(`APIエラー: ${response.status} ${response.statusText}`);
       }
     }
@@ -111,10 +127,13 @@ async function sendDifyFormDataRequest(
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
         const error = await response.json();
+        console.error("Dify APIエラーレスポンス:", error);
         throw new Error(
           error.error || error.message || "APIリクエストに失敗しました"
         );
       } else {
+        const text = await response.text();
+        console.error("Dify API非JSONエラーレスポンス:", text);
         throw new Error(`APIエラー: ${response.status} ${response.statusText}`);
       }
     }

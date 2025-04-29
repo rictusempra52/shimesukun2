@@ -29,11 +29,16 @@ export default function KnowledgeExplorer() {
             setLoading(true);
             setError(null);
             try {
+                console.log('ナレッジベース一覧を取得中...');
                 const result = await getKnowledgeBases();
+                console.log('ナレッジベース取得結果:', result);
                 setKnowledgeBases(result.data || []);
             } catch (error: any) {
-                setError(error.message || "ナレッジベースの取得に失敗しました");
                 console.error("ナレッジベース取得エラー:", error);
+                setError(`ナレッジベースの取得に失敗しました: ${error.message || 'エラーが発生しました'}`);
+                if (error.message && error.message.includes('Authorization header')) {
+                    setError(`APIキー認証エラー: Dify API認証用のAPIキーが正しく設定されていない可能性があります。デプロイ環境の環境変数設定を確認してください。`);
+                }
             } finally {
                 setLoading(false);
             }
