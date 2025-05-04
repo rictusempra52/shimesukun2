@@ -6,23 +6,25 @@
 import { PDFDocument } from "pdf-lib";
 import { convertPDFToMarkdown } from "./gemini";
 
-// PDF.jsを動的にロードし、ワーカーを設定する関数
+// PDF.jsワーカーの設定方法を改善
 const loadPdfjsLib = async () => {
   if (typeof window === "undefined") {
     throw new Error("PDF.jsはブラウザ環境でのみ使用できます");
   }
-
+  
   try {
     // PDF.jsライブラリを動的にインポート
     const pdfjs = await import("pdfjs-dist");
-
-    // Next.jsのwebpack設定に合わせてワーカーを設定
-    // これにより、PDFワーカーが正しく読み込まれるようになります
-    if (typeof window !== "undefined" && "Worker" in window) {
-      // PDFワーカーのURLを直接設定する方法を使用
-      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+    
+    // 絶対パスでワーカーを指定
+    if (window.location.hostname === "localhost") {
+      // 開発環境
+      pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.js";
+    } else {
+      // 本番環境
+      pdfjs.GlobalWorkerOptions.workerSrc = `${window.location.origin}/pdf.worker.min.js`;
     }
-
+    
     return pdfjs;
   } catch (error) {
     console.error("PDF.jsのロード中にエラーが発生しました:", error);
