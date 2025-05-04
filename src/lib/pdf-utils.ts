@@ -4,12 +4,9 @@
  */
 
 import { PDFDocument } from "pdf-lib";
-
-// pdfjs-distはブラウザ環境のみでインポートするために、直接インポートしない
-// import * as pdfjs from "pdfjs-dist";
 import { convertPDFToMarkdown } from "./gemini";
 
-// 動的にpdfjs-distをロードする関数
+// PDF.jsを動的にロードし、ワーカーを設定する関数
 const loadPdfjsLib = async () => {
   if (typeof window === "undefined") {
     throw new Error("PDF.jsはブラウザ環境でのみ使用できます");
@@ -19,10 +16,11 @@ const loadPdfjsLib = async () => {
     // PDF.jsライブラリを動的にインポート
     const pdfjs = await import("pdfjs-dist");
 
-    // ワーカーを設定
-    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
-      // Next.jsとの互換性のあるワーカー設定
-      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    // Next.jsのwebpack設定に合わせてワーカーを設定
+    // これにより、PDFワーカーが正しく読み込まれるようになります
+    if (typeof window !== "undefined" && "Worker" in window) {
+      // PDFワーカーのURLを直接設定する方法を使用
+      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
     }
 
     return pdfjs;
@@ -64,6 +62,11 @@ export async function convertPDFToImages(
 
     // PDF.jsを動的にロード
     const pdfjs = await loadPdfjsLib();
+
+    console.log(
+      "PDF.jsを正常にロードしました。ワーカー設定:",
+      pdfjs.GlobalWorkerOptions.workerSrc
+    );
 
     // PDF.jsでPDFをロード
     const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
