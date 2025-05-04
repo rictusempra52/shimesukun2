@@ -1,19 +1,39 @@
 /**
  * Gemini APIを使用するためのユーティリティ関数
  * PDFのOCRやマークダウン変換などの処理をサポート
+ * このモジュールはクライアントサイドでのみ使用可能です
  */
-import { GoogleGenerativeAI } from "@google/generative-ai";
 
-// Gemini APIの設定
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
+// 環境変数の取得 - クライアントサイドでは NEXT_PUBLIC_ プレフィックスが必要
+const GEMINI_API_KEY =
+  typeof window !== "undefined"
+    ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
+    : "";
 const geminiModel = "gemini-2.0-flash"; // 最適なモデル
+
+// GoogleGenerativeAI をクライアントサイドでのみインポートするための動的インポート
+let GoogleGenerativeAI: any;
 
 /**
  * Gemini APIのクライアントを作成
+ * この関数はクライアントサイドでのみ使用可能です
  */
-export const getGeminiClient = () => {
+export const getGeminiClient = async () => {
+  // サーバーサイドでの実行を防止
+  if (typeof window === "undefined") {
+    throw new Error("Gemini APIはブラウザ環境でのみ使用できます");
+  }
+
   if (!GEMINI_API_KEY) {
-    throw new Error("GEMINI_API_KEY is not set in environment variables");
+    throw new Error(
+      "NEXT_PUBLIC_GEMINI_API_KEY is not set in environment variables"
+    );
+  }
+
+  // GoogleGenerativeAIを動的にインポート
+  if (!GoogleGenerativeAI) {
+    const module = await import("@google/generative-ai");
+    GoogleGenerativeAI = module.GoogleGenerativeAI;
   }
 
   return new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -21,6 +41,7 @@ export const getGeminiClient = () => {
 
 /**
  * 画像からテキストを抽出してマークダウンに変換
+ * この関数はクライアントサイドでのみ使用可能です
  *
  * @param imageBuffer - 画像データのバッファ
  * @returns マークダウンフォーマットされたテキスト
@@ -28,8 +49,13 @@ export const getGeminiClient = () => {
 export async function extractTextAsMarkdown(
   imageBuffer: ArrayBuffer
 ): Promise<string> {
+  // サーバーサイドでの実行を防止
+  if (typeof window === "undefined") {
+    throw new Error("この関数はブラウザ環境でのみ使用できます");
+  }
+
   try {
-    const genAI = getGeminiClient();
+    const genAI = await getGeminiClient();
     const model = genAI.getGenerativeModel({ model: geminiModel });
 
     // OCR実行用プロンプト
@@ -43,8 +69,13 @@ Don't try to output any image.
 Output should be in Japanese if the original text is in Japanese.
 `;
 
-    // 画像データをBase64に変換
-    const base64Image = Buffer.from(imageBuffer).toString("base64");
+    // 画像データをBase64に変換（ブラウザ環境ではBufferの代わりにUint8Arrayを使用）
+    const uint8Array = new Uint8Array(imageBuffer);
+    const base64Image = btoa(
+      Array.from(uint8Array)
+        .map((b) => String.fromCharCode(b))
+        .join("")
+    );
 
     // Gemini APIに画像を送信して処理
     const result = await model.generateContent([
@@ -70,6 +101,7 @@ Output should be in Japanese if the original text is in Japanese.
 
 /**
  * PDFの各ページをMarkdownに変換する
+ * この関数はクライアントサイドでのみ使用可能です
  *
  * @param pdfPagesAsImages - PDFの各ページを画像として表現したバッファの配列
  * @param progressCallback - 処理の進捗を報告するコールバック関数（0-100）
@@ -79,6 +111,11 @@ export async function convertPDFToMarkdown(
   pdfPagesAsImages: ArrayBuffer[],
   progressCallback?: (progress: number) => void
 ): Promise<string[]> {
+  // サーバーサイドでの実行を防止
+  if (typeof window === "undefined") {
+    throw new Error("この関数はブラウザ環境でのみ使用できます");
+  }
+
   const markdownChunks: string[] = [];
 
   // 各ページを順番に処理

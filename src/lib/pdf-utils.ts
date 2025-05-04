@@ -4,16 +4,25 @@
  */
 
 import { PDFDocument } from "pdf-lib";
-import * as pdfjs from "pdfjs-dist";
+
+// pdfjs-distはブラウザ環境のみでインポートするために、直接インポートしない
+// import * as pdfjs from "pdfjs-dist";
 import { convertPDFToMarkdown } from "./gemini";
 
-// PDF.jsのワーカーを設定
-if (typeof window !== "undefined") {
+// 動的にpdfjs-distをロードする関数
+const loadPdfjsLib = async () => {
+  if (typeof window === "undefined") {
+    throw new Error("PDF.jsはブラウザ環境でのみ使用できます");
+  }
+
+  const pdfjs = await import("pdfjs-dist");
   pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-}
+  return pdfjs;
+};
 
 /**
  * PDFファイルから全ページの画像を生成
+ * この関数はクライアントサイドでのみ使用可能です
  *
  * @param pdfBuffer - PDFファイルのバッファ
  * @param progressCallback - 進捗状況を報告するコールバック関数（0-100）
@@ -23,6 +32,11 @@ export async function convertPDFToImages(
   pdfBuffer: ArrayBuffer,
   progressCallback?: (progress: number) => void
 ): Promise<ArrayBuffer[]> {
+  // サーバーサイドではエラーをスローする
+  if (typeof window === "undefined") {
+    throw new Error("この関数はブラウザ環境でのみ使用できます");
+  }
+
   try {
     // PDFドキュメントをロード
     const pdfDoc = await PDFDocument.load(pdfBuffer);
@@ -36,73 +50,68 @@ export async function convertPDFToImages(
       progressCallback(0);
     }
 
-    // ブラウザ環境で各ページを画像としてレンダリング
-    if (typeof window !== "undefined") {
-      // PDF.jsでPDFをロード
-      const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
-      const pdf = await loadingTask.promise;
+    // PDF.jsを動的にロード
+    const pdfjs = await loadPdfjsLib();
 
-      // 各ページを処理
-      for (let i = 0; i < pageCount; i++) {
-        try {
-          const pageNum = i + 1;
-          console.log(`ページ ${pageNum}/${pageCount} を画像化中...`);
+    // PDF.jsでPDFをロード
+    const loadingTask = pdfjs.getDocument({ data: pdfBuffer });
+    const pdf = await loadingTask.promise;
 
-          // 進捗状況の更新（画像変換部分は全体の50%と想定）
-          if (progressCallback) {
-            progressCallback(Math.floor((i / pageCount) * 50));
-          }
+    // 各ページを処理
+    for (let i = 0; i < pageCount; i++) {
+      try {
+        const pageNum = i + 1;
+        console.log(`ページ ${pageNum}/${pageCount} を画像化中...`);
 
-          // PDFページを取得
-          const page = await pdf.getPage(pageNum);
-
-          // ページのビューポートを設定（解像度を調整）
-          const viewport = page.getViewport({ scale: 1.5 }); // スケールを調整して解像度を上げる
-
-          // キャンバスを作成
-          const canvas = document.createElement("canvas");
-          const context = canvas.getContext("2d");
-
-          if (!context) {
-            throw new Error("Canvasコンテキストを取得できませんでした");
-          }
-
-          // キャンバスサイズをビューポートに合わせる
-          canvas.width = viewport.width;
-          canvas.height = viewport.height;
-
-          // PDFページをキャンバスにレンダリング
-          const renderContext = {
-            canvasContext: context,
-            viewport: viewport,
-          };
-
-          await page.render(renderContext).promise;
-
-          // キャンバスをPNG画像に変換
-          const imageBlob = await new Promise<Blob>((resolve) => {
-            canvas.toBlob(
-              (blob) => {
-                if (blob) resolve(blob);
-                else throw new Error("Canvasを画像に変換できませんでした");
-              },
-              "image/png",
-              0.95
-            ); // 高品質でエクスポート
-          });
-
-          // BlobをArrayBufferに変換
-          const imageArrayBuffer = await imageBlob.arrayBuffer();
-          pageImages.push(imageArrayBuffer);
-        } catch (error) {
-          console.error(`ページ ${i + 1} の処理中にエラー:`, error);
+        // 進捗状況の更新（画像変換部分は全体の50%と想定）
+        if (progressCallback) {
+          progressCallback(Math.floor((i / pageCount) * 50));
         }
+
+        // PDFページを取得
+        const page = await pdf.getPage(pageNum);
+
+        // ページのビューポートを設定（解像度を調整）
+        const viewport = page.getViewport({ scale: 1.5 }); // スケールを調整して解像度を上げる
+
+        // キャンバスを作成
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+
+        if (!context) {
+          throw new Error("Canvasコンテキストを取得できませんでした");
+        }
+
+        // キャンバスサイズをビューポートに合わせる
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
+
+        // PDFページをキャンバスにレンダリング
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport,
+        };
+
+        await page.render(renderContext).promise;
+
+        // キャンバスをPNG画像に変換
+        const imageBlob = await new Promise<Blob>((resolve) => {
+          canvas.toBlob(
+            (blob) => {
+              if (blob) resolve(blob);
+              else throw new Error("Canvasを画像に変換できませんでした");
+            },
+            "image/png",
+            0.95
+          ); // 高品質でエクスポート
+        });
+
+        // BlobをArrayBufferに変換
+        const imageArrayBuffer = await imageBlob.arrayBuffer();
+        pageImages.push(imageArrayBuffer);
+      } catch (error) {
+        console.error(`ページ ${i + 1} の処理中にエラー:`, error);
       }
-    } else {
-      // サーバー側では別の方法が必要
-      throw new Error(
-        "サーバーサイドでのPDFレンダリングはまだ実装されていません"
-      );
     }
 
     // 画像変換が完了したら50%まで進捗を更新
@@ -119,6 +128,7 @@ export async function convertPDFToImages(
 
 /**
  * PDFをマークダウンに変換するためのワークフロー全体を管理
+ * この関数はクライアントサイドでのみ使用可能です
  *
  * @param fileOrBuffer - PDFファイルまたはバッファ
  * @param progressCallback - 進捗状況を報告するコールバック関数（0-100）
@@ -128,6 +138,11 @@ export async function processPDFToMarkdown(
   fileOrBuffer: File | ArrayBuffer,
   progressCallback?: (progress: number) => void
 ): Promise<string[]> {
+  // サーバーサイドではエラーをスローする
+  if (typeof window === "undefined") {
+    throw new Error("この関数はブラウザ環境でのみ使用できます");
+  }
+
   try {
     // ファイルかバッファかを判断し、バッファに統一
     let pdfBuffer: ArrayBuffer;

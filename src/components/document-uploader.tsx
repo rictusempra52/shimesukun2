@@ -12,7 +12,6 @@ import { Progress } from "@/components/ui/progress"
 import { FileUp, Upload, Check, AlertCircle, Sparkles, Database, FileText } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { getKnowledgeBasesFromClient, uploadDocumentToKnowledgeBase, analyzeDocumentWithAI } from "@/lib/dify/browser"
-import { processPDFToMarkdown } from "@/lib/pdf-utils" // PDF処理関数をインポート
 import { Badge } from "@/components/ui/badge"
 
 export function DocumentUploader() {
@@ -256,45 +255,55 @@ export function DocumentUploader() {
     setSuggestedDescription(null)
   }
 
+  // Gemini PDF→Markdown変換処理
   const handleGeminiConversion = async () => {
-    if (!file || file.type !== "application/pdf") {
-      setError("PDFファイルを選択してください")
-      return
+    // クライアントサイドでのみ実行可能
+    if (typeof window === "undefined") {
+      setError("この機能はブラウザ環境でのみ使用できます");
+      return;
     }
 
-    setIsConvertingToMarkdown(true)
-    setConversionProgress(0)
-    setError(null)
-    setMarkdownChunks([]) // 前回の結果をクリア
-    setConversionComplete(false)
+    if (!file || file.type !== "application/pdf") {
+      setError("PDFファイルを選択してください");
+      return;
+    }
+
+    setIsConvertingToMarkdown(true);
+    setConversionProgress(0);
+    setError(null);
+    setMarkdownChunks([]); // 前回の結果をクリア
+    setConversionComplete(false);
 
     try {
+      // 動的インポートを使用してクライアントサイドでのみモジュールを読み込む
+      const { processPDFToMarkdown } = await import("@/lib/pdf-utils");
+
       // PDFをMarkdownに変換（進捗状況を受け取るコールバックを渡す）
       const result = await processPDFToMarkdown(file, (progress) => {
-        setConversionProgress(progress)
-      })
+        setConversionProgress(progress);
+      });
 
       // 結果を保存
-      setMarkdownChunks(result)
-      setConversionComplete(true)
+      setMarkdownChunks(result);
+      setConversionComplete(true);
 
       // 変換結果をメタデータに適用
       if (result.length > 0) {
         // 最初のチャンクから概要を生成
-        const firstChunk = result[0].substring(0, 100) + "..."
+        const firstChunk = result[0].substring(0, 100) + "...";
         if (!description) {
-          setDescription(firstChunk)
+          setDescription(firstChunk);
         } else {
-          setSuggestedDescription(firstChunk)
+          setSuggestedDescription(firstChunk);
         }
       }
     } catch (err: any) {
-      console.error("Gemini変換エラー:", err)
-      setError(`Gemini変換中にエラーが発生しました: ${err.message || "不明なエラー"}`)
+      console.error("Gemini変換エラー:", err);
+      setError(`Gemini変換中にエラーが発生しました: ${err.message || "不明なエラー"}`);
     } finally {
-      setIsConvertingToMarkdown(false)
+      setIsConvertingToMarkdown(false);
     }
-  }
+  };
 
   if (success) {
     return (
