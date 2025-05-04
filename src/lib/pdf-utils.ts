@@ -17,10 +17,8 @@ const loadPdfjsLib = async () => {
     const pdfjs = await import("pdfjs-dist");
 
     // Next.jsのwebpack設定に合わせてワーカーを設定
-    // これにより、PDFワーカーが正しく読み込まれるようになります
     if (typeof window !== "undefined" && "Worker" in window) {
-      const PdfjsWorker = await import("pdfjs-dist/build/pdf.worker.entry");
-      pdfjs.GlobalWorkerOptions.workerSrc = PdfjsWorker.default;
+      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
     }
 
     return pdfjs;
