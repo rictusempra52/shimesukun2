@@ -1,47 +1,12 @@
 /**
  * Gemini APIを使用するためのユーティリティ関数
  * PDFのOCRやマークダウン変換などの処理をサポート
- * このモジュールはクライアントサイドでのみ使用可能です
+ * サーバーサイドAPIを経由してGemini APIを使用します
  */
-
-// 環境変数の取得 - クライアントサイドでは NEXT_PUBLIC_ プレフィックスが必要
-const GEMINI_API_KEY =
-  typeof window !== "undefined"
-    ? process.env.NEXT_PUBLIC_GEMINI_API_KEY || ""
-    : "";
-const geminiModel = "gemini-2.0-flash"; // 最適なモデル
-
-// GoogleGenerativeAI をクライアントサイドでのみインポートするための動的インポート
-let GoogleGenerativeAI: any;
-
-/**
- * Gemini APIのクライアントを作成
- * この関数はクライアントサイドでのみ使用可能です
- */
-export const getGeminiClient = async () => {
-  // サーバーサイドでの実行を防止
-  if (typeof window === "undefined") {
-    throw new Error("Gemini APIはブラウザ環境でのみ使用できます");
-  }
-
-  if (!GEMINI_API_KEY) {
-    throw new Error(
-      "NEXT_PUBLIC_GEMINI_API_KEY is not set in environment variables"
-    );
-  }
-
-  // GoogleGenerativeAIを動的にインポート
-  if (!GoogleGenerativeAI) {
-    const module = await import("@google/generative-ai");
-    GoogleGenerativeAI = module.GoogleGenerativeAI;
-  }
-
-  return new GoogleGenerativeAI(GEMINI_API_KEY);
-};
 
 /**
  * 画像からテキストを抽出してマークダウンに変換
- * この関数はクライアントサイドでのみ使用可能です
+ * サーバーサイドAPIを使用して処理します
  *
  * @param imageBuffer - 画像データのバッファ
  * @returns マークダウンフォーマットされたテキスト
@@ -49,27 +14,8 @@ export const getGeminiClient = async () => {
 export async function extractTextAsMarkdown(
   imageBuffer: ArrayBuffer
 ): Promise<string> {
-  // サーバーサイドでの実行を防止
-  if (typeof window === "undefined") {
-    throw new Error("この関数はブラウザ環境でのみ使用できます");
-  }
-
   try {
-    const genAI = await getGeminiClient();
-    const model = genAI.getGenerativeModel({ model: geminiModel });
-
-    // OCR実行用プロンプト
-    const MARKDOWN_PROMPT = `
-OCR the following page into Markdown. Tables should be formatted as HTML.
-Do not surround your output with triple backticks.
-Chunk the document into sections of roughly 250 - 1000 words.
-Surround each chunk with <chunk> and </chunk> tags.
-Preserve as much content as possible, including headings, tables, etc.
-Don't try to output any image.
-Output should be in Japanese if the original text is in Japanese.
-`;
-
-    // 画像データをBase64に変換（ブラウザ環境ではBufferの代わりにUint8Arrayを使用）
+    // 画像データをBase64に変換（ブラウザ環境ではUint8Arrayを使用）
     const uint8Array = new Uint8Array(imageBuffer);
     const base64Image = btoa(
       Array.from(uint8Array)
@@ -77,22 +23,24 @@ Output should be in Japanese if the original text is in Japanese.
         .join("")
     );
 
-    // Gemini APIに画像を送信して処理
-    const result = await model.generateContent([
-      MARKDOWN_PROMPT,
-      {
-        inlineData: {
-          data: base64Image,
-          mimeType: "image/png",
-        },
+    // サーバーサイドAPIを呼び出してGemini処理を実行
+    const response = await fetch("/api/gemini/extract-text", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    ]);
+      body: JSON.stringify({
+        imageBase64: base64Image,
+      }),
+    });
 
-    // レスポンステキストを取得
-    const response = await result.response;
-    const markdown = response.text();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`APIエラー: ${errorData.error || response.statusText}`);
+    }
 
-    return markdown;
+    const result = await response.json();
+    return result.markdown;
   } catch (error: any) {
     console.error("Gemini APIエラー:", error);
     throw new Error(`Geminiによるテキスト抽出に失敗しました: ${error.message}`);
@@ -129,7 +77,7 @@ export async function convertPDFToMarkdown(
         progressCallback(progress);
       }
 
-      // ページの画像からテキストを抽出
+      // ページの画像からテキストを抽出（サーバーサイドAPIを使用）
       const pageMarkdown = await extractTextAsMarkdown(pdfPagesAsImages[i]);
 
       // チャンクを抽出
