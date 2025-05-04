@@ -15,9 +15,21 @@ const loadPdfjsLib = async () => {
     throw new Error("PDF.jsはブラウザ環境でのみ使用できます");
   }
 
-  const pdfjs = await import("pdfjs-dist");
-  pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-  return pdfjs;
+  try {
+    // PDF.jsライブラリを動的にインポート
+    const pdfjs = await import("pdfjs-dist");
+
+    // ワーカーを設定
+    if (!pdfjs.GlobalWorkerOptions.workerSrc) {
+      // Next.jsとの互換性のあるワーカー設定
+      pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+    }
+
+    return pdfjs;
+  } catch (error) {
+    console.error("PDF.jsのロード中にエラーが発生しました:", error);
+    throw new Error(`PDF.jsのロードに失敗しました: ${error}`);
+  }
 };
 
 /**
