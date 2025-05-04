@@ -38,10 +38,12 @@ async function sendDifyRequest(
 
   // リクエスト前にデバッグ情報を出力
   console.log(`Dify APIリクエスト: ${DIFY_API_ENDPOINT}${endpoint}`);
-  
+
   // 認証情報の状態を確認（apiKeyが空かどうか）
   if (!apiKey) {
-    console.error("警告: APIキーが設定されていません。認証エラーが発生する可能性があります。");
+    console.error(
+      "警告: APIキーが設定されていません。認証エラーが発生する可能性があります。"
+    );
   }
 
   try {

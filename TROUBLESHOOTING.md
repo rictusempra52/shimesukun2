@@ -11,14 +11,14 @@
    - [Firebase エミュレーター接続エラー](#firebase-エミュレーター接続エラー)
 2. [Firebase エミュレーター関連の問題](#firebase-エミュレーター関連の問題)
    - [エラー: データベースルールが設定されていない](#エラー-データベースルールが設定されていない)
-3. [API関連の問題](#api関連の問題)
+3. [API 関連の問題](#api関連の問題)
    - [エラー: "Dify API キーが設定されていません"](#エラー-dify-api-キーが設定されていません)
    - [エラー: "AI 回答の生成に失敗しました"](#エラー-ai-回答の生成に失敗しました)
    - [エラー: "CORS policy" または "No 'Access-Control-Allow-Origin' header"](#エラー-cors-policy-または-no-access-control-allow-origin-header)
    - [回答品質に関する問題](#回答品質に関する問題)
    - [エラー: 必須パラメータが不足している](#エラー-必須パラメータが不足している)
    - [エラー: "HTML エラーページが返されました" または "Unexpected token '<'"](#エラー-htmlエラーページが返されました-または-unexpected-token)
-   - [Dify API認証エラー: "Authorization header must be provided and start with 'Bearer'"](#dify-api認証エラー-authorization-header-must-be-provided-and-start-with-bearer)
+   - [Dify API 認証エラー: "Authorization header must be provided and start with 'Bearer'"](#dify-api認証エラー-authorization-header-must-be-provided-and-start-with-bearer)
 4. [Dify ナレッジベース API 関連のトラブル](#dify-ナレッジベース-api-関連のトラブル)
    - [エラー: "Dify API キーが設定されていません"](#エラー-dify-api-キーが設定されていません-1)
    - [エラー: "ドキュメントのアップロードに失敗しました"](#エラー-ドキュメントのアップロードに失敗しました)
@@ -230,7 +230,7 @@ Firebase エミュレーターのデータベース設定にルールファイ�
 
 これでエラーが解消されるはずです。
 
-## API関連の問題
+## API 関連の問題
 
 ### エラー: "Dify API キーが設定されていません"
 
@@ -359,13 +359,13 @@ Dify API のエンドポイントが正しく設定されていない、また�
 
 これにより、HTML エラーページが返される問題を解消できます。
 
-### Dify API認証エラー: "Authorization header must be provided and start with 'Bearer'"
+### Dify API 認証エラー: "Authorization header must be provided and start with 'Bearer'"
 
 **症状:**
 ナレッジベース一覧の取得時や検索時に「Authorization header must be provided and start with 'Bearer'」というエラーが表示される。
 
 **原因:**
-Dify APIへのリクエストで必要な認証トークン（Bearer token）が提供されていません。これは以下の理由で発生する可能性があります：
+Dify API へのリクエストで必要な認証トークン（Bearer token）が提供されていません。これは以下の理由で発生する可能性があります：
 
 1. 環境変数 `DIFY_KNOWLEDGE_API_KEY` が設定されていない
 2. 環境変数が正しく読み込まれていない
@@ -373,24 +373,28 @@ Dify APIへのリクエストで必要な認証トークン（Bearer token）が
 **解決策:**
 
 1. **ローカル環境の場合:**
+
    - `.env.local` ファイルに以下の環境変数が正しく設定されていることを確認：
+
    ```
    DIFY_API_ENDPOINT=https://api.dify.ai/v1
    DIFY_API_KEY=your_dify_app_api_key
    DIFY_KNOWLEDGE_API_KEY=your_dify_knowledge_api_key
    ```
+
    - 開発サーバーを再起動して、環境変数の変更を反映させる
 
-2. **デプロイ環境（Vercel、Netlify、Firebase Hostingなど）の場合:**
+2. **デプロイ環境（Vercel、Netlify、Firebase Hosting など）の場合:**
+
    - デプロイ先のプラットフォームの環境変数設定画面で、上記の環境変数が設定されていることを確認
    - Vercel: ダッシュボード > プロジェクト > Settings > Environment Variables
    - Netlify: ダッシュボード > Site > Site settings > Environment > Environment variables
-   - Firebase: Firebase CLIの環境変数設定機能を使用
+   - Firebase: Firebase CLI の環境変数設定機能を使用
    - 環境変数を追加または更新した後、再デプロイが必要な場合があります
 
 3. **環境変数が正しく設定されているが、まだエラーが発生する場合:**
-   - Dify APIキーが有効であるか確認（Difyダッシュボードで確認可能）
-   - APIキーの権限を確認（ナレッジベースにアクセスするための適切な権限が必要）
+   - Dify API キーが有効であるか確認（Dify ダッシュボードで確認可能）
+   - API キーの権限を確認（ナレッジベースにアクセスするための適切な権限が必要）
    - ネットワークの問題がないか確認
 
 ## Dify ナレッジベース API 関連のトラブル
@@ -501,8 +505,9 @@ Dify APIへのリクエストで必要な認証トークン（Bearer token）が
 ローカル環境と本番環境で環境変数の設定に違いがある可能性があります。
 
 **解決策:**
+
 1. ローカル環境の `.env.local` と本番環境の環境変数設定が一致していることを確認
-2. 機密情報（APIキーなど）がリポジトリにコミットされていないことを確認
+2. 機密情報（API キーなど）がリポジトリにコミットされていないことを確認
 3. 必要に応じて、デプロイプロセスで環境変数が正しく渡されているか確認
 
 ### 環境変数のデバッグ方法
@@ -513,4 +518,4 @@ Dify APIへのリクエストで必要な認証トークン（Bearer token）が
 2. 一時的にコンソールログを追加してデバッグ情報を出力（例: `console.log("環境変数:", { ENDPOINT_SET: !!process.env.DIFY_API_ENDPOINT });`）
 3. 環境変数が存在するかどうかの条件分岐を追加してエラーメッセージを改善
 
-**重要:** デバッグ目的であっても、APIキーなどの機密情報をログに出力しないでください。代わりに `!!process.env.SOME_KEY` のように存在チェックの結果だけをログ出力しましょう。
+**重要:** デバッグ目的であっても、API キーなどの機密情報をログに出力しないでください。代わりに `!!process.env.SOME_KEY` のように存在チェックの結果だけをログ出力しましょう。
