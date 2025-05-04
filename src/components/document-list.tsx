@@ -37,7 +37,7 @@
 "use client"
 
 // - ReactのuseState, useEffect: 状態管理と副作用処理
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 // - UIコンポーネント
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -45,13 +45,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectItem, SelectContent, SelectTrigger, SelectValue } from "@/components/ui/select"
 // - アイコン
-import { ChevronDown, ChevronRight, Download, Eye, FileIcon, Search } from "lucide-react"
+import { ChevronDown, ChevronRight, Download, Eye, FileIcon, Search, FileText } from "lucide-react"
 // - ルーター
 import { useRouter } from "next/navigation"
 // - 型定義
 import { Document } from "@/types/document"
 import { getKnowledgeBasesFromClient } from "@/lib/dify/browser" // ナレッジベース取得関数
 import { Badge } from "@/components/ui/badge"
+import { processPDFToMarkdown } from "@/lib/pdf-utils" // PDF処理関数をインポート
 
 /** DocumentListコンポーネントのプロップ定義 */
 interface DocumentListProps {
@@ -116,7 +117,7 @@ export function DocumentList({ searchQuery = "", initialDocuments = [] }: Docume
         setKnowledgeBases(result.data || []);
         setError(null);
       } catch (err: any) {
-        console.error("Error fetching knowledge bases:", err);
+        console.error("Error fetching knowledge bases:", err)
         setError(`ナレッジベース一覧の取得に失敗しました: ${err.message}`);
       } finally {
         setIsLoading(false);

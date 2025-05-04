@@ -9,9 +9,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { Progress } from "@/components/ui/progress"
-import { FileUp, Upload, Check, AlertCircle, Sparkles, Database } from "lucide-react"
+import { FileUp, Upload, Check, AlertCircle, Sparkles, Database, FileText } from "lucide-react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { getKnowledgeBasesFromClient, uploadDocumentToKnowledgeBase, analyzeDocumentWithAI } from "@/lib/dify/browser"
+import { processPDFToMarkdown } from "@/lib/pdf-utils" // PDF処理関数をインポート
+import { Badge } from "@/components/ui/badge"
 
 export function DocumentUploader() {
   const [file, setFile] = useState<File | null>(null)
@@ -33,6 +35,13 @@ export function DocumentUploader() {
   const [suggestedTitle, setSuggestedTitle] = useState<string | null>(null)
   const [suggestedBuilding, setSuggestedBuilding] = useState<string | null>(null)
   const [suggestedDescription, setSuggestedDescription] = useState<string | null>(null)
+
+  // Gemini変換関連の状態
+  const [markdownChunks, setMarkdownChunks] = useState<string[]>([])
+  const [isConvertingToMarkdown, setIsConvertingToMarkdown] = useState(false)
+  const [conversionComplete, setConversionComplete] = useState(false)
+  const [conversionProgress, setConversionProgress] = useState(0)
+  const [useGeminiOCR, setUseGeminiOCR] = useState(false)
 
   // コンポーネント初期化時にナレッジベース一覧を取得
   useEffect(() => {
@@ -229,6 +238,10 @@ export function DocumentUploader() {
     setSuggestedBuilding(null)
     setSuggestedDescription(null)
     setIsProcessingOcr(false)
+    setMarkdownChunks([])
+    setConversionComplete(false)
+    setConversionProgress(0)
+    setUseGeminiOCR(false)
   }
 
   // 全ての提案を一括で適用する
@@ -241,6 +254,46 @@ export function DocumentUploader() {
     setSuggestedTitle(null)
     setSuggestedBuilding(null)
     setSuggestedDescription(null)
+  }
+
+  const handleGeminiConversion = async () => {
+    if (!file || file.type !== "application/pdf") {
+      setError("PDFファイルを選択してください")
+      return
+    }
+
+    setIsConvertingToMarkdown(true)
+    setConversionProgress(0)
+    setError(null)
+    setMarkdownChunks([]) // 前回の結果をクリア
+    setConversionComplete(false)
+
+    try {
+      // PDFをMarkdownに変換（進捗状況を受け取るコールバックを渡す）
+      const result = await processPDFToMarkdown(file, (progress) => {
+        setConversionProgress(progress)
+      })
+
+      // 結果を保存
+      setMarkdownChunks(result)
+      setConversionComplete(true)
+
+      // 変換結果をメタデータに適用
+      if (result.length > 0) {
+        // 最初のチャンクから概要を生成
+        const firstChunk = result[0].substring(0, 100) + "..."
+        if (!description) {
+          setDescription(firstChunk)
+        } else {
+          setSuggestedDescription(firstChunk)
+        }
+      }
+    } catch (err: any) {
+      console.error("Gemini変換エラー:", err)
+      setError(`Gemini変換中にエラーが発生しました: ${err.message || "不明なエラー"}`)
+    } finally {
+      setIsConvertingToMarkdown(false)
+    }
   }
 
   if (success) {
@@ -468,6 +521,51 @@ export function DocumentUploader() {
             <span>{progress}%</span>
           </div>
           <Progress value={progress} className="h-2" />
+        </div>
+      )}
+
+      {file && file.type === "application/pdf" && (
+        <div className="space-y-2">
+          <Label htmlFor="geminiConversion">Gemini PDF→Markdown変換</Label>
+          <Button
+            type="button"
+            onClick={handleGeminiConversion}
+            disabled={isConvertingToMarkdown}
+            className="w-full"
+          >
+            {isConvertingToMarkdown ? (
+              <span className="flex items-center gap-2">
+                <FileText className="h-4 w-4 animate-pulse" />
+                変換中...
+              </span>
+            ) : (
+              <span className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Markdownに変換
+              </span>
+            )}
+          </Button>
+          {isConvertingToMarkdown && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>変換中...</span>
+                <span>{conversionProgress}%</span>
+              </div>
+              <Progress value={conversionProgress} className="h-2" />
+            </div>
+          )}
+          {conversionComplete && (
+            <div className="space-y-2">
+              <Label>変換結果</Label>
+              <div className="space-y-2">
+                {markdownChunks.map((chunk, index) => (
+                  <Badge key={index} className="block w-full text-left">
+                    {chunk}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
