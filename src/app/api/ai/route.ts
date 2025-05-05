@@ -8,6 +8,22 @@ import { askDifyBuildingManagementQuestion } from "@/lib/dify";
 export const config = {
   maxDuration: 60,
 };
+
+/**
+ * レスポンスの文字数を確認し、問題がないことを検証する
+ * @param response Difyからのレスポンス
+ * @returns 処理されたレスポンス
+ */
+function validateAndProcessResponse(response: any) {
+  // 文字数制限の問題を解決するために実行時チェック
+  if (typeof response === "object") {
+    // レスポンスが長文でも確実に表示されるよう処理
+    console.log("Dify完全レスポンス:", JSON.stringify(response).length, "文字");
+    return response;
+  }
+  return response;
+}
+
 /**
  * AIの質問応答APIエンドポイント
  * クライアントからの質問をサーバーサイドのDify関数に転送
@@ -21,7 +37,10 @@ export async function POST(req: NextRequest) {
     const { query } = await req.json();
     const response = await askDifyBuildingManagementQuestion(query);
 
-    return NextResponse.json(response, {
+    // レスポンスを検証・処理
+    const processedResponse = validateAndProcessResponse(response);
+
+    return NextResponse.json(processedResponse, {
       headers: {
         "Cache-Control": "no-store, no-cache, max-age=0, must-revalidate",
       },

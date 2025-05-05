@@ -1,3 +1,136 @@
+app:
+  mode: workflow
+  name: フロント担当者向けマンション管理チャットボット
+  version: 1.0.0
+
+workflow:
+  graph:
+    edges:
+      - source: start_node
+        target: question_classifier_node
+        data:
+          sourceType: start
+          targetType: question_classifier
+      - source: question_classifier_node
+        target: data_retrieval_node
+        data:
+          sourceType: question_classifier
+          targetType: data_retrieval
+          sourceHandle: '区分所有法'  # 例：区分所有法に関する質問
+      - source: question_classifier_node
+        target: case_analysis_node
+        data:
+          sourceType: question_classifier
+          targetType: case_analysis
+          sourceHandle: '事例'  # 例：過去の事例に関する質問
+      - source: data_retrieval_node
+        target: llm_node
+        data:
+          sourceType: data_retrieval
+          targetType: llm
+      - source: case_analysis_node
+        target: llm_node
+        data:
+          sourceType: case_analysis
+          targetType: llm
+      - source: llm_node
+        target: response_node
+        data:
+          sourceType: llm
+          targetType: response
+
+
+    nodes:
+      start_node:
+        id: start_node_id
+        type: start
+        variables:
+          - type: text-input
+            variable: user_question
+            label: 質問内容
+            required: true
+            max_length: 500
+      question_classifier_node:
+        id: question_classifier_node_id
+        type: question_classifier
+        data:
+          title: 質問分類
+          model:
+            provider: openai
+            name: gpt-3.5-turbo
+            mode: chat
+            completion_params:
+              temperature: 0.7
+          query_variable_selector:
+            - start_node_id
+            - user_question
+          classes:
+            - id: '区分所有法'
+              name: 区分所有法
+            - id: '事例'
+              name: 事例
+            - id: '実務'
+              name: 管理実務
+            - id: 'その他'
+              name: その他
+      data_retrieval_node:
+        id: data_retrieval_node_id
+        type: data_retrieval
+        data:
+          title: 法令データ取得
+          dataset_ids:
+            - civil_code
+            - property_law
+          query_variable_selector:
+            - question_classifier_node_id
+            - class_id
+          output_variable: legal_documents
+      case_analysis_node:
+        id: case_analysis_node_id
+        type: case_analysis
+        data:
+          title: 事例分析
+          dataset_ids:
+            - case_studies
+          query_variable_selector:
+            - question_classifier_node_id
+            - class_id
+          output_variable: case_details
+      llm_node:
+        id: llm_node_id
+        type: llm
+        data:
+          title: 回答生成
+          model:
+            provider: openai
+            name: gpt-3.5-turbo
+            mode: chat
+            completion_params:
+              temperature: 0.7
+          prompt_template:
+            - role: system
+              text: |
+                以下の質問に対する回答を、法的・実務的な観点から生成してください。法的根拠を示せる場合は、法令の条文も明記してください。示せない場合はその旨を明記し、信頼できる情報源を参考に説明してください。
+                質問: {{#user_question#}}
+                法令情報: {{#legal_documents#}}
+                事例情報: {{#case_details#}}
+          context:
+            enabled: true
+            variable_selector:
+              - data_retrieval_node_id
+              - legal_documents
+              - case_analysis_node_id
+              - case_details
+      response_node:
+        id: response_node_id
+        type: response
+        data:
+          title: 回答出力
+          outputs:
+            - variable: response_text
+              value_selector:
+                - llm_node_id
+                - generated_text
 "use client"
 
 import type React from "react"

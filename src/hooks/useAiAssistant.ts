@@ -7,27 +7,7 @@ import { v4 as uuidv4 } from "uuid"; // UUIDを生成するために必要
 export interface ChatMessage {
   id: string;
   role: "user" | "assistant";
-  content: string;
-  structuredContent?: {
-    回答要点?: string;
-    法的実務的根拠?: string;
-    実行プラン?: {
-      すぐに実行すべきこと?: string;
-      中期的に検討すべきこと?: string;
-      長期的に準備すべきこと?: string;
-    };
-    注意点とリスク?: {
-      想定されるトラブルや注意点?: string;
-      法的リスクや責任の所在?: string;
-    };
-    管理実務上のポイント?: {
-      書類作成保管に関するアドバイス?: string;
-      区分所有者への説明方法?: string;
-      意思決定プロセスの進め方?: string;
-    };
-    参考事例?: string;
-    links?: { title: string; url: string }[];
-  };
+  content: any; // 文字列またはオブジェクトに対応するためanyに変更
 }
 
 /** AIアシスタントの状態と機能を管理するカスタムフック
@@ -89,16 +69,20 @@ export function useAiAssistant(documentId?: string) {
       }
 
       const data = await response.json();
+      console.log("API レスポンス:", data); // デバッグログを追加
+
+      // APIレスポンスの処理を改善
+      // データがそのままオブジェクトとして利用できるように
+      const aiContent = data;
 
       // AIの応答をチャットに追加
       const aiResponse: ChatMessage = {
         id: uuidv4(),
         role: "assistant",
-        content: data.answer || data.text || "回答を取得できませんでした",
+        content: aiContent, // オブジェクトをそのまま保存
       };
 
       setMessages((prev) => [...prev, aiResponse]);
-
     } catch (err) {
       console.error("AIアシスタントエラー:", err);
       setError(
