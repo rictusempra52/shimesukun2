@@ -16,13 +16,9 @@ const loadPdfjsLib = async () => {
     // PDF.jsライブラリを動的にインポート
     const pdfjs = await import("pdfjs-dist");
 
-    // npm パッケージからワーカーを直接読み込む
+    // publicディレクトリのワーカーを使用
     if (typeof window !== "undefined" && "Worker" in window) {
-      const workerUrl = new URL(
-        "pdfjs-dist/build/pdf.worker.min.js",
-        import.meta.url
-      );
-      pdfjs.GlobalWorkerOptions.workerSrc = workerUrl.toString();
+      pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
     }
 
     return pdfjs;
