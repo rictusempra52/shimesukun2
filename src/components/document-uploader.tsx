@@ -181,10 +181,17 @@ export function DocumentUploader() {
 
     try {
       // メタデータの準備
+      // 説明文は150字以内に制限して送信する
+      const limitedDescription = description && description.length > 150
+        ? description.substring(0, 147) + '...'
+        : description;
+
+      console.log(`説明文の長さ: ${description ? description.length : 0}文字 → ${limitedDescription ? limitedDescription.length : 0}文字に制限`);
+
       const metadata = {
         title,
         building,
-        description,
+        description: limitedDescription, // 制限された説明文を使用
         uploadedAt: new Date().toISOString(),
         buildingName: {
           building1: "グランドパレス東京",

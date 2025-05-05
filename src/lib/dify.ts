@@ -39,6 +39,10 @@ export async function askDifyBuildingManagementQuestion(
     const url = `${apiEndpoint}/chat-messages`;
     console.log(`Dify API リクエスト送信先: ${url}`);
 
+    // タイムアウト付きのフェッチを実装
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 40000); // 40秒タイムアウト
+
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -46,10 +50,16 @@ export async function askDifyBuildingManagementQuestion(
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
 
+    // タイムアウトクリア
+    clearTimeout(timeoutId);
+
     // デバッグのためのログ追加
-    console.log("Dify API レスポンス:", JSON.stringify(response, null, 2));
+    console.log(
+      `Dify API ステータス: ${response.status} ${response.statusText}`
+    );
 
     // レスポンスのContent-Typeをチェック
     const contentType = response.headers.get("content-type");
@@ -91,7 +101,18 @@ export async function askDifyBuildingManagementQuestion(
 
     // 正常なJSONレスポンス
     const jsonResponse = await response.json();
-    console.log("Dify APIからのJSON応答:", jsonResponse);
+
+    // 簡潔なレスポンスログを出力
+    console.log(
+      "Dify APIレスポンス受信:",
+      jsonResponse.answer
+        ? `(answer field: ${
+            typeof jsonResponse.answer === "string"
+              ? jsonResponse.answer.substring(0, 50) + "..."
+              : "(object)"
+          })`
+        : "(no answer field)"
+    );
 
     // 修正: answerフィールドが存在し、文字列の場合はそれをパースする
     if (jsonResponse.answer && typeof jsonResponse.answer === "string") {
@@ -129,7 +150,14 @@ export async function askDifyBuildingManagementQuestion(
 
     // それ以外の構造の場合は元のレスポンスを返す
     return jsonResponse;
-  } catch (error) {
+  } catch (error: any) {
+    // AbortController によるタイムアウトエラーの特別処理
+    if (error.name === "AbortError") {
+      throw new Error(
+        "Dify APIリクエストがタイムアウトしました。後でもう一度試してください。"
+      );
+    }
+
     console.error("Dify API呼び出しエラー:", error);
 
     const errorMessage =
