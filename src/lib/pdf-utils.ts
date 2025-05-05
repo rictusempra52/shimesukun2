@@ -16,9 +16,13 @@ const loadPdfjsLib = async () => {
     // PDF.jsライブラリを動的にインポート
     const pdfjs = await import("pdfjs-dist");
 
-    // Next.jsのwebpack設定に合わせてワーカーを設定
+    // npm パッケージからワーカーを直接読み込む
     if (typeof window !== "undefined" && "Worker" in window) {
-      pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+      const workerUrl = new URL(
+        "pdfjs-dist/build/pdf.worker.min.js",
+        import.meta.url
+      );
+      pdfjs.GlobalWorkerOptions.workerSrc = workerUrl.toString();
     }
 
     return pdfjs;
