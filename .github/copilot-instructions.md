@@ -118,9 +118,9 @@ Shimesukun（シメスくん）は、マンションの書類をデジタル化�
 - プログラミング初心者。
 - 分譲マンション管理のプロ。マンション管理について質問があれば遠慮なくユーザーに確認してください。
 - 触れた技術は以下の通り。
-  - TypeScript（ごくわずか）
-  - Next.js（ごくわずか）
-  - React(ごくわずか)
+  - TypeScript
+  - Next.js
+  - React
   - vb.net
   - vba(最も経験がある)
   - javascript
