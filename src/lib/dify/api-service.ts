@@ -20,7 +20,7 @@ console.log("Dify API設定情報(api-service.ts):", {
 /**
  * Dify APIへの基本的なリクエストを送信する内部関数
  * @param endpoint APIエンドポイント
- * @param method HTTPメソッド
+ * @param method HTTPメソッド(GET, POST, DELETEなど)
  * @param apiKey 使用するAPIキー
  * @param body リクエストボディ（オプション）
  * @returns APIレスポンス
@@ -31,6 +31,10 @@ async function sendDifyRequest(
   apiKey: string,
   body?: any
 ) {
+  /**　リクエストヘッダーの設定
+   * - Content-Type: JSONデータを送信するための設定
+   * - Authorization: Dify APIの認証に必要なBearerトークン
+   */
   const headers = {
     "Content-Type": "application/json",
     Authorization: `Bearer ${apiKey}`,
@@ -96,6 +100,10 @@ export async function difyAppRequest(
 
 /**
  * Dify ナレッジベースAPIへのリクエストを送信する関数
+ * @param endpoint APIエンドポイント
+ * @param method HTTPメソッド
+ * @param body リクエストボディ（オプション）
+ * @returns APIレスポンス
  */
 export async function difyKnowledgeRequest(
   endpoint: string,
